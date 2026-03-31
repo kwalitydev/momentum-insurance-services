@@ -1,0 +1,216 @@
+2023-07-31 18:38:52.690 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-07-31 18:38:54.681 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-07-31 18:38:54.681 INFO  adapter.PaymentAdapter - Webservice initialization took 1957 ms
+2023-07-31 18:38:54.681 INFO  adapter.PaymentAdapter - Attempt to query updated policies for 20230626 to T24
+2023-07-31 18:38:58.054 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@180e6ac4
+2023-07-31 18:39:53.791 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-07-31 18:39:55.771 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-07-31 18:39:55.771 INFO  adapter.PaymentAdapter - Webservice initialization took 1943 ms
+2023-07-31 18:39:55.771 INFO  adapter.PaymentAdapter - Attempt to query updated policies for 20230626 to T24
+2023-07-31 18:39:57.385 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@64337702
+2023-07-31 18:40:17.256 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-07-31 18:40:19.081 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-07-31 18:40:19.081 INFO  adapter.PaymentAdapter - Webservice initialization took 1788 ms
+2023-07-31 18:40:19.081 INFO  adapter.PaymentAdapter - Attempt to query updated policies for 20230626 to T24
+2023-07-31 18:40:20.149 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@62f68dff
+2023-07-31 18:42:35.545 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-07-31 18:42:37.547 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-07-31 18:42:37.548 INFO  adapter.PaymentAdapter - Webservice initialization took 1968 ms
+2023-07-31 18:42:37.548 INFO  adapter.PaymentAdapter - Attempt to query updated policies for 20230626 to T24
+2023-07-31 18:42:38.580 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@4fe89c24
+2023-07-31 18:43:03.043 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-07-31 18:43:05.000 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-07-31 18:43:05.000 INFO  adapter.PaymentAdapter - Webservice initialization took 1921 ms
+2023-07-31 18:43:05.000 INFO  adapter.PaymentAdapter - Attempt to query updated policies for 20230626 to T24
+2023-07-31 18:43:06.120 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@76c7beb3
+2023-07-31 18:43:52.260 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-07-31 18:43:54.214 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-07-31 18:43:54.214 INFO  adapter.PaymentAdapter - Webservice initialization took 1921 ms
+2023-07-31 18:43:54.214 INFO  adapter.PaymentAdapter - Attempt to query updated policies for 20230626 to T24
+2023-07-31 18:43:56.440 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@55795845
+2023-07-31 18:44:31.116 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-07-31 18:44:33.130 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-07-31 18:44:33.131 INFO  adapter.PaymentAdapter - Webservice initialization took 1979 ms
+2023-07-31 18:44:33.131 INFO  adapter.PaymentAdapter - Attempt to query updated policies for 20230626 to T24
+2023-07-31 18:44:34.167 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@76c7beb3
+2023-07-31 23:11:16.687 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-07-31 23:11:19.399 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-07-31 23:11:19.400 INFO  adapter.PaymentAdapter - Webservice initialization took 2678 ms
+2023-07-31 23:11:19.400 INFO  adapter.PaymentAdapter - Attempt to get insurance details for HOS08MG2317706252
+2023-07-31 23:11:21.207 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@274872f8
+2023-07-31 23:11:21.208 INFO  adapter.PaymentAdapter - Request took 1808 ms to process
+2023-07-31 23:13:55.828 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-07-31 23:13:58.015 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-07-31 23:13:58.016 INFO  adapter.PaymentAdapter - Webservice initialization took 2153 ms
+2023-07-31 23:13:58.016 INFO  adapter.PaymentAdapter - Attempt to get insurance details for HOC01MG1326701627
+2023-07-31 23:13:59.846 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@30ea8c23
+2023-07-31 23:13:59.848 INFO  adapter.PaymentAdapter - Request took 1832 ms to process
+2023-07-31 23:14:15.845 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-07-31 23:14:18.005 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-07-31 23:14:18.006 INFO  adapter.PaymentAdapter - Webservice initialization took 2121 ms
+2023-07-31 23:14:18.006 INFO  adapter.PaymentAdapter - Attempt to get insurance details for HOC01MG1326701627
+2023-07-31 23:14:19.513 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@119f1f2a
+2023-07-31 23:14:19.514 INFO  adapter.PaymentAdapter - Request took 1507 ms to process
+2023-07-31 23:14:32.924 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-07-31 23:14:35.085 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-07-31 23:14:35.086 INFO  adapter.PaymentAdapter - Webservice initialization took 2127 ms
+2023-07-31 23:14:35.086 INFO  adapter.PaymentAdapter - Attempt to get insurance details for HOC01MG1326701627
+2023-07-31 23:14:36.596 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@3d08f3f5
+2023-07-31 23:14:36.597 INFO  adapter.PaymentAdapter - Request took 1511 ms to process
+2023-07-31 23:14:50.713 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-07-31 23:14:52.725 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-07-31 23:14:52.725 INFO  adapter.PaymentAdapter - Webservice initialization took 1979 ms
+2023-07-31 23:14:52.726 INFO  adapter.PaymentAdapter - Attempt to get insurance details for HOC01MG1326701627
+2023-07-31 23:14:54.424 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@765f05af
+2023-07-31 23:14:54.424 INFO  adapter.PaymentAdapter - Request took 1698 ms to process
+2023-07-31 23:15:11.713 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-07-31 23:15:13.827 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-07-31 23:15:13.827 INFO  adapter.PaymentAdapter - Webservice initialization took 2081 ms
+2023-07-31 23:15:13.827 INFO  adapter.PaymentAdapter - Attempt to get insurance details for HOC01MG1326701627
+2023-07-31 23:15:16.447 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@3d08f3f5
+2023-07-31 23:15:16.448 INFO  adapter.PaymentAdapter - Request took 2621 ms to process
+2023-07-31 23:38:53.484 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-07-31 23:38:57.802 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-07-31 23:38:57.802 INFO  adapter.PaymentAdapter - Webservice initialization took 4284 ms
+2023-07-31 23:38:57.802 INFO  adapter.PaymentAdapter - Attempt to query updated policies for 20230626 to T24
+2023-07-31 23:38:58.778 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@2cf92cc7
+2023-07-31 23:39:24.001 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-07-31 23:39:26.173 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-07-31 23:39:26.174 INFO  adapter.PaymentAdapter - Webservice initialization took 2139 ms
+2023-07-31 23:39:26.174 INFO  adapter.PaymentAdapter - Attempt to query updated policies for 20230626 to T24
+2023-07-31 23:39:27.360 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@76c7beb3
+2023-07-31 23:40:06.013 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-07-31 23:40:08.153 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-07-31 23:40:08.154 INFO  adapter.PaymentAdapter - Webservice initialization took 2110 ms
+2023-07-31 23:40:08.154 INFO  adapter.PaymentAdapter - Attempt to query updated policies for 20230626 to T24
+2023-07-31 23:40:09.340 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@7e985ce9
+2023-08-01 21:23:30.860 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-08-01 21:23:33.127 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-08-01 21:23:33.127 INFO  adapter.PaymentAdapter - Webservice initialization took 2231 ms
+2023-08-01 21:23:33.127 INFO  adapter.PaymentAdapter - Attempt to query updated policies for 20230626 to T24
+2023-08-01 21:23:57.429 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@41fe9859
+2023-08-01 22:50:25.160 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-08-01 22:50:27.667 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-08-01 22:50:27.667 INFO  adapter.PaymentAdapter - Webservice initialization took 2471 ms
+2023-08-01 22:50:27.667 INFO  adapter.PaymentAdapter - Attempt to get insurance details for HOS08MG2317706252
+2023-08-01 22:50:29.232 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@4f936da8
+2023-08-01 22:50:29.232 INFO  adapter.PaymentAdapter - Request took 1565 ms to process
+2023-08-01 22:51:01.433 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-08-01 22:51:03.696 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-08-01 22:51:03.696 INFO  adapter.PaymentAdapter - Webservice initialization took 2226 ms
+2023-08-01 22:51:03.696 INFO  adapter.PaymentAdapter - Attempt to get insurance details for HOS08MG2317706252
+2023-08-01 22:51:05.356 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@4b85880b
+2023-08-01 22:51:05.357 INFO  adapter.PaymentAdapter - Request took 1661 ms to process
+2023-08-01 22:51:16.992 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-08-01 22:51:19.154 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-08-01 22:51:19.155 INFO  adapter.PaymentAdapter - Webservice initialization took 2128 ms
+2023-08-01 22:51:19.155 INFO  adapter.PaymentAdapter - Attempt to get insurance details for HOS08MG2317706252
+2023-08-01 22:51:20.621 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@4215838f
+2023-08-01 22:51:20.623 INFO  adapter.PaymentAdapter - Request took 1468 ms to process
+2023-08-01 22:51:54.969 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-08-01 22:51:57.231 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-08-01 22:51:57.232 INFO  adapter.PaymentAdapter - Webservice initialization took 2226 ms
+2023-08-01 22:51:57.232 INFO  adapter.PaymentAdapter - Attempt to get insurance details for HOS08MG2317706252
+2023-08-01 22:51:58.908 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@6c67e137
+2023-08-01 22:51:58.908 INFO  adapter.PaymentAdapter - Request took 1676 ms to process
+2023-08-02 23:48:38.523 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-08-02 23:48:42.747 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-08-02 23:48:42.747 INFO  adapter.PaymentAdapter - Webservice initialization took 4189 ms
+2023-08-02 23:48:42.747 INFO  adapter.PaymentAdapter - Core Payload -> com.temenos.sbm_insurance.SBInsuranceUpdateTable@4b85880b
+2023-08-02 23:48:44.644 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@4a9f80d3
+2023-08-02 23:49:05.270 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-08-02 23:49:07.528 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-08-02 23:49:07.528 INFO  adapter.PaymentAdapter - Webservice initialization took 2217 ms
+2023-08-02 23:49:07.529 INFO  adapter.PaymentAdapter - Core Payload -> com.temenos.sbm_insurance.SBInsuranceUpdateTable@7fcbe147
+2023-08-02 23:49:08.949 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@36b0fcd5
+2023-08-02 23:54:52.898 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-08-02 23:54:55.046 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-08-02 23:54:55.047 INFO  adapter.PaymentAdapter - Webservice initialization took 2112 ms
+2023-08-02 23:54:55.047 INFO  adapter.PaymentAdapter - Core Payload -> com.temenos.sbm_insurance.SBInsuranceUpdateTable@5c153b9e
+2023-08-02 23:54:56.970 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@6bea52d4
+2023-08-02 23:56:12.770 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-08-02 23:56:14.917 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.61:8080/SBM-Insurance.Payment/services?wsdl
+2023-08-02 23:56:14.917 INFO  adapter.PaymentAdapter - Webservice initialization took 2111 ms
+2023-08-02 23:56:14.917 INFO  adapter.PaymentAdapter - Core Payload -> com.temenos.sbm_insurance.SBInsuranceUpdateTable@7fcbe147
+2023-08-02 23:56:16.845 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@36b0fcd5
+2023-08-03 00:02:36.093 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-08-22 11:22:38.193 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-08-22 11:22:42.069 ERROR adapter.PaymentAdapter - Failed to initialise T24 Webservice
+2023-08-22 11:22:42.079 INFO  adapter.PaymentAdapter - Attempt to get insurance details for S08AA211758TKK1
+2023-08-22 11:22:42.080 INFO  adapter.PaymentAdapter - Error while getting insurance details
+2023-08-22 11:22:42.152 INFO  adapter.PaymentAdapter - Request took 45 ms to process
+2023-08-22 11:23:37.609 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-08-22 11:23:39.378 ERROR adapter.PaymentAdapter - Failed to initialise T24 Webservice
+2023-08-22 11:23:39.388 INFO  adapter.PaymentAdapter - Attempt to get insurance details for S08AA211758TKK1
+2023-08-22 11:23:39.388 INFO  adapter.PaymentAdapter - Error while getting insurance details
+2023-08-22 11:23:39.435 INFO  adapter.PaymentAdapter - Request took 20 ms to process
+2023-08-22 11:31:39.897 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-08-22 11:31:41.980 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.45:8080/SBM-Insurance.Payment/services?wsdl
+2023-08-22 11:31:41.980 INFO  adapter.PaymentAdapter - Webservice initialization took 2048 ms
+2023-08-22 11:31:41.980 INFO  adapter.PaymentAdapter - Attempt to get insurance details for S08AA211758TKK1
+2023-08-22 11:31:55.275 INFO  adapter.PaymentAdapter - T24 responded. Status -> Status{transactionId='null', messageId='null', successIndicator=SUCCESS, application='null', messages=[@ID@ID/CUSTOMERCus ID/CUS NAMECustomer Name/CURRENCYCURRENCY/PACKPack/TOTAL.PREMIUMPremium/ISSUE.DATEIssue Date/DEBIT.ACCOUNTDebit Acct/PAYMENT.DATEPayment Date/PAYMENT.AMOUNTAmount Paid/POLICY.STATUSPolicy Status/POLICY.EXP.DATEPOLICY.EXP.DATE/BRANCHBranch/LOAN.CONTRACT.IDLOAN.CONTRACT.ID/REPAYMENT.FREQREPAYMENT.FREQ/NEXT.PAYMENT.DATENEXT.PAYMENT.DATE/LAST.DATE.PAIDLAST.DATE.PAID/MIGRATION.STATUSMIGRATION.STATUS/MIGRATION.DATEMIGRATION.DATE, No records were found that matched the selection criteria]}
+2023-08-22 11:31:55.276 INFO  adapter.PaymentAdapter - Request took 13296 ms to process
+2023-08-22 11:34:02.205 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-08-22 11:34:04.199 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.45:8080/SBM-Insurance.Payment/services?wsdl
+2023-08-22 11:34:04.199 INFO  adapter.PaymentAdapter - Webservice initialization took 1962 ms
+2023-08-22 11:34:04.199 INFO  adapter.PaymentAdapter - Attempt to get insurance details for S08AA21328WDJ0H
+2023-08-22 11:34:05.452 INFO  adapter.PaymentAdapter - T24 responded. Status -> Status{transactionId='null', messageId='null', successIndicator=SUCCESS, application='null', messages=[@ID@ID/CUSTOMERCus ID/CUS NAMECustomer Name/CURRENCYCURRENCY/PACKPack/TOTAL.PREMIUMPremium/ISSUE.DATEIssue Date/DEBIT.ACCOUNTDebit Acct/PAYMENT.DATEPayment Date/PAYMENT.AMOUNTAmount Paid/POLICY.STATUSPolicy Status/POLICY.EXP.DATEPOLICY.EXP.DATE/BRANCHBranch/LOAN.CONTRACT.IDLOAN.CONTRACT.ID/REPAYMENT.FREQREPAYMENT.FREQ/NEXT.PAYMENT.DATENEXT.PAYMENT.DATE/LAST.DATE.PAIDLAST.DATE.PAID/MIGRATION.STATUSMIGRATION.STATUS/MIGRATION.DATEMIGRATION.DATE, No records were found that matched the selection criteria]}
+2023-08-22 11:34:05.454 INFO  adapter.PaymentAdapter - Request took 1255 ms to process
+2023-08-22 11:34:28.799 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-08-22 11:34:30.645 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.45:8080/SBM-Insurance.Payment/services?wsdl
+2023-08-22 11:34:30.645 INFO  adapter.PaymentAdapter - Webservice initialization took 1815 ms
+2023-08-22 11:34:30.646 INFO  adapter.PaymentAdapter - Attempt to get insurance details for S08AA21328WDJ0H
+2023-08-22 11:34:31.894 INFO  adapter.PaymentAdapter - T24 responded. Status -> Status{transactionId='null', messageId='null', successIndicator=SUCCESS, application='null', messages=[@ID@ID/CUSTOMERCus ID/CUS NAMECustomer Name/CURRENCYCURRENCY/PACKPack/TOTAL.PREMIUMPremium/ISSUE.DATEIssue Date/DEBIT.ACCOUNTDebit Acct/PAYMENT.DATEPayment Date/PAYMENT.AMOUNTAmount Paid/POLICY.STATUSPolicy Status/POLICY.EXP.DATEPOLICY.EXP.DATE/BRANCHBranch/LOAN.CONTRACT.IDLOAN.CONTRACT.ID/REPAYMENT.FREQREPAYMENT.FREQ/NEXT.PAYMENT.DATENEXT.PAYMENT.DATE/LAST.DATE.PAIDLAST.DATE.PAID/MIGRATION.STATUSMIGRATION.STATUS/MIGRATION.DATEMIGRATION.DATE, No records were found that matched the selection criteria]}
+2023-08-22 11:34:31.895 INFO  adapter.PaymentAdapter - Request took 1249 ms to process
+2023-08-22 14:41:22.948 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-08-22 14:41:25.694 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.45:8080/SBM-Insurance.Payment/services?wsdl
+2023-08-22 14:41:25.695 INFO  adapter.PaymentAdapter - Webservice initialization took 2713 ms
+2023-08-22 14:41:25.695 INFO  adapter.PaymentAdapter - Attempt to get insurance details for AA21328WDJ0H
+2023-08-22 14:41:29.889 INFO  adapter.PaymentAdapter - T24 responded. Status -> Status{transactionId='null', messageId='null', successIndicator=SUCCESS, application='null', messages=[@ID@ID/CUSTOMERCus ID/CUS NAMECustomer Name/CURRENCYCURRENCY/PACKPack/TOTAL.PREMIUMPremium/ISSUE.DATEIssue Date/DEBIT.ACCOUNTDebit Acct/PAYMENT.DATEPayment Date/PAYMENT.AMOUNTAmount Paid/POLICY.STATUSPolicy Status/POLICY.EXP.DATEPOLICY.EXP.DATE/BRANCHBranch/LOAN.CONTRACT.IDLOAN.CONTRACT.ID/REPAYMENT.FREQREPAYMENT.FREQ/NEXT.PAYMENT.DATENEXT.PAYMENT.DATE/LAST.DATE.PAIDLAST.DATE.PAID/MIGRATION.STATUSMIGRATION.STATUS/MIGRATION.DATEMIGRATION.DATE, No records were found that matched the selection criteria]}
+2023-08-22 14:41:29.891 INFO  adapter.PaymentAdapter - Request took 4196 ms to process
+2023-08-22 14:42:02.288 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-08-22 14:42:04.409 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.45:8080/SBM-Insurance.Payment/services?wsdl
+2023-08-22 14:42:04.409 INFO  adapter.PaymentAdapter - Webservice initialization took 2087 ms
+2023-08-22 14:42:04.409 INFO  adapter.PaymentAdapter - Attempt to get insurance details for AA21328WDJ0H
+2023-08-22 14:42:06.019 INFO  adapter.PaymentAdapter - T24 responded. Status -> Status{transactionId='null', messageId='null', successIndicator=SUCCESS, application='null', messages=[@ID@ID/CUSTOMERCus ID/CUS NAMECustomer Name/CURRENCYCURRENCY/PACKPack/TOTAL.PREMIUMPremium/ISSUE.DATEIssue Date/DEBIT.ACCOUNTDebit Acct/PAYMENT.DATEPayment Date/PAYMENT.AMOUNTAmount Paid/POLICY.STATUSPolicy Status/POLICY.EXP.DATEPOLICY.EXP.DATE/BRANCHBranch/LOAN.CONTRACT.IDLOAN.CONTRACT.ID/REPAYMENT.FREQREPAYMENT.FREQ/NEXT.PAYMENT.DATENEXT.PAYMENT.DATE/LAST.DATE.PAIDLAST.DATE.PAID/MIGRATION.STATUSMIGRATION.STATUS/MIGRATION.DATEMIGRATION.DATE, No records were found that matched the selection criteria]}
+2023-08-22 14:42:06.021 INFO  adapter.PaymentAdapter - Request took 1612 ms to process
+2023-09-13 23:49:54.923 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-09-13 23:49:57.948 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.45:8080/SBM-Insurance.Payment/services?wsdl in 2984 ms
+2023-09-27 18:11:46.322 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-09-27 18:11:48.312 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.45:8080/SBM-Insurance.Payment/services?wsdl in 1957 ms
+2023-09-27 18:11:48.312 INFO  adapter.PaymentAdapter - Attempt to query updated policies with TRANS.TYPE = NEW to T24
+2023-09-27 18:11:49.908 INFO  adapter.PaymentAdapter - T24 responded. Status -> com.temenos.sbm_insurance.Status@6e16b8b5
+2023-09-27 18:12:47.845 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-09-27 18:12:49.948 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.45:8080/SBM-Insurance.Payment/services?wsdl in 2070 ms
+2023-09-27 18:12:49.949 INFO  adapter.PaymentAdapter - Attempt to query updated policies with TRANS.TYPE = NEW to T24
+2023-09-27 18:12:51.121 INFO  adapter.PaymentAdapter - T24 responded. Status -> Status{transactionId='null', messageId='null', successIndicator=SUCCESS, application='null', messages=[@ID@ID/SEG.IDSEG.ID/TRANS.TYPETRANS.TYPE/PROCESS.DATEPROCESS.DATE/CURRENCYCURRENCY/TRANS.AMOUNTTRANS.AMOUNT/MIGRATION.STATUSMIGRATION.STATUS/TRANS.IDTRANS.ID/PAYMENT.STATUSPAYMENT.STATUS/PAYMENT.DATEPAYMENT.DATE, No records were found that matched the selection criteria, EB-EXEC.SELECT.ERR]}
+2023-09-28 10:13:04.436 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-09-28 10:13:07.138 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.45:8080/SBM-Insurance.Payment/services?wsdl in 2672 ms
+2023-09-28 10:13:07.139 INFO  adapter.PaymentAdapter - Attempt to query updated policies with TRANS.TYPE = NEW to T24
+2023-09-28 10:13:08.781 INFO  adapter.PaymentAdapter - T24 responded. Status -> Status{transactionId='null', messageId='null', successIndicator=SUCCESS, application='null', messages=null}
+2023-09-28 10:14:33.904 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-09-28 10:14:35.925 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.45:8080/SBM-Insurance.Payment/services?wsdl in 1990 ms
+2023-09-28 10:14:35.925 INFO  adapter.PaymentAdapter - Attempt to query updated policies with TRANS.TYPE = NEW to T24
+2023-09-28 10:14:37.119 INFO  adapter.PaymentAdapter - T24 responded. Status -> Status{transactionId='null', messageId='null', successIndicator=SUCCESS, application='null', messages=null}
+2023-09-28 10:30:56.127 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-09-28 10:30:58.987 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.45:8080/SBM-Insurance.Payment/services?wsdl in 2830 ms
+2023-09-28 10:30:58.987 INFO  adapter.PaymentAdapter - Attempt to get insurance details for IPN10MG2318500109
+2023-09-28 10:31:00.143 INFO  adapter.PaymentAdapter - T24 response -> com.temenos.sbm_insurance.SBInsuranceGetLoanListResponse@78a287ed
+2023-09-28 10:31:00.144 INFO  adapter.PaymentAdapter - Request took 1156 ms to process
+2023-09-28 10:31:36.303 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-09-28 10:31:38.859 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.207.45:8080/SBM-Insurance.Payment/services?wsdl in 2520 ms
+2023-09-28 10:31:38.861 INFO  adapter.PaymentAdapter - Attempt to get insurance details for IPN10MG2318500109
+2023-09-28 10:31:40.052 INFO  adapter.PaymentAdapter - T24 response -> com.temenos.sbm_insurance.SBInsuranceGetLoanListResponse@3c0fae6c
+2023-09-28 10:31:40.052 INFO  adapter.PaymentAdapter - Request took 1191 ms to process
+2023-10-07 02:49:47.807 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-10-07 02:49:50.641 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.10.30:8080/SBM-Insurance.Payment/services?wsdl in 2774 ms
+2023-10-07 02:49:50.642 INFO  adapter.PaymentAdapter - Attempt to query policyHolder 1010127421004 to T24. traceId -> abc
+2023-10-07 02:49:52.216 INFO  adapter.PaymentAdapter - T24 response -> com.temenos.sbm_insurance.SBGetCustomerByAccountResponse@4c168660. traceId -> abc
+2023-10-07 02:50:09.051 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-10-07 02:50:11.138 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.10.30:8080/SBM-Insurance.Payment/services?wsdl in 2052 ms
+2023-10-07 02:50:11.139 INFO  adapter.PaymentAdapter - Attempt to query policyHolder 1010127421004 to T24. traceId -> abc
+2023-10-07 02:50:12.548 INFO  adapter.PaymentAdapter - T24 response -> com.temenos.sbm_insurance.SBGetCustomerByAccountResponse@4ebea12c. traceId -> abc
+2023-10-07 02:55:00.361 INFO  adapter.PaymentAdapter - Attempting to initialise T24 Webservices
+2023-10-07 02:55:03.024 INFO  adapter.PaymentAdapter - T24 Webservices successfully initialised in http://10.245.10.30:9094/SBM-Insurance.Payment/services?wsdl in 2629 ms
+2023-10-07 02:55:03.024 INFO  adapter.PaymentAdapter - Attempt to query policyHolder 1010127421004 to T24. traceId -> abc
+2023-10-07 02:55:07.841 INFO  adapter.PaymentAdapter - T24 response -> com.temenos.sbm_insurance.SBGetCustomerByAccountResponse@4eed46ee. traceId -> abc

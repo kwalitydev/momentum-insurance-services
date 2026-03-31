@@ -1,0 +1,293 @@
+package core.util;
+
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
+import core.constants.Statuses;
+import dao.entities.*;
+import dao.entities.Currency;
+import org.apache.logging.log4j.Logger;
+import org.joda.time.Interval;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import static core.util.CoreUtil.today;
+
+public class Util {
+    public static final String AES_SECRET = "05C02B85-685F-4282-BEDD-13C9D4C9AA9F";
+    public static final String DATETIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
+    public static final String SIMPLE_DATE_PATTERN = "yyyy-MM-dd";
+    public static final String SIMPLE_CORE_DATE_PATTERN = "dd MMM yyyy";
+    public static final String DATABASE_DATE_PATTERN = "dd/MM/yyyy";
+    public static final String SHORT_DATE_PATTERN = "dd-MMMM";
+    public static final String T24_DATE_PATTERN = "yyyyMMdd";
+    public static final String LAST_YEAR_DATE_PATTERN = "yy";
+    public static final String TIMESTAMP_PATTERN = "yyyyMMddHHmmss";
+
+    //Webservices
+    public static final String STATUS_APP_ENDPOINT = "/status";
+    public static final String ROLE_ENDPOINT = "/role";
+    public static final String AUTH_ENDPOINT = "/auth";
+    public static final String USER_INFO_ENDPOINT = "/info";
+    public static final String DEPARTMENT_ENDPOINT = "/departments";
+    public static final String USER_LOGOUT_ENDPOINT = "/logout";
+    public static final String USER_ENDPOINT = "/list";
+    public static final String USER_STATUS_ENDPOINT = "/status/update";
+    public static final String USER_EDIT_ENDPOINT = "/edit";
+    public static final String USER_CREATE_ENDPOINT = "/create";
+
+    //Messages
+    public static final String REPORT_DIR = "reports";
+    public static final String CLAIMS_DIR = "claims";
+    public static final String QUOTATION_DIR = "quotations";
+    public static final String TEMPLATE_DIR = "templates";
+    public static final String EXPORT_DIR = "export";
+    public static final String DOCUMENT_DIR = "documents";
+    public static final String DEFAULT_CURRENCY = "MZN";
+
+    public static String getCoCode(String accountNumber){
+        return "MZ0010"+accountNumber.substring(0,3);
+    }
+
+
+
+    public static String formatDouble(double numberToFormat){
+        return String.format("%,.2f", numberToFormat);
+    }
+
+
+
+
+    public static String getSaltString(int len) {
+        String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        StringBuilder salt = new StringBuilder();
+        Random rnd = new Random();
+        while (salt.length() < 18) { // length of the random string.
+            int index = (int) (rnd.nextFloat() * SALTCHARS.length());
+            salt.append(SALTCHARS.charAt(index));
+        }
+        String saltStr = salt.toString();
+        return saltStr;
+
+    }
+
+
+    public static Status setActive(){
+        Status status = new Status();
+        status.setId(Statuses.ACTIVE.toString());
+        return status;
+    }
+
+    public static Status setPending(){
+        Status status = new Status();
+        status.setId(Statuses.PENDING.toString());
+        return status;
+    }
+    public static SubProduct setSubProduct(Long subProductId){
+        SubProduct subProduct = new SubProduct();
+        subProduct.setSubProductId(subProductId);
+        return subProduct;
+    }
+
+    public static BenefitCycle setBenefitCycle(Long benefitCycleId){
+        BenefitCycle benefitCycle = new BenefitCycle();
+        benefitCycle.setId(benefitCycleId);
+        return benefitCycle;
+    }
+    public static Product setProduct(String productId){
+        Product product = new Product();
+        product.setProductId(productId);
+        return product;
+    }
+    public static Frequency setFrequency(String f){
+        Frequency frequency = new Frequency();
+        frequency.setFrequencyId(f);
+        return frequency;
+    }
+
+    public static IDType setIDType(String id){
+        IDType idType = new IDType();
+        idType.setIdType(id);
+        return idType;
+    }
+
+    public static DocumentType setDocumentType(Long id){
+        DocumentType documentType = new DocumentType();
+        documentType.setId(id);
+        return documentType;
+    }
+
+    public static Currency setCurrency(String id){
+        Currency currency = new Currency();
+        currency.setCurrencyId(id);
+        return currency;
+    }
+    public static RelationShip setRelationShip(Long relationShipId){
+        RelationShip relationShip = new RelationShip();
+        relationShip.setRelationShipId(relationShipId);
+        return relationShip;
+    }
+
+    public static PolicyHolder setAccount(String accountId){
+        PolicyHolder policyHolder = new PolicyHolder();
+        policyHolder.setAccountNumber(accountId);
+        return policyHolder;
+    }
+
+    public static Status setStatus(String statusId){
+        Status status = new Status();
+        status.setId(statusId);
+        return status;
+    }
+
+
+    public static Industry setIndustry(String industryId){
+        Industry industry = new Industry();
+        industry.setIndustryId(industryId);
+        return industry;
+    }
+
+    public static ProcessAction setProcessAction(String processActionId){
+        ProcessAction processAction = new ProcessAction();
+        processAction.setProcessActionId(processActionId);
+        return processAction;
+    }
+
+    public static ProcessState setProcessState(String processStateId){
+        ProcessState processState = new ProcessState();
+        processState.setProcessStateId(processStateId);
+        return processState;
+    }
+    public static ProductConfig setProductConfig(Long productConfigId){
+        ProductConfig productConfig = new ProductConfig();
+        productConfig.setProductConfigId(productConfigId);
+        return productConfig;
+    }
+
+    public static InsurancePolicy setInsurancePolicy(String policyId){
+        InsurancePolicy ip = new InsurancePolicy();
+        ip.setPolicyId(policyId);
+        return ip;
+    }
+
+    public static JobTitle setJobTitle(Long jobTitleId){
+        JobTitle jt = new JobTitle();
+        jt.setJobTitleId(jobTitleId);
+        return jt;
+    }
+
+    public static Term setTerm(Long termId){
+        Term term = new Term();
+        term.setTermId(termId);
+        return term;
+    }
+    public static String isNull(String s){
+        try{
+            if(s.equalsIgnoreCase("null"))
+                return "";
+            return s;
+        }
+        catch (Exception e){
+            return "";
+        }
+
+
+    }
+
+    public static boolean isPhoneNumberValid(String phone)
+    {
+        PhoneNumberUtil phoneUtil
+                = PhoneNumberUtil.getInstance();
+                 Phonenumber.PhoneNumber phoneNumber;
+
+        try {
+            phoneNumber = phoneUtil.parse(phone, "MZ");
+        }
+        catch (NumberParseException e) {
+            return false;
+        }
+
+        return phoneUtil.isValidNumber(phoneNumber);
+    }
+
+
+
+    public static int getLastDayOfTheMonth(String date){
+
+        LocalDate convertedDate = LocalDate.parse(date, DateTimeFormatter.ofPattern(SIMPLE_DATE_PATTERN));
+        convertedDate = convertedDate.withDayOfMonth(
+                convertedDate.getMonth().length(convertedDate.isLeapYear()));
+        return convertedDate.getDayOfMonth();
+    }
+
+    public static int getFirstDayOfTheMonth(String date){
+        LocalDate convertedDate = LocalDate.parse(date, DateTimeFormatter.ofPattern(SIMPLE_DATE_PATTERN));
+
+        return convertedDate.with(TemporalAdjusters.firstDayOfMonth()).getDayOfMonth();
+    }
+
+    public static long getDateDiffInHours(Date d1, Date d2){
+        long diff = d2.getTime() - d1.getTime();//as given
+
+        return TimeUnit.MILLISECONDS.toHours(diff);
+    }
+    public static long getDateDiffDays(Date d1, Date d2){
+        long diff = d2.getTime() - d1.getTime();//as given
+
+        return TimeUnit.MILLISECONDS.toDays(diff);
+    }
+
+    public static String formatHours(long hours){
+        if(hours>72){
+            return formatDouble ((double) hours/24)+" dias";
+        }
+        else {
+            return formatDouble((double)  hours)+" h";
+        }
+
+    }
+
+
+    public static boolean isSameDate(Date today,Date futureDate){
+       return today.equals(futureDate);
+    }
+
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(Double.toString(value));
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+
+    public static void getDelay(Logger logger,Date startDate,String logId){
+        Interval interval = new Interval(startDate.getTime(), today().getTime());
+        long delay = interval.toDurationMillis();
+        if(delay>60000){
+            logger.info("Request took {} m to process. traceId-> {}", round((double) delay/60000,2),logId);
+        }
+        else if(delay>1000) {
+            logger.info("Request took {} s to process. traceId-> {}", round((double )delay/1000,2),logId);
+        }
+        else{
+            logger.info("Request took {} ms to process. traceId-> {}", delay,logId);
+        }
+
+    }
+
+    public static int getRandomNumberInRange(int min, int max) {
+
+        if (min >= max) {
+            throw new IllegalArgumentException("max must be greater than min");
+        }
+
+        Random r = new Random();
+        return r.nextInt((max - min) + 1) + min;
+    }
+}
