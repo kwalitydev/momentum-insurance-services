@@ -36,8 +36,7 @@ public class WorkflowAPI {
     private UserDetailsInterface userDetailsInterface;
     @Inject
     private ClaimInterface claimInterface;
-    @Inject
-    private CoverageInterface coverageInterface;
+
     @Inject
     private BaseAmountInterface baseAmountInterface;
     @Inject
@@ -144,7 +143,6 @@ public class WorkflowAPI {
 
             if(users.isPresent()){
 
-                if(objectType.equals(WorkflowObjects.PARAMETERS.toString())){
                     ProductConfigAuthResponse productConfigAuthResponse = new ProductConfigAuthResponse();
 
                     if(processAction.equals(ProcessActions.ALTER.toString())){
@@ -172,32 +170,7 @@ public class WorkflowAPI {
 
                     }
 
-                }
-                else if(objectType.equals(WorkflowObjects.COVERAGE.toString())){
-                    CoverageUpdateResponse coverageUpdateResponse = new CoverageUpdateResponse();
-                    if(processAction.equals(ProcessActions.ALTER.toString())){
-                        Optional<Coverage> coverage = coverageInterface.findByCoverageId(Long.parseLong(objectId));
-                        if(coverage.isPresent()){
-                            Optional<Coverage> currentCoverage = coverageInterface.findByCoverageId(
-                                    Long.parseLong(coverage.get().getProcessWorkflow().getChangedObjectId())
-                            );
-                            if(currentCoverage.isPresent()){
-                                coverageUpdateResponse.setCurrentCoverage(currentCoverage.get());
-                                coverageUpdateResponse.setNewCoverage(coverage.get());
-                                return Response.status(Response.Status.OK).entity(coverageUpdateResponse).build();
 
-                            }
-                            else {
-                                LOGGER.info("Current coverage not found");
-                            }
-
-                        }
-                        else {
-                            LOGGER.info("New Coverage not found");
-                        }
-
-                    }
-                }
 
                 response = Response.status(Response.Status.OK).entity(workflowResponses).build();
                 queryExecuted = true;
@@ -306,97 +279,6 @@ public class WorkflowAPI {
         } finally {
             queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, productConfigUpdate.getUsername(),
                     methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, productConfigUpdate.getSessionId(),headers.getRemoteAddr()));
-        }
-
-        return response;
-
-    }
-
-    @POST
-    @Path("/auth/coverage/approve")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Transactional
-    public Response approveCoverage(CoverageUpdate coverageUpdate, @Context HttpServletRequest headers) {
-
-        String reqRes = getLogId();
-        Date requestTime = today();
-        String methodName = "approveCoverage";
-        LOGGER.info("{} is being called with parameter. request -> {}, logId -> {}, ipAddress -> {} ",
-                methodName,coverageUpdate, reqRes,headers.getRemoteAddr());
-
-        Response response = Response.status(Response.Status.NO_CONTENT).build();
-        boolean queryExecuted = false;
-        String errorCause = "";
-
-
-        try {
-            Optional<Users> users = userInterface.findByUserId(coverageUpdate.getUsername());
-
-            if(users.isPresent()){
-
-                ProcessState processState = new ProcessState();
-
-                if(coverageUpdate.getProcessActionId().equals(ProcessActions.APPROVE.toString())) {
-                    int newUpdated = coverageInterface.updateCoverageStatus(setStatus(Statuses.ACTIVE.toString()), coverageUpdate.getCoverageId());
-                    if (newUpdated > 0) {
-                        LOGGER.info("New Coverage updated. id -> {}", coverageUpdate.getCoverageId());
-                    } else {
-                        LOGGER.warn("Current Product config not updated. id -> {}", coverageUpdate.getCoverageId());
-                    }
-                    Optional<Coverage> coverage = coverageInterface.findByCoverageId(coverageUpdate.getCoverageId());
-                    if ((coverage.isPresent())){
-                        int currentUpdated = coverageInterface.updateCoverageStatus(setStatus(Statuses.INACTIVE.toString()),
-                                Long.parseLong(coverage.get().getProcessWorkflow().getChangedObjectId()));
-                        if (currentUpdated > 0) {
-                            LOGGER.info("Current coverage updated. id -> {}",coverage.get().getProcessWorkflow().getChangedObjectId());
-                        } else {
-                            LOGGER.warn("Current coverage not updated. id -> {}", coverage.get().getProcessWorkflow().getChangedObjectId());
-                        }
-                    }
-
-                    processState = setProcessState(ProcessStates.APPROVED.toString());
-
-
-                }
-                else if(coverageUpdate.getProcessActionId().equals(ProcessActions.DECLINE.toString())){
-                    Optional<Coverage> coverage = coverageInterface.findByCoverageId(coverageUpdate.getCoverageId());
-                    if ((coverage.isPresent())){
-                        int currentUpdated = coverageInterface.updateCoverageStatus(setStatus(Statuses.CANCELLED.toString()),
-                                Long.parseLong(coverage.get().getProcessWorkflow().getChangedObjectId()));
-                        if (currentUpdated > 0) {
-                            LOGGER.info("Current coverage cancelled. id -> {}",coverage.get().getProcessWorkflow().getChangedObjectId());
-                        } else {
-                            LOGGER.warn("Current coverage not cancelled. id -> {}", coverage.get().getProcessWorkflow().getChangedObjectId());
-                        }
-                    }
-                    processState = setProcessState(ProcessStates.DECLINED.toString());
-                }
-
-
-                int updatedWorkflow = processWorkflowInterface.updateProcessWorkflow(processState,setUser(coverageUpdate.getUsername()), today(), setProcessAction(coverageUpdate.getProcessActionId()),
-                        coverageUpdate.getComments(),coverageUpdate.getWorkflowId());
-                if(updatedWorkflow>0){
-                    LOGGER.info("ProcessWorkflow updated. id -> {}",coverageUpdate.getWorkflowId());
-                }
-                else {
-                    LOGGER.info("ProcessWorkflow not updated. id -> {}",coverageUpdate.getWorkflowId());
-                }
-
-                response = Response.status(Response.Status.OK).entity(true).build();
-                queryExecuted = true;
-            }
-
-
-        } catch (Exception e) {
-           LOGGER.error(e);
-            LOGGER.error(e.getMessage());
-            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-            errorCause = e.getCause().getMessage();
-
-        } finally {
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, coverageUpdate.getUsername(),
-                    methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, coverageUpdate.getSessionId(),headers.getRemoteAddr()));
         }
 
         return response;

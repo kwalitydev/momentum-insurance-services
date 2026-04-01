@@ -147,6 +147,7 @@
 /Users/mauromauane/Documents/Workspace/Projectos/Own/momentum/src/main/java/dao/entities/ErrorLog.java
 /Users/mauromauane/Documents/Workspace/Projectos/Own/momentum/src/main/java/dao/repositories/RoleRepository.java
 /Users/mauromauane/Documents/Workspace/Projectos/Own/momentum/src/main/java/dao/interfaces/UserAttemptInterface.java
+/Users/mauromauane/Documents/Workspace/Projectos/Own/momentum/src/main/java/core/impl/SendSMSImpl.java
 /Users/mauromauane/Documents/Workspace/Projectos/Own/momentum/src/main/java/core/beans/CorePayload.java
 /Users/mauromauane/Documents/Workspace/Projectos/Own/momentum/src/main/java/core/constants/DocumentTypes.java
 /Users/mauromauane/Documents/Workspace/Projectos/Own/momentum/src/main/java/core/tasks/PaymentScheduleHandler.java
@@ -178,7 +179,6 @@
 /Users/mauromauane/Documents/Workspace/Projectos/Own/momentum/src/main/java/dao/entities/Term.java
 /Users/mauromauane/Documents/Workspace/Projectos/Own/momentum/src/main/java/dao/interfaces/ProcessWorkflowInterface.java
 /Users/mauromauane/Documents/Workspace/Projectos/Own/momentum/src/main/java/core/beans/InsuranceCancellationResponse.java
-/Users/mauromauane/Documents/Workspace/Projectos/Own/momentum/src/main/java/dao/interfaces/CoverageInterface.java
 /Users/mauromauane/Documents/Workspace/Projectos/Own/momentum/src/main/java/dao/interfaces/IDTypeInterface.java
 /Users/mauromauane/Documents/Workspace/Projectos/Own/momentum/src/main/java/core/sms/ApiGet.java
 /Users/mauromauane/Documents/Workspace/Projectos/Own/momentum/src/main/java/core/beans/CollectionRate.java

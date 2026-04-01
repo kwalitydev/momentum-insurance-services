@@ -51,6 +51,7 @@ core/beans/PolicyResponse.class
 core/beans/ProductConfigUpdate.class
 dao/entities/CoreErrorMapping.class
 dao/interfaces/MemberPriceInterface.class
+core/impl/SendSMSImpl.class
 dao/repositories/SubProductAccountRepository.class
 dao/entities/Status.class
 core/beans/PolicyCancelRequest.class
@@ -125,7 +126,6 @@ dao/repositories/BaseAmountRepository.class
 core/threads/PostCancellation.class
 core/beans/ClaimAuthRequest.class
 dao/interfaces/ReportFieldMapInterface.class
-dao/interfaces/CoverageInterface.class
 dao/interfaces/DocumentTypeInterface.class
 core/util/InsuranceUtil.class
 dao/repositories/DocumentFileRepository.class

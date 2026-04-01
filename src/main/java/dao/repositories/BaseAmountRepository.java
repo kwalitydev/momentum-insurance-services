@@ -2,7 +2,6 @@ package dao.repositories;
 
 import dao.entities.*;
 import dao.interfaces.BaseAmountInterface;
-import dao.interfaces.CoverageInterface;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

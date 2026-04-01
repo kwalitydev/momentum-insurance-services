@@ -565,6 +565,7 @@ public class PolicyAPI {
 
             Date requestTime = today();
 
+
             boolean queryExecuted = false;
             String errorCause = "";
             PolicyResponse policyResponse = new PolicyResponse();

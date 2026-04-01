@@ -34,8 +34,7 @@ public class GenericAPI {
     private static final Logger LOGGER = LogManager.getLogger(GenericAPI.class);
     @Inject
     private CurrencyInterface currencyInterface;
-    @Inject
-    private CoverageInterface coverageInterface;
+
     @Inject
     private QueryUtil queryUtil;
     @Inject
@@ -105,42 +104,6 @@ public class GenericAPI {
     }
 
 
-    @GET
-    @Path("/coverage/id")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getCoverageById(@QueryParam("sessionId") String sessionId,@QueryParam("username") String username,@QueryParam("coverageId") Long coverageId,@Context HttpServletRequest headers) {
-
-        String reqRes = getLogId();
-        String methodName = "getCoverageById";
-        LOGGER.info("{} is being called with parameter. username -> {}, sessionId -> {}, logId -> {}, ipAddress -> {}, traceId -> {} ",
-                methodName, username, sessionId, reqRes,headers.getRemoteAddr(),reqRes);
-
-        Date requestTime = today();
-        Response response = Response.status(Response.Status.NO_CONTENT).build();
-        boolean queryExecuted = false;
-        String errorCause = "";
-
-        try {
-            Optional<Coverage> coverage = coverageInterface.findByCoverageId(coverageId);
-
-            if (coverage.isPresent())
-                return Response.status(Response.Status.OK).entity(coverage.get()).build();
-            queryExecuted = true;
-            defaultSuccess(LOGGER,reqRes);
-        } catch (Exception e) {
-            LOGGER.error(e);
-            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-            errorCause = e.getCause().getMessage();
-        } finally {
-
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
-                    methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId,headers.getRemoteAddr()));
-        }
-
-        return response;
-
-    }
 
 
     @GET
