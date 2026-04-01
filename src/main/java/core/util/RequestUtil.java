@@ -13,8 +13,6 @@ public class RequestUtil {
     public static String TWS_USERNAME;
     public static String TWS_PASSWORD;
     public static String TWS_ENDPOINT;
-    public static int TWS_REQUEST_TIMEOUT;
-    public static int TWS_CONNECT_TIMEOUT;
     public static String TEST_NUMBERS;
     public static boolean SEND_SMS;
     public static List<String> OVERRIDE_LIST;

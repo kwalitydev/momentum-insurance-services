@@ -1,9 +1,6 @@
 package core.beans;
 
-import com.its.stb.services.ITSBaseException_Exception;
-import com.its.stb.services.ITSBusinessException_Exception;
-import com.its.stb.services.ITSInternalException_Exception;
-import com.its.stb.services.SendNotificationOut;
+
 
 import java.io.Serializable;
 

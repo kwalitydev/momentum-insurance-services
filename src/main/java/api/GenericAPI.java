@@ -2,7 +2,6 @@ package api;
 
 import core.beans.InsuranceSync;
 import core.beans.PolicySyncRequest;
-import core.threads.PostInsuranceSync;
 import core.util.CoreUtil;
 import core.util.QueryUtil;
 import dao.entities.*;
@@ -49,8 +48,6 @@ public class GenericAPI {
     private StatusInterface statusInterface;
     @Inject
     private UserInterface userInterface;
-    @Inject
-    private PostInsuranceSync postInsuranceSync;
     @Resource(name = "java:comp/DefaultManagedExecutorService")
     private ManagedExecutorService executorService;
     @Inject
@@ -320,8 +317,8 @@ public class GenericAPI {
                     insuranceSync.setAccountNumber(is.getAccountNumber());
                     insuranceSync.setPolicyId(is.getPolicyId());
                     insuranceSync.setMigrationStatus(policySyncRequest.getMigrationStatus());
-                    Callable<String> callable = () -> postInsuranceSync.apply(insuranceSync);
-                    executorService.submit(callable);
+                  //  Callable<String> callable = () -> postInsuranceSync.apply(insuranceSync);
+                 //   executorService.submit(callable);
 
                 }
 

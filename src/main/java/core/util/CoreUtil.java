@@ -1,6 +1,6 @@
 package core.util;
 
-import core.constants.RecordTypes;
+
 import dao.entities.*;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.Interval;

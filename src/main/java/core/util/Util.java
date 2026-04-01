@@ -23,9 +23,7 @@ public class Util {
     public static final String AES_SECRET = "05C02B85-685F-4282-BEDD-13C9D4C9AA9F";
     public static final String DATETIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
     public static final String SIMPLE_DATE_PATTERN = "yyyy-MM-dd";
-    public static final String SIMPLE_CORE_DATE_PATTERN = "dd MMM yyyy";
     public static final String DATABASE_DATE_PATTERN = "dd/MM/yyyy";
-    public static final String SHORT_DATE_PATTERN = "dd-MMMM";
     public static final String T24_DATE_PATTERN = "yyyyMMdd";
     public static final String LAST_YEAR_DATE_PATTERN = "yy";
     public static final String TIMESTAMP_PATTERN = "yyyyMMddHHmmss";

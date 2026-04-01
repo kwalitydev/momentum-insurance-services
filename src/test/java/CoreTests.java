@@ -1,5 +1,3 @@
-import adapter.PaymentAdapter;
-import adapter.PaymentInterface;
 import com.temenos.fundstransfer.FUNDSTRANSFERType;
 import com.temenos.sbm_insurance.*;
 import core.util.AES;

@@ -1,10 +1,5 @@
 package api;
 
-import adapter.PaymentInterface;
-import com.temenos.sbgetcustomerbyaccount.SBGETCUSTOMERBYACCOUNTType;
-import com.temenos.sbm_insurance.SBGetCustomerByAccountResponse;
-import core.beans.CoreCustomer;
-import core.beans.CustomerResponse;
 import core.beans.SubProductResponse;
 import core.constants.RecordTypes;
 import core.constants.Statuses;
@@ -25,7 +20,6 @@ import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.util.*;
 
-import static core.constants.ErrorCodes.*;
 import static core.util.CoreUtil.*;
 import static core.util.Util.*;
 
@@ -47,8 +41,6 @@ public class QueryAPI {
     private SubProductAccountInterface subProductAccountInterface;
     @Inject
     private InsurancePolicyInterface insurancePolicyInterface;
-    @Inject
-    private PaymentInterface paymentInterface;
     @Inject
     private PaymentScheduleInterface paymentScheduleInterface;
     @Inject

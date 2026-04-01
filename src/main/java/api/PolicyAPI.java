@@ -1,12 +1,9 @@
 package api;
 
-import com.temenos.sbm_insurance.SBInsurancePaymentsResponse;
 import core.beans.*;
 import core.constants.*;
-import core.impl.CoverageImpl;
 import core.impl.ProcessWorkflowImpl;
 import core.threads.PostCancellation;
-import core.threads.PostCollectPremium;
 import core.threads.PostReportBuild;
 import core.util.*;
 import dao.BeanFactory;
@@ -16,7 +13,6 @@ import dao.interfaces.*;
 import dao.repositories.SubProductAccountRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.joda.time.Interval;
 
 import javax.annotation.Resource;
 import javax.enterprise.concurrent.ManagedExecutorService;
@@ -28,7 +24,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
@@ -51,8 +46,6 @@ public class PolicyAPI {
     private QueryUtil queryUtil;
     @Inject
     private SubProductInterface subProductInterface;
-    @Inject
-    private CoverageImpl coverageInterface;
     @Inject
     private InsurancePolicyInterface insurancePolicyInterface;
     @Inject
@@ -82,8 +75,6 @@ public class PolicyAPI {
     @Inject
     private TermInterface termInterface;
     @Inject
-    private PostCollectPremium postCollectPremium;
-    @Inject
     private FrequencyInterface frequencyInterface;
 
     @Inject
@@ -92,8 +83,6 @@ public class PolicyAPI {
     private BeanFactory beanFactory;
     @Inject
     private InsuranceUtil insuranceUtil;
-    @Inject
-    private PaymentUtil paymentUtil;
     @Inject
     private NotificationUtil notificationUtil;
     @Inject
@@ -213,45 +202,6 @@ public class PolicyAPI {
 
     }
 
-    @GET
-    @Path("/coverage-list")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getCoverage(@QueryParam("subProductId") Long subProductId,@QueryParam("currency") String currency,@QueryParam("sessionId") String sessionId,@QueryParam("username") String username,@Context HttpServletRequest headers) {
-
-        String traceId = getLogId();
-        String methodName = "getCoverage";
-        LOGGER.info("{} is being called with parameter. subProductId -> {}, username -> {}, sessionId -> {}, logId -> {}, ipAddress -> {} ",
-                methodName, subProductId, username, sessionId, traceId, headers.getRemoteAddr());
-
-        Date requestTime = today();
-        Response response = Response.status(Response.Status.NO_CONTENT).build();
-        boolean queryExecuted = false;
-        String errorCause = "";
-        List<Coverage> coverages;
-        try {
-            SubProduct subProduct = new SubProduct();
-            subProduct.setSubProductId(subProductId);
-            Currency ccy = new Currency();
-            ccy.setCurrencyId(currency);
-            coverages = coverageInterface.findBySubProductAndStatusAndCurrencyOrderByCoverAmount(subProduct, setActive(), ccy);
-            defaultSuccess(LOGGER,traceId);
-            response = Response.status(Response.Status.OK).entity(coverages).build();
-            queryExecuted = true;
-
-        } catch (Exception e) {
-            LOGGER.error(traceId,e);
-            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-            errorCause = e.getMessage();
-
-        } finally {
-
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, username,
-                    methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, headers.getRemoteAddr()));
-        }
-        return response;
-
-    }
 
     @POST
     @Path("/create")
@@ -1003,147 +953,6 @@ public class PolicyAPI {
     }
 
 
-    /** TODO: remove workflow **/
-    @POST
-    @Path("/update/coverage")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Transactional
-    public Response updateCoverage(CoverageUpdate coverageUpdate,@Context HttpServletRequest headers) {
-
-        String traceId = getLogId();
-        String methodName = "updateCoverage";
-        Response response = Response.status(Response.Status.BAD_REQUEST).build();
-        if(coverageUpdate==null){
-            LOGGER.info("CoverageUpdateRequest is null. traceId -> {}",traceId);
-        }
-        else {
-            defaultObjectRequest(LOGGER, traceId, coverageUpdate.toString(), methodName, headers.getRemoteAddr());
-
-            Date requestTime = today();
-            boolean queryExecuted = false;
-            String errorCause = "";
-
-            try {
-                Optional<Users> users = userInterface.findByUserId(coverageUpdate.getUsername());
-                if (users.isPresent()) {
-                    /*ProcessWorkflow processWorkflow = new ProcessWorkflow();
-                    processWorkflow.setProcessAction(setProcessAction(coverageUpdate.getProcessActionId()));
-                    processWorkflow.setProcessState(setProcessState(AWAITING_APPROVAL.toString()));
-                    processWorkflow.setCurrentDepartment(users.get().getDepartment());
-                    processWorkflow.setInputDate(today());
-                    processWorkflow.setUserInput(users.get());
-                    processWorkflow.setChangedObjectId(String.valueOf(coverageUpdate.getCoverageId()));
-                    LOGGER.info("ProcessWorkflow to be saved! id = {}, traceId -> {}", processWorkflow, traceId);
-                    ProcessWorkflow pw = processWorkflowInterface.save(processWorkflow);
-                    LOGGER.info("ProcessWorkflow saved! id = {}. traceId -> {}", pw.getWorkflowId(), traceId);
-
-
-                    Coverage coverage = new Coverage();
-                    coverage.setCreatedDate(today());
-                    coverage.setLastUpdated(today());
-                    coverage.setCoverAmount(coverageUpdate.getCoverAmount());
-                    coverage.setCurrency(setCurrency(coverageUpdate.getCurrencyId()));
-                    coverage.setPremiumAmount(coverageUpdate.getPremiumAmount());
-                    coverage.setProductConfig(setProductConfig(coverageUpdate.getProductConfigId()));
-                    coverage.setStatus(setPending());
-                    coverage.setProcessWorkflow(processWorkflow);
-
-                    LOGGER.info("Coverage to be saved {}. traceId -> {}", coverage, traceId);
-                    Coverage c = coverageInterface.save(coverage); */
-                    coverageInterface.updateCoverage(coverageUpdate.getCoverAmount(), coverageUpdate.getPremiumAmount(), coverageUpdate.getCoverageId());
-                    LOGGER.info("Coverage updated! id = {}", coverageUpdate.getCoverageId());
-                    queryExecuted = true;
-                    response = Response.status(Response.Status.OK).entity(true).build();
-
-
-                } else {
-                    LOGGER.info("User not found. traceId -> {}", traceId);
-                }
-
-            } catch (Exception e) {
-                LOGGER.error(e);
-                response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-                errorCause = e.getCause().getMessage();
-            } finally {
-
-                queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, coverageUpdate.getUsername(),
-                        methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, coverageUpdate.getSessionId(), headers.getRemoteAddr()));
-            }
-        }
-
-        return response;
-
-    }
-
-    @POST
-    @Path("/delete/coverage")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Transactional
-    public Response deleteCoverage(CoverageUpdate coverageUpdate,
-                                   @Context HttpServletRequest headers) {
-
-        String traceId = getLogId();
-        String methodName = "updateCoverage";
-        Response response = Response.status(Response.Status.BAD_REQUEST).build();
-        if(coverageUpdate==null){
-            LOGGER.info("BeneficiaryRequest is null. traceId -> {}",traceId);
-        }
-        else {
-
-            Date requestTime = today();
-            boolean queryExecuted = false;
-            String errorCause = "";
-
-            try {
-                Optional<Users> users = userInterface.findByUserId(coverageUpdate.getUsername());
-                if (users.isPresent()) {
-                    ProcessWorkflow processWorkflow = new ProcessWorkflow();
-                    processWorkflow.setProcessAction(setProcessAction(coverageUpdate.getProcessActionId()));
-                    processWorkflow.setProcessState(setProcessState(AWAITING_APPROVAL.toString()));
-                    processWorkflow.setCurrentDepartment(users.get().getDepartment());
-                    processWorkflow.setInputDate(today());
-                    processWorkflow.setUserInput(users.get());
-
-                    ProcessWorkflow pw = processWorkflowInterface.save(processWorkflow);
-                    LOGGER.info("ProcessWorkflow saved! id = {}", pw.getWorkflowId());
-
-
-                    Coverage coverage = new Coverage();
-                    coverage.setCreatedDate(today());
-                    coverage.setLastUpdated(today());
-                    coverage.setCoverAmount(coverageUpdate.getCoverAmount());
-                    coverage.setCurrency(setCurrency(coverageUpdate.getCurrencyId()));
-                    coverage.setPremiumAmount(coverageUpdate.getPremiumAmount());
-                    coverage.setProductConfig(setProductConfig(coverageUpdate.getProductConfigId()));
-                    coverage.setStatus(setPending());
-                    coverage.setProcessWorkflow(processWorkflow);
-
-                    Coverage c = coverageInterface.save(coverage);
-                    LOGGER.info("Coverage saved! id = {}", c.getCoverageId());
-                    queryExecuted = true;
-                    response = Response.status(Response.Status.OK).entity(true).build();
-
-
-                } else {
-                    LOGGER.info("User not found. LogId -> {}", traceId);
-                }
-
-            } catch (Exception e) {
-                LOGGER.error(e);
-                response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-                errorCause = e.getCause().getMessage();
-            } finally {
-
-                queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, coverageUpdate.getUsername(),
-                        methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, coverageUpdate.getSessionId(), headers.getRemoteAddr()));
-            }
-        }
-
-        return response;
-
-    }
 
     @GET
     @Path("/accounts/details")

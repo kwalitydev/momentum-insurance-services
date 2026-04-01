@@ -1,8 +1,7 @@
 package core.util;
 
-import com.temenos.sbm_insurance.SBInsurancePaymentsResponse;
+
 import core.beans.*;
-import core.constants.PaymentMethods;
 import core.constants.Statuses;
 import core.threads.PostReportBuild;
 import dao.BeanFactory;
@@ -18,13 +17,11 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.io.File;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Optional;
 
 import static core.constants.ProcessActions.ALTER;
-import static core.constants.ProcessStates.AWAITING_APPROVAL;
 import static core.constants.ProcessStates.AWAITING_VALIDATION;
 import static core.util.CoreUtil.*;
 import static core.util.Util.*;
@@ -57,11 +54,7 @@ public class InsuranceUtil implements Serializable {
     @Inject
     private BeanFactory beanFactory;
     @Inject
-    private PaymentUtil paymentUtil;
-    @Inject
     private QueryUtil queryUtil;
-    @Inject
-    private T24Util t24Util;
     @Inject
     private DocumentTypeInterface documentTypeInterface;
     @Inject
@@ -219,64 +212,6 @@ public class InsuranceUtil implements Serializable {
     }
 
 
-
-    private void handlePolicyAmountDelta(PolicyRequest policyRequest, InsurancePolicy insurancePolicy, PolicyResponse policyResponse, String traceId) throws Exception {
-        double currentAmount = insurancePolicy.getTotalAmount().doubleValue();
-        double newAmount = policyRequest.getTotalAmount().doubleValue();
-        double diff = newAmount - currentAmount;
-
-        if (diff != 0) {
-            boolean isRefund = !(diff > 0);
-            PaymentSchedule paymentSchedule = setPaymentSchedule(insurancePolicy, BigDecimal.valueOf(Math.abs(diff)));
-            PaymentLog paymentLog = new PaymentLog();
-            StringBuilder errorMessage = new StringBuilder();
-
-            try {
-                SubProductAccount subProductAccount = queryUtil.getSubProductAccount(insurancePolicy);
-
-                if (subProductAccount != null && insurancePolicy.getPolicyHolder() != null) {
-                    CollectionLog collectionLog = new CollectionLog();
-                    collectionLog.setAccountNumber(insurancePolicy.getPolicyHolder().getAccountNumber());
-                    paymentLog.setAttemptDate(today());
-                    paymentLog.setErrorMessage(errorMessage.toString());
-                    paymentLog.setPaymentMethod(PaymentMethods.NORMAL.getMethod());
-
-                    SBInsurancePaymentsResponse paymentsResponse;
-                    String debitAmount = String.valueOf(BigDecimal.valueOf(Math.abs(diff)));
-
-                    if (isRefund) {
-                        paymentsResponse = paymentUtil.setCorePayment(traceId, policyResponse, insurancePolicy, paymentSchedule, errorMessage, subProductAccount,
-                                subProductAccount.getAccountId(), insurancePolicy.getPolicyHolder().getAccountNumber(), debitAmount, "Devolucao - premio");
-                    } else {
-                        paymentsResponse = paymentUtil.setCorePayment(traceId, policyResponse, insurancePolicy, paymentSchedule, errorMessage, subProductAccount,
-                                insurancePolicy.getPolicyHolder().getAccountNumber(), subProductAccount.getAccountId(), debitAmount, "Actualizacao - premio");
-                    }
-
-                    logPayments(errorMessage, paymentLog, insurancePolicy, collectionLog, paymentSchedule, paymentsResponse.getStatus().toString());
-                } else {
-                    handleErrorInPayment(traceId, insurancePolicy, policyResponse);
-                }
-            } catch (Exception e) {
-                LOGGER.error("Generic error",e);
-                policyResponse.setErrorMessage("Core Banking indisponível");
-            }
-        } else {
-            LOGGER.info("No refund needed! Delta is zero");
-        }
-    }
-
-    private void handleErrorInPayment(String traceId, InsurancePolicy insurancePolicy, PolicyResponse policyResponse) {
-        if (insurancePolicy.getPolicyHolder() == null) {
-            LOGGER.info("policy {} has not associated account. traceId -> {}", insurancePolicy.getPolicyId(),traceId);
-            policyResponse.setErrorMessage("Ocorreu um erro ao emitir a apólice");
-        } else {
-            LOGGER.info("No accounts found for policy {}", insurancePolicy.getPolicyId());
-            policyResponse.setErrorMessage("Ocorreu um erro ao emitir a apólice");
-        }
-    }
-
-
-
     public void setBeneficiaries(PolicyRequest policyRequest,  InsurancePolicy savedInsurancePolicy, MemberRequest mr, Status status) throws ParseException {
         Beneficiaries beneficiaries = new Beneficiaries();
         beneficiaries.setCreatedDate(today());
@@ -415,29 +350,7 @@ public class InsuranceUtil implements Serializable {
         }
     }
 
-    public boolean postChargeablePolicy(PolicyHolder policyHolder, InsurancePolicy insurancePolicy, PolicyRequest policyRequest,
-                                        SubProductAccount subProductAccount, String traceId) throws Exception{
-        InsurancePolicy savedInsurancePolicy;
-        if(policyHolder !=null) {
-            PolicyHolder savedPolicyHolder = policyHolderInterface.saveAndFlush(policyHolder);
-            insurancePolicy.setPolicyHolder(savedPolicyHolder);
-            LOGGER.info("Account saved -> {}", savedPolicyHolder);
-        }
 
-
-        savedInsurancePolicy = insurancePolicyInterface.saveAndFlush(insurancePolicy);
-        LOGGER.info("Policy saved. Policy ID -> {}", savedInsurancePolicy.getPolicyId());
-
-
-        CorePayload corePayload = new CorePayload();
-        corePayload.setInsurancePolicy(savedInsurancePolicy);
-        corePayload.setTraceId(traceId);
-        corePayload.setSubProductAccount(subProductAccount);
-
-        logDocuments(policyRequest,traceId,insurancePolicy.getPolicyId());
-
-        return t24Util.postTransaction(corePayload);
-    }
 
 
 }
