@@ -1,16 +1,10 @@
 package api;
 
 import core.beans.*;
-import core.constants.ErrorCodes;
-import core.constants.StatusType;
 import core.constants.Statuses;
 import core.util.*;
 import dao.entities.*;
 import dao.interfaces.*;
-import mz.co.stdbank.jactive.directory.Credentials;
-import mz.co.stdbank.jactive.directory.Domain;
-import mz.co.stdbank.jactive.directory.Session;
-import mz.co.stdbank.jactive.directory.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.PageRequest;
@@ -25,10 +19,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.*;
 
-import static core.constants.ErrorCodes.*;
 import static core.constants.LoginStatus.FAILED;
-import static core.constants.LoginStatus.SUCCESS;
-import static core.constants.StatusType.LOCKED;
 import static core.constants.Statuses.ACTIVATING;
 import static core.constants.Statuses.ACTIVE;
 import static core.util.CoreUtil.*;
@@ -559,186 +550,6 @@ public class UserAPI {
 
 
     }
-
-    /**
-     * Authenticate and get user information
-     **/
-    @POST
-    @Path(AUTH_ENDPOINT)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response doLogin(LoginRequest loginRequest, @Context HttpServletRequest headers) {
-
-        String reqResId = getLogId();
-        String methodName = "doLogin";
-        LOGGER.info("{} is being called with parameters. username -> {},requestId -> {} ", methodName, loginRequest.getUsername(), reqResId);
-        String ipAddress = headers.getRemoteAddr();
-        Date requestTime = today();
-        Response response = Response.status(Response.Status.NO_CONTENT).build();
-        String errorCause = "";
-
-        boolean loginSucceeded = false;
-        UserInformation loginResponse = new UserInformation();
-        boolean isLocalUser;
-        boolean isUserPresent = false;
-        loginResponse.setSessionId(reqResId);
-
-        try {
-            Optional<Users> dbUser = userInterface.findByUserId(loginRequest.getUsername());
-            if (dbUser.isPresent()) {
-                isUserPresent = true;
-
-                isLocalUser = dbUser.get().getActiveDirectory();
-
-                LOGGER.info("Logging in with AD user -> {}. traceId -> {}. sessionId -> {}", isLocalUser, reqResId,reqResId);
-
-                boolean canLogin = false;
-                if (isLocalUser) {
-
-                    Credentials credentials = Credentials.make(loginRequest.getUsername(), loginRequest.getPassword());
-                    Domain domain = new Domain();
-                    Session session = domain.getSession(credentials);
-                    User user = session.getUser();
-
-                    if (user != null) {
-                        canLogin = true;
-                    }
-                } else {
-                    String dbPassword = AES.decrypt(dbUser.get().getUserKey(), AES_SECRET);
-                    assert dbPassword != null;
-                    if (dbPassword.equals(loginRequest.getPassword())) {
-                        canLogin = true;
-                    }
-                }
-
-                if (canLogin) {
-                    loginResponse = getUserInfo(loginRequest.getUsername());
-                    loginResponse.setSessionId(reqResId);
-                    if (loginResponse.getUsers() != null) {
-                        if (loginResponse.getUsers().getStatus().getId().equals(Statuses.LOCKED.toString())) {
-                            loginResponse = new UserInformation();
-                            LOGGER.info("User {} status is {}, Request Id = {}", loginRequest.getUsername(), LOCKED.getStatus(), reqResId);
-                            loginResponse.setErrorCode(ErrorCodes.USER_LOCKED.getErrorCode());
-                            response = Response.status(Response.Status.OK).entity(loginResponse).build();
-                        } else if (loginResponse.getUsers().getStatus().getId().equals(Statuses.INACTIVE.toString())) {
-                            loginResponse = new UserInformation();
-                            LOGGER.info("User {} status is {}, Request Id = {}", loginRequest.getUsername(), Statuses.INACTIVE.toString(), reqResId);
-                            loginResponse.setErrorCode(ErrorCodes.INACTIVE_USER.getErrorCode());
-                            response = Response.status(Response.Status.OK).entity(loginResponse).build();
-                        } else {
-                          //  userInterface.updateSuccessLogin(loginRequest.getUsername(), today());
-                            userHelper.updateSuccessLogin(loginRequest.getUsername(), today());
-                            List<UserAttempts> ua = userInterface.getUserAttempt(loginRequest.getUsername(), formatDate(today(), SIMPLE_DATE_PATTERN), SUCCESS.toString());
-
-                            if (ua.size()>0) {
-                                userHelper.updateUserAttempts(loginRequest.getUsername(), formatDate(today(), SIMPLE_DATE_PATTERN), SUCCESS.toString(), today());
-                            } else {
-
-                                UserAttempts userAttempts = new UserAttempts();
-                                userAttempts.setAttemptStatus(SUCCESS.toString());
-                                userAttempts.setCreatedDate(today());
-                                userAttempts.setLoginDate(today());
-                                userAttempts.setIpAddress(headers.getRemoteAddr());
-                                userAttempts.setAttempts(1);
-                                Users users = new Users();
-                                users.setUserId(loginRequest.getUsername());
-                                userAttempts.setUsers(users);
-                                userAttempts.setId(getLogId());
-                                userHelper.logUserAttempt(userAttempts);
-                            }
-
-                            if (loginResponse.getUsers().getStatus().getId().equals(Statuses.ACTIVATING.toString())) {
-                                LOGGER.info("User {} status is {}, Request Id = {}", loginRequest.getUsername(), StatusType.ACTIVATING.getStatus(), reqResId);
-                                loginResponse.setActivating(true);
-                            }
-                            loginSucceeded = true;
-
-                            userHelper.resetUserAttempt(loginRequest.getUsername(), formatDate(today(), SIMPLE_DATE_PATTERN), FAILED.toString(), today());
-                            response = Response.status(Response.Status.OK).entity(loginResponse).build();
-
-                        }
-
-                    } else {
-                        LOGGER.info("User {} information missing to complete login, Request Id = {}", loginRequest.getUsername(), reqResId);
-                        loginResponse.setErrorCode(INVALID_CREDENTIALS.getErrorCode());
-                        response = Response.status(Response.Status.OK).entity(loginResponse).build();
-                    }
-
-                } else {
-                    loginResponse = new UserInformation();
-                    loginResponse.setErrorCode(INVALID_CREDENTIALS.getErrorCode());
-                    response = Response.status(Response.Status.OK).entity(loginResponse).build();
-
-                    LOGGER.info("Invalid Credentials, Request Id = {}", reqResId);
-                }
-
-            } else {
-                loginResponse.setErrorCode(INVALID_CREDENTIALS.getErrorCode());
-                response = Response.status(Response.Status.OK).entity(loginResponse).build();
-                LOGGER.info("User does not exists. Request Id = {}", reqResId);
-            }
-        } catch (Exception e) {
-           LOGGER.error(e);
-            errorCause = e.getMessage();
-            LOGGER.info("Invalid credentials for user {}, Request id = {}", loginRequest.getUsername(), reqResId);
-            userHelper.updateFailedLogin(loginRequest.getUsername());
-
-            Optional<Users> users = userInterface.findByUserId(loginRequest.getUsername());
-            if (users.isPresent()) {
-                Users u = users.get();
-
-                List<UserAttempts> ua = userInterface.getUserAttempt(loginRequest.getUsername(), formatDate(today(), SIMPLE_DATE_PATTERN), FAILED.toString());
-                if (ua.size()>0) {
-                    int max_attempts = applicationInterface.getAppMaxAttempts(RequestUtil.APP_ID);
-                    if (ua.get(0).getAttempts() == max_attempts) {
-                        if (!u.getStatus().getId().equals(Statuses.LOCKED.toString())) {
-                            userInterface.updateStatus(Statuses.LOCKED.toString(), loginRequest.getUsername());
-                            LOGGER.info("User {} max attempts reached. Status updated to locked. Request Id = {}", ua.get(0).getUsers().getUserId(), reqResId);
-                            loginResponse.setErrorCode(LOGIN_MAX_ATTEMPTS_REACHED.getErrorCode());
-                        } else {
-                            LOGGER.info("User {} is locked. Request Id = {}", ua.get(0).getUsers().getUserId(), reqResId);
-                            loginResponse.setErrorCode(USER_LOCKED.getErrorCode());
-                        }
-                    } else {
-                        userInterface.updateUserAttempts(loginRequest.getUsername(), formatDate(today(), SIMPLE_DATE_PATTERN), FAILED.toString(), today());
-                        loginResponse.setErrorCode(INVALID_CREDENTIALS.getErrorCode());
-                    }
-                } else {
-                    loginResponse = new UserInformation();
-                    UserAttempts userAttempts = new UserAttempts();
-                    userAttempts.setAttemptStatus(FAILED.toString());
-                    userAttempts.setCreatedDate(today());
-                    userAttempts.setIpAddress(headers.getRemoteAddr());
-                    userAttempts.setAttempts(1);
-                    userAttempts.setUsers(u);
-                    userAttempts.setId(getLogId());
-                    userAttemptInterface.save(userAttempts);
-                    loginResponse.setErrorCode(INVALID_CREDENTIALS.toString());
-                }
-            } else {
-                loginResponse.setErrorCode(INVALID_CREDENTIALS.toString());
-            }
-            response = Response.status(Response.Status.OK).entity(loginResponse).build();
-
-
-        } finally {
-
-            String payload = "Username : "+loginRequest.getUsername()+"\n"+
-                    "Login status : "+loginSucceeded+"\n"+
-                    "Error  : "+isNull(loginResponse.getErrorCode());
-
-            if(isUserPresent) {
-                queryUtil.saveLog(CoreUtil.setWebserviceLog(reqResId, requestTime, loginRequest.getUsername(),
-                        methodName, response.getStatus(), loginSucceeded, HttpMethod.GET, errorCause, null, ipAddress, false, "Login", payload));
-            }
-            else {
-                LOGGER.info("User -> {}, not found in database",loginRequest.getUsername());
-            }
-            }
-
-
-        return response;
-    }
-
 
     private UserInformation getUserInfo(String username) {
 

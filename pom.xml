@@ -116,20 +116,6 @@
             <version>2.2.2</version>
         </dependency>
 
-
-        <dependency>
-            <groupId>stdbank.common</groupId>
-            <artifactId>jactive-directory-impl</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>stdbank.common</groupId>
-            <artifactId>jactive-directory-api</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-
-
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
