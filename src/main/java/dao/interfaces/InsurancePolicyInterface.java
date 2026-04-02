@@ -18,17 +18,16 @@ public interface InsurancePolicyInterface {
     Optional<InsurancePolicy> findByPolicyId(String policyId);
     Optional<InsurancePolicy> findBySimulationId(String policyId);
 
-    List<InsurancePolicy> findByDateInterval(Date startDate,Date endDate,String recordType);
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,SubProduct subProduct,String recordType);
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate, SubProduct subProduct, PolicyHolder policyHolder, String recordType);
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate, SubProduct subProduct, PolicyHolder policyHolder, Users userId, String recordType);
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Users userId,String recordType);
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Status status,String recordType);
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate, Status status, PolicyHolder policyHolder, String recordType);
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Status status,SubProduct subProduct,String recordType);
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Status status,Users userId,String recordType);
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Users userId,SubProduct subProduct,String recordType);
-    List<InsurancePolicy> getPoliciesToPay(List<String> status,String recordStatus,Date expiryDate);
+    List<InsurancePolicy> findByDateInterval(Date startDate,Date endDate);
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,SubProduct subProduct);
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate, SubProduct subProduct,Users userId);
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Users userId);
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Status status);
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate, Status status, PolicyHolder policyHolder);
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Status status,SubProduct subProduct);
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Status status,Users userId);
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Users userId,SubProduct subProduct);
+    List<InsurancePolicy> getPoliciesToPay(List<String> status,Date expiryDate);
     List<InsurancePolicy> getPoliciesToPay(List<String> status,String recordStatus,Date expiryDate, Frequency frequency);
    int cancelPolicy(Date lastUpdate, Status status,String userId,String policyId);
 
@@ -40,15 +39,15 @@ public interface InsurancePolicyInterface {
     List<InsurancePolicy> getPoliciesUnClaimed(Status status, String recordType,Date startDate, Date endDate);
 
 
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate, Product product, String recordType, Pageable pageable);
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Product product,Status status,String recordType,Pageable pageable);
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,SubProduct subProduct,String recordType,Pageable pageable);
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Status status,SubProduct subProduct,String recordType,Pageable pageable);
-    List<InsurancePolicy> findByDateIntervalCancel(Date startDate, Date endDate, Product product, String recordType, Pageable pageable);
-    List<InsurancePolicy> findByDateIntervalCancel(Date startDate, Date endDate,Product product,Status status,String recordType,Pageable pageable);
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate, Product product, Pageable pageable);
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Product product,Status status,Pageable pageable);
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,SubProduct subProduct,Pageable pageable);
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Status status,SubProduct subProduct,Pageable pageable);
+    List<InsurancePolicy> findByDateIntervalCancel(Date startDate, Date endDate, Product product,  Pageable pageable);
+    List<InsurancePolicy> findByDateIntervalCancel(Date startDate, Date endDate,Product product,Status status,Pageable pageable);
 
-    List<InsurancePolicy> findByDateIntervalCancel(Date startDate, Date endDate,SubProduct subProduct,String recordType,Pageable pageable);
-    List<InsurancePolicy> findByDateIntervalCancel(Date startDate, Date endDate,Status status,SubProduct subProduct,String recordType,Pageable pageable);
+    List<InsurancePolicy> findByDateIntervalCancel(Date startDate, Date endDate,SubProduct subProduct,Pageable pageable);
+    List<InsurancePolicy> findByDateIntervalCancel(Date startDate, Date endDate,Status status,SubProduct subProduct,Pageable pageable);
 
     int updatePremium(Date lastUpdate, String users, BigDecimal totalAmount,String policyId);
 

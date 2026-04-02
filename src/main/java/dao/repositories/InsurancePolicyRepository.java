@@ -17,42 +17,39 @@ import java.util.List;
 public interface InsurancePolicyRepository extends JpaRepository<InsurancePolicy, String>, InsurancePolicyInterface {
 
 
-    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.recordType=?3 ORDER BY ip.issueDate DESC")
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,String recordType);
+    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 ORDER BY ip.issueDate DESC")
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate);
 
-    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.subProduct =?3 AND ip.recordType=?4 ORDER BY ip.issueDate DESC")
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,SubProduct subProduct,String recordType);
+    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.subProduct =?3 ORDER BY ip.createdDate DESC")
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate, SubProduct subProduct);
 
-    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.subProduct =?3 AND ip.policyHolder =?4 AND ip.recordType=?5 ORDER BY ip.createdDate DESC")
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate, SubProduct subProduct, PolicyHolder policyHolder, String recordType);
-
-    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.subProduct =?3 AND ip.policyHolder =?4 AND ip.users =?5 AND ip.recordType=?6 ORDER BY ip.createdDate DESC")
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate, SubProduct subProduct, PolicyHolder policyHolder, Users userId, String recordType);
+    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.subProduct =?3  AND ip.users =?5 ORDER BY ip.createdDate DESC")
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate, SubProduct subProduct,  Users userId);
 
 
-    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.users =?3 AND ip.recordType=?4 ORDER BY ip.createdDate DESC")
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Users userId,String recordType);
+    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.users =?3 ORDER BY ip.createdDate DESC")
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Users userId);
 
-    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.status =?3 AND ip.recordType=?4 ORDER BY ip.createdDate DESC")
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Status status,String recordType);
+    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.status =?3 ORDER BY ip.createdDate DESC")
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Status status);
 
-    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.status =?3 AND ip.policyHolder =?4 AND ip.recordType=?5 ORDER BY ip.createdDate DESC")
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate, Status status, PolicyHolder policyHolder, String recordType);
+    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.status =?3 AND ip.policyHolder =?4 ORDER BY ip.createdDate DESC")
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate, Status status, PolicyHolder policyHolder);
 
-    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.status =?3 AND ip.subProduct =?4 AND ip.recordType=?5 ORDER BY ip.createdDate DESC")
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Status status,SubProduct subProduct,String recordType);
+    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.status =?3 AND ip.subProduct =?4 ORDER BY ip.createdDate DESC")
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Status status,SubProduct subProduct);
 
-    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.status =?3 AND ip.users =?4 AND ip.recordType=?5 ORDER BY ip.createdDate DESC")
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Status status,Users users,String recordType);
+    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.status =?3 AND ip.users =?4 ORDER BY ip.createdDate DESC")
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Status status,Users users);
 
-    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.users =?3 AND ip.subProduct =?4 AND ip.recordType=?5 ORDER BY ip.createdDate DESC")
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Users users,SubProduct subProduct,String recordType);
+    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.users =?3 AND ip.subProduct =?4 ORDER BY ip.createdDate DESC")
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Users users,SubProduct subProduct);
 
     @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.status.id IN ?1 AND ip.recordType = ?2 AND (ip.expiryDate>=?3 OR ip.expiryDate IS NULL)")
     List<InsurancePolicy> getPoliciesToPay(List<String> status,String recordStatus,Date expiryDate);
 
-    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.status.id IN ?1 AND ip.recordType = ?2 AND (ip.expiryDate>=?3 OR ip.expiryDate IS NULL) AND ip.paymentFrequency=?4")
-    List<InsurancePolicy> getPoliciesToPay(List<String> status,String recordStatus,Date expiryDate,Frequency frequency);
+    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.status.id IN ?1 AND (ip.expiryDate>=?2 OR ip.expiryDate IS NULL) AND ip.paymentFrequency=?3")
+    List<InsurancePolicy> getPoliciesToPay(List<String> status,Date expiryDate,Frequency frequency);
 
     @Modifying(clearAutomatically = true)
     @Query("update InsurancePolicy set lastUpdated=?1, status =?2, updatedUser=?3 where policyId=?4")
@@ -62,45 +59,31 @@ public interface InsurancePolicyRepository extends JpaRepository<InsurancePolicy
     @Query("update InsurancePolicy set lastUpdated=?1, updatedUser=?2,coverage=?3, totalAmount=?4, subProduct =?5,expiryDate=?6 where policyId=?7")
     int updatePolicy(Date lastUpdate, String users, Coverage coverage, BigDecimal totalAmount,SubProduct subProduct,Date expiryDate,String policyId);
 
-
-    @Query("SELECT ip FROM InsurancePolicy ip " +
-            "WHERE ip.recordType = ?1 " +
-            "AND ip.subProduct.product = ?2 "+
-            "ORDER BY ip.createdDate DESC")
-    List<InsurancePolicy> findByRecordTypeByOrderByCreatedDateDesc(String recordType,Product subProduct);
-
-
     @Query("SELECT ip FROM InsurancePolicy ip INNER JOIN Claim c ON (ip <> c.insurancePolicy AND c.status = ?5) " +
-            "WHERE ip.status = ?1 AND ip.recordType = ?2 AND ip.createdDate BETWEEN ?3 AND ?4")
-    List<InsurancePolicy> getPoliciesToClaim(Status status, String recordType,Date startDate, Date endDate,Status claimStatus);
+            "WHERE ip.status = ?1 AND ip.createdDate BETWEEN ?2 AND ?3")
+    List<InsurancePolicy> getPoliciesToClaim(Status status, Date startDate, Date endDate,Status claimStatus);
+    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.status = ?1 AND ip.createdDate BETWEEN ?2 AND ?3")
+    List<InsurancePolicy> getPoliciesUnClaimed(Status status,Date startDate, Date endDate);
 
+    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.subProduct.product =?3 ORDER BY ip.createdDate DESC")
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate, Product product, Pageable pageable);
+    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.subProduct.product =?3 AND ip.status =?4 ORDER BY ip.createdDate DESC")
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Product product,Status status,Pageable pageable);
 
-    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.status = ?1 AND ip.recordType = ?2 AND ip.createdDate BETWEEN ?3 AND ?4")
-    List<InsurancePolicy> getPoliciesUnClaimed(Status status, String recordType,Date startDate, Date endDate);
+    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.subProduct =?3 ORDER BY ip.issueDate DESC")
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,SubProduct subProduct,Pageable pageable);
+    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.status =?3 AND ip.subProduct =?4 ORDER BY ip.createdDate DESC")
+    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Status status,SubProduct subProduct,Pageable pageable);
 
+    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.lastUpdated BETWEEN ?1 AND ?2 AND ip.subProduct.product =?3 ORDER BY ip.lastUpdated DESC")
+    List<InsurancePolicy> findByDateIntervalCancel(Date startDate, Date endDate, Product product, Pageable pageable);
+    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.lastUpdated BETWEEN ?1 AND ?2 AND ip.subProduct.product =?3 AND ip.status =?4 ORDER BY ip.lastUpdated DESC")
+    List<InsurancePolicy> findByDateIntervalCancel(Date startDate, Date endDate,Product product,Status status,Pageable pageable);
 
-    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.subProduct.product =?3 AND ip.recordType=?4 ORDER BY ip.createdDate DESC")
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate, Product product, String recordType, Pageable pageable);
-    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.subProduct.product =?3 AND ip.status =?4 AND ip.recordType=?5 ORDER BY ip.createdDate DESC")
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Product product,Status status,String recordType,Pageable pageable);
-
-    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.subProduct =?3 AND ip.recordType=?4 ORDER BY ip.issueDate DESC")
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,SubProduct subProduct,String recordType,Pageable pageable);
-    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.issueDate BETWEEN ?1 AND ?2 AND ip.status =?3 AND ip.subProduct =?4 AND ip.recordType=?5 ORDER BY ip.createdDate DESC")
-    List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Status status,SubProduct subProduct,String recordType,Pageable pageable);
-
-
-
-
-    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.lastUpdated BETWEEN ?1 AND ?2 AND ip.subProduct.product =?3 AND ip.recordType=?4 ORDER BY ip.lastUpdated DESC")
-    List<InsurancePolicy> findByDateIntervalCancel(Date startDate, Date endDate, Product product, String recordType, Pageable pageable);
-    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.lastUpdated BETWEEN ?1 AND ?2 AND ip.subProduct.product =?3 AND ip.status =?4 AND ip.recordType=?5 ORDER BY ip.lastUpdated DESC")
-    List<InsurancePolicy> findByDateIntervalCancel(Date startDate, Date endDate,Product product,Status status,String recordType,Pageable pageable);
-
-    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.lastUpdated BETWEEN ?1 AND ?2 AND ip.subProduct =?3 AND ip.recordType=?4 ORDER BY ip.lastUpdated DESC")
-    List<InsurancePolicy> findByDateIntervalCancel(Date startDate, Date endDate,SubProduct subProduct,String recordType,Pageable pageable);
-    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.lastUpdated BETWEEN ?1 AND ?2 AND ip.status =?3 AND ip.subProduct =?4 AND ip.recordType=?5 ORDER BY ip.lastUpdated DESC")
-    List<InsurancePolicy> findByDateIntervalCancel(Date startDate, Date endDate,Status status,SubProduct subProduct,String recordType,Pageable pageable);
+    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.lastUpdated BETWEEN ?1 AND ?2 AND ip.subProduct =?3 ORDER BY ip.lastUpdated DESC")
+    List<InsurancePolicy> findByDateIntervalCancel(Date startDate, Date endDate,SubProduct subProduct,Pageable pageable);
+    @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.lastUpdated BETWEEN ?1 AND ?2 AND ip.status =?3 AND ip.subProduct =?4 ORDER BY ip.lastUpdated DESC")
+    List<InsurancePolicy> findByDateIntervalCancel(Date startDate, Date endDate,Status status,SubProduct subProduct,Pageable pageable);
 
 
     @Modifying(clearAutomatically = true)

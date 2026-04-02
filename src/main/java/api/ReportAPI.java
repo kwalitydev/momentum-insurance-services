@@ -89,20 +89,18 @@ public class ReportAPI {
     public Response getPolicies(@QueryParam("startDate") String startDate,
                                 @QueryParam("endDate") String endDate,
                                 @QueryParam("subProductId") String subProductId,
-                                @QueryParam("accountId") String accountId,
                                 @QueryParam("userId") String userId,
                                 @QueryParam("statusId") String statusId,
                                 @QueryParam("sessionId") String sessionId,
                                 @QueryParam("username") String username,
-                                @QueryParam("recordType") String recordType,
                                 @Context HttpServletRequest headers) {
 
         String reqRes = getLogId();
         Date requestTime = today();
         String methodName = "getPolicies";
         String ipAddress = headers.getRemoteAddr();
-        LOGGER.info("{} is being called with parameter. startDate -> {}, endDate -> {}, subProductId -> {}, accountId ->{},userId ->{}, username -> {}, sessionId -> {}, logId -> {}, ipAddress -> {} ",
-                methodName,startDate,endDate,subProductId,accountId,userId,username, sessionId, reqRes,headers.getRemoteAddr());
+        LOGGER.info("{} is being called with parameter. startDate -> {}, endDate -> {}, subProductId -> {}, userId ->{}, username -> {}, sessionId -> {}, logId -> {}, ipAddress -> {} ",
+                methodName,startDate,endDate,subProductId,userId,username, sessionId, reqRes,headers.getRemoteAddr());
 
         Response response = Response.status(Response.Status.NO_CONTENT).build();
         List<InsurancePolicy> insurancePolicies = new ArrayList<>();
@@ -116,63 +114,42 @@ public class ReportAPI {
             Date ed = getDatePlus(stringToDate(endDate), 1, Calendar.DATE);
 
             if(subProductId.equalsIgnoreCase(RequestParams.ALL.toString()) &&
-                    accountId.equalsIgnoreCase(RequestParams.ALL.toString()) &&
                         userId.equalsIgnoreCase(RequestParams.ALL.toString()) &&
                     statusId.equalsIgnoreCase(RequestParams.ALL.toString())){
-                insurancePolicies = insurancePolicyInterface.findByDateInterval(sd,ed,recordType);
+                insurancePolicies = insurancePolicyInterface.findByDateInterval(sd,ed);
 
             }
             else if(!subProductId.equalsIgnoreCase(RequestParams.ALL.toString())){
 
-                if( accountId.equalsIgnoreCase(RequestParams.ALL.toString()) &&
-                        userId.equalsIgnoreCase(RequestParams.ALL.toString())){
-                    insurancePolicies = insurancePolicyInterface.findByDateInterval(sd,ed,setSubProduct(Long.parseLong(subProductId)),recordType);
+                if( userId.equalsIgnoreCase(RequestParams.ALL.toString())){
+                    insurancePolicies = insurancePolicyInterface.findByDateInterval(sd,ed,setSubProduct(Long.parseLong(subProductId)));
                 }
-                else if(!accountId.equalsIgnoreCase(RequestParams.ALL.toString()) &&
-                        userId.equalsIgnoreCase(RequestParams.ALL.toString())){
-                    insurancePolicies = insurancePolicyInterface.findByDateInterval(sd,ed,setSubProduct(Long.parseLong(subProductId)),setAccount(accountId),recordType);
+                else if(userId.equalsIgnoreCase(RequestParams.ALL.toString())){
+                    insurancePolicies = insurancePolicyInterface.findByDateInterval(sd,ed,setSubProduct(Long.parseLong(subProductId)));
                 }
-                else if(!accountId.equalsIgnoreCase(RequestParams.ALL.toString()) &&
-                        !userId.equalsIgnoreCase(RequestParams.ALL.toString())){
-                    insurancePolicies = insurancePolicyInterface.findByDateInterval(sd,ed,setSubProduct(Long.parseLong(subProductId)),setAccount(accountId),setUser(userId),recordType);
+                else if(!userId.equalsIgnoreCase(RequestParams.ALL.toString())){
+
+                    insurancePolicies = insurancePolicyInterface.findByDateInterval(sd,ed,setSubProduct(Long.parseLong(subProductId)),setUser(userId));
                 }
                 else if(!userId.equalsIgnoreCase(RequestParams.ALL.toString()) &&
-                        statusId.equalsIgnoreCase(RequestParams.ALL.toString()) &&
-                        accountId.equalsIgnoreCase(RequestParams.ALL.toString())){
-                    insurancePolicies = insurancePolicyInterface.findByDateInterval(sd,ed,setUser(userId),setSubProduct(Long.parseLong(subProductId)),recordType);
+                        statusId.equalsIgnoreCase(RequestParams.ALL.toString())){
+                    insurancePolicies = insurancePolicyInterface.findByDateInterval(sd,ed,setUser(userId),setSubProduct(Long.parseLong(subProductId)));
                 }
-
-            }
-            else if(!accountId.equalsIgnoreCase(RequestParams.ALL.toString())){
-
-                if(subProductId.equalsIgnoreCase(RequestParams.ALL.toString()) &&
-                        userId.equalsIgnoreCase(RequestParams.ALL.toString())){
-                   // insurancePolicies = insurancePolicyInterface.findByDateInterval(sd,ed,setAccount(accountId),recordType);
-                }
-                else if(subProductId.equalsIgnoreCase(RequestParams.ALL.toString()) &&
-                        !userId.equalsIgnoreCase(RequestParams.ALL.toString())){
-                    insurancePolicies = insurancePolicyInterface.findByDateInterval(sd,ed,recordType);
-                }
-
-
 
             }
             else if (!statusId.equalsIgnoreCase(RequestParams.ALL.toString())){
                 if(subProductId.equalsIgnoreCase(RequestParams.ALL.toString()) &&
-                        userId.equalsIgnoreCase(RequestParams.ALL.toString()) &&
-                        accountId.equalsIgnoreCase(RequestParams.ALL.toString())){
-                    insurancePolicies = insurancePolicyInterface.findByDateInterval(sd,ed,setStatus(statusId),setAccount(accountId),recordType);
+                        userId.equalsIgnoreCase(RequestParams.ALL.toString())){
+                    insurancePolicies = insurancePolicyInterface.findByDateInterval(sd,ed,setStatus(statusId));
                 }
                 else if(!subProductId.equalsIgnoreCase(RequestParams.ALL.toString()) &&
-                        userId.equalsIgnoreCase(RequestParams.ALL.toString()) &&
-                        accountId.equalsIgnoreCase(RequestParams.ALL.toString())){
-                    insurancePolicies = insurancePolicyInterface.findByDateInterval(sd,ed,setStatus(statusId),setSubProduct(Long.parseLong(subProductId)),recordType);
+                        userId.equalsIgnoreCase(RequestParams.ALL.toString())){
+                    insurancePolicies = insurancePolicyInterface.findByDateInterval(sd,ed,setStatus(statusId),setSubProduct(Long.parseLong(subProductId)));
                 }
                 else if(subProductId.equalsIgnoreCase(RequestParams.ALL.toString()) &&
-                        !userId.equalsIgnoreCase(RequestParams.ALL.toString()) &&
-                        accountId.equalsIgnoreCase(RequestParams.ALL.toString())){
+                        !userId.equalsIgnoreCase(RequestParams.ALL.toString())){
 
-                    insurancePolicies = insurancePolicyInterface.findByDateInterval(sd,ed,setStatus(statusId),setUser(userId),recordType);
+                    insurancePolicies = insurancePolicyInterface.findByDateInterval(sd,ed,setStatus(statusId),setUser(userId));
                 }
 
 
@@ -181,14 +158,12 @@ public class ReportAPI {
 
                 LOGGER.info("Searching with filtered username");
                 if(subProductId.equalsIgnoreCase(RequestParams.ALL.toString()) &&
-                        statusId.equalsIgnoreCase(RequestParams.ALL.toString()) &&
-                        accountId.equalsIgnoreCase(RequestParams.ALL.toString())){
-                    insurancePolicies = insurancePolicyInterface.findByDateInterval(sd,ed,setUser(userId),recordType);
+                        statusId.equalsIgnoreCase(RequestParams.ALL.toString())){
+                    insurancePolicies = insurancePolicyInterface.findByDateInterval(sd,ed,setUser(userId));
                 }
                 else if(!subProductId.equalsIgnoreCase(RequestParams.ALL.toString()) &&
-                        statusId.equalsIgnoreCase(RequestParams.ALL.toString()) &&
-                        accountId.equalsIgnoreCase(RequestParams.ALL.toString())){
-                    insurancePolicies = insurancePolicyInterface.findByDateInterval(sd,ed,setUser(userId),setSubProduct(Long.parseLong(subProductId)),recordType);
+                        statusId.equalsIgnoreCase(RequestParams.ALL.toString())){
+                    insurancePolicies = insurancePolicyInterface.findByDateInterval(sd,ed,setUser(userId),setSubProduct(Long.parseLong(subProductId)));
                 }
 
             }
@@ -210,10 +185,6 @@ public class ReportAPI {
         return response;
 
     }
-
-
-
-
 
 
 
@@ -293,7 +264,6 @@ public class ReportAPI {
             @QueryParam("limit") int limit,
             @QueryParam("offset") int offset,
             @QueryParam("policyId") String policyId,
-            @QueryParam("recordType") String recordType,
             @QueryParam("resultType") String resultType,
             @QueryParam("accountNumber") String accountNumber,
             @QueryParam("cif") String cif,
@@ -327,7 +297,7 @@ public class ReportAPI {
 
 
             LOGGER.info("Searching by date interval, product/subProduct, and status");
-            insurancePolicies = getPoliciesByFilters(sd, ed, productId, subProductId, statusId, recordType, pageable);
+            insurancePolicies = getPoliciesByFilters(sd, ed, productId, subProductId, statusId, pageable);
 
             if (resultType.equalsIgnoreCase(ResultTypes.PREVIEW.toString())) {
                 LOGGER.info("{} returned {} results", methodName, insurancePolicies.size());
@@ -353,15 +323,15 @@ public class ReportAPI {
         return Response.status(Response.Status.OK).entity(policies).build();
     }
 
-    private List<InsurancePolicy> getPoliciesByFilters(Date sd, Date ed, String productId, String subProductId, String statusId, String recordType, Pageable pageable) {
+    private List<InsurancePolicy> getPoliciesByFilters(Date sd, Date ed, String productId, String subProductId, String statusId, Pageable pageable) {
         if (subProductId.equalsIgnoreCase(RequestParams.ALL.toString())) {
             return statusId.equalsIgnoreCase(RequestParams.ALL.toString()) ?
-                    insurancePolicyInterface.findByDateInterval(sd, ed, setProduct(productId), recordType, pageable) :
-                    insurancePolicyInterface.findByDateInterval(sd, ed, setProduct(productId), setStatus(statusId), recordType, pageable);
+                    insurancePolicyInterface.findByDateInterval(sd, ed, setProduct(productId), pageable) :
+                    insurancePolicyInterface.findByDateInterval(sd, ed, setProduct(productId), setStatus(statusId), pageable);
         } else {
             return statusId.equalsIgnoreCase(RequestParams.ALL.toString()) ?
-                    insurancePolicyInterface.findByDateInterval(sd, ed, setSubProduct(Long.parseLong(subProductId)), recordType, pageable) :
-                    insurancePolicyInterface.findByDateInterval(sd, ed, setStatus(statusId), setSubProduct(Long.parseLong(subProductId)), recordType, pageable);
+                    insurancePolicyInterface.findByDateInterval(sd, ed, setSubProduct(Long.parseLong(subProductId)), pageable) :
+                    insurancePolicyInterface.findByDateInterval(sd, ed, setStatus(statusId), setSubProduct(Long.parseLong(subProductId)), pageable);
         }
     }
 
@@ -1914,11 +1884,11 @@ public class ReportAPI {
 
                 if(statusId.equalsIgnoreCase(RequestParams.ALL.toString())){
                     LOGGER.info("Searching by ALL Statuses and Product");
-                    insurancePolicies = insurancePolicyInterface.findByDateIntervalCancel(sd,ed,setProduct(productId),recordType,top);
+                    insurancePolicies = insurancePolicyInterface.findByDateIntervalCancel(sd,ed,setProduct(productId),top);
                 }
                 else {
                     LOGGER.info("Searching by Single Status and Product");
-                    insurancePolicies = insurancePolicyInterface.findByDateIntervalCancel(sd,ed,setProduct(productId),setStatus(statusId),recordType,top);
+                    insurancePolicies = insurancePolicyInterface.findByDateIntervalCancel(sd,ed,setProduct(productId),setStatus(statusId),top);
                 }
 
             }
@@ -1927,12 +1897,12 @@ public class ReportAPI {
 
                 if(statusId.equalsIgnoreCase(RequestParams.ALL.toString())){
                     LOGGER.info("Searching by ALL Statuses and SubProduct");
-                    insurancePolicies = insurancePolicyInterface.findByDateIntervalCancel(sd,ed,setSubProduct(Long.parseLong(subProductId)),recordType,top);
+                    insurancePolicies = insurancePolicyInterface.findByDateIntervalCancel(sd,ed,setSubProduct(Long.parseLong(subProductId)),top);
                 }
                 else{
                     LOGGER.info("Searching by Single Status and SubProduct");
                     insurancePolicies = insurancePolicyInterface.findByDateIntervalCancel(sd,ed,setStatus(statusId),
-                            setSubProduct(Long.parseLong(subProductId)),recordType,top);
+                            setSubProduct(Long.parseLong(subProductId)),top);
                 }
 
 
