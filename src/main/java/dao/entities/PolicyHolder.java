@@ -9,12 +9,12 @@ public class PolicyHolder implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(length = 13)
-    private String accountNumber;
     private String customerId;
     private Date dateOfBirth;
     @Column(length = 25)
     private String mobileNumber;
+    @Column(length = 25)
+    private String altMobileNumber;
     private Date lastUpdate;
     private String customerName;
     private String email;
@@ -35,14 +35,6 @@ public class PolicyHolder implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getAccountNumber() {
-        return accountNumber;
-    }
-
-    public void setAccountNumber(String accountNumber) {
-        this.accountNumber = accountNumber;
     }
 
     public String getCustomerId() {
@@ -149,15 +141,22 @@ public class PolicyHolder implements Serializable {
         this.jobTitle = jobTitle;
     }
 
+    public String getAltMobileNumber() {
+        return altMobileNumber;
+    }
+
+    public void setAltMobileNumber(String altMobileNumber) {
+        this.altMobileNumber = altMobileNumber;
+    }
 
     @Override
     public String toString() {
-        return "Account{" +
+        return "PolicyHolder{" +
                 "id=" + id +
-                ", accountNumber='" + accountNumber + '\'' +
                 ", customerId='" + customerId + '\'' +
                 ", dateOfBirth=" + dateOfBirth +
                 ", mobileNumber='" + mobileNumber + '\'' +
+                ", altMobileNumber='" + altMobileNumber + '\'' +
                 ", lastUpdate=" + lastUpdate +
                 ", customerName='" + customerName + '\'' +
                 ", email='" + email + '\'' +

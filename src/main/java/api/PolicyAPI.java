@@ -167,7 +167,8 @@ public class PolicyAPI {
     @Path("/sub-products-list")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getSubProducts(@QueryParam("productId") String productId,@QueryParam("sessionId") String sessionId,@QueryParam("username") String username,@Context HttpServletRequest headers) {
+    public Response getSubProducts(@QueryParam("productId") String productId,@QueryParam("sessionId") String sessionId,
+                                   @QueryParam("username") String username,@Context HttpServletRequest headers) {
 
         String traceId = getLogId();
         String methodName = "getSubProducts";
@@ -223,9 +224,7 @@ public class PolicyAPI {
         InsurancePolicy savedInsurancePolicy;
 
         try {
-
-
-            PolicyHolder policyHolder = new PolicyHolder();
+                PolicyHolder policyHolder = new PolicyHolder();
                 policyHolder.setLastUpdate(today());
                 policyHolder.setMobileNumber(policyRequest.getMainPhone());
                 policyHolder.setCustomerName(policyRequest.getFullName()+" "+policyRequest.getSurname());
@@ -234,12 +233,14 @@ public class PolicyAPI {
                 policyHolder.setVat(policyRequest.getNuit());
                 policyHolder.setAddress(policyRequest.getAddress());
                 policyHolder.setJobTitle(setJobTitle(policyRequest.getJobTitle()));
+                policyHolder.setAltMobileNumber(policyRequest.getAltPhone());
 
                 InsurancePolicy insurancePolicy = new InsurancePolicy();
                 insurancePolicy.setPolicyId(genPolicyId("M"));
                 insurancePolicy.setCreatedDate(today());
                 insurancePolicy.setLastUpdated(today());
                 insurancePolicy.setPaymentFrequency(setFrequency(policyRequest.getFrequencyId()));
+                insurancePolicy.setBenefitCycle(setBenefitCycle(policyRequest.getCycleId()));
 
                 insurancePolicy.setStatus(setStatus(Statuses.ACTIVATING.toString()));
                 insurancePolicy.setSubProduct(setSubProduct(policyRequest.getPackageId()));
@@ -254,11 +255,7 @@ public class PolicyAPI {
 
                 response = Response.status(Response.Status.OK).entity(policyResponse).build();
                 queryExecuted = true;
-
                 notificationUtil.postSendSMS(traceId, savedInsurancePolicy);
-
-
-
 
 
         } catch (Exception e) {

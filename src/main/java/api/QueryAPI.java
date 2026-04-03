@@ -183,53 +183,6 @@ public class QueryAPI {
 
 
 
-    @GET
-    @Path("/quotation/list")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getQuotations( @QueryParam("sessionId") String sessionId,
-                                        @QueryParam("username") String username,
-                                        @QueryParam("productId") String productId,
-                                        @Context HttpServletRequest headers) {
-
-        String reqRes = getLogId();
-        String methodName = "getQuotations";
-        LOGGER.info("{} is being called with parameter. username -> {}, sessionId -> {}, logId -> {}, ipAddress -> {} ",
-                methodName, username, sessionId, reqRes,headers.getRemoteAddr());
-
-        Date requestTime = today();
-        Response response = Response.status(Response.Status.NO_CONTENT).build();
-        boolean queryExecuted = false;
-        String errorCause = "";
-
-        try {
-
-            List<InsurancePolicy> insurancePolicies = insurancePolicyInterface.findByRecordTypeByOrderByCreatedDateDesc(RecordTypes.SIMULATED.toString(),setProduct(productId));
-
-            List<InsurancePolicy> filtered = new ArrayList<>();
-            insurancePolicies.forEach((ip)->{
-
-                Optional<InsurancePolicy> toAdd = insurancePolicyInterface.findBySimulationId(ip.getPolicyId());
-                if(!toAdd.isPresent()){
-                    filtered.add(ip);
-                }
-
-            });
-            defaultSuccess(LOGGER,reqRes);
-            response = Response.status(Response.Status.OK).entity(filtered).build();
-            queryExecuted = true;
-        } catch (Exception e) {
-            LOGGER.error(e);
-            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-            errorCause = e.getCause().getMessage();
-        } finally {
-
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
-                    methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId,headers.getRemoteAddr()));
-        }
-        return response;
-
-    }
 
     @GET
     @Path("/member/price-list")

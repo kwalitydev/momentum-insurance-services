@@ -273,42 +273,7 @@ public class ClaimAPI {
     }
 
 
-    @GET
-    @Path("/policies/interval")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getPoliciesToClaim(@QueryParam("startDate") String startDate,
-                               @QueryParam("endDate") String endDate,
-                               @QueryParam("username") String username,
-                               @QueryParam("sessionId") String sessionId,
-                               @Context HttpServletRequest headers) {
 
-
-        String logId = getLogId();
-        LOGGER.info("getPoliciesToClaim webservice is being called with parameters. Request {startDate -> {}, endDate -> {}, userId -> {}}, Ip Address = {}, LogId = {} ",
-                startDate,endDate,username, headers.getRemoteAddr(),logId);
-
-        try {
-            Date sd = stringToDateTime(startDate);
-            Date ed = getDatePlus(stringToDate(endDate), 1, Calendar.DATE);
-            List<InsurancePolicy> insurancePolicies = insurancePolicyInterface.getPoliciesUnClaimed(
-                    setActive(),
-                    RecordTypes.COMMITTED.toString(),
-                    sd,
-                    ed
-
-            );
-
-            LOGGER.info("listClaims returned {}. LogId = {}", insurancePolicies, logId);
-            return Response.status(Response.Status.OK).entity(insurancePolicies).build();
-
-
-        }
-        catch (Exception e){
-            LOGGER.error(e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
-
-    }
 
 
     @GET

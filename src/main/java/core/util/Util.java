@@ -132,12 +132,6 @@ public class Util {
         return relationShip;
     }
 
-    public static PolicyHolder setAccount(String accountId){
-        PolicyHolder policyHolder = new PolicyHolder();
-        policyHolder.setAccountNumber(accountId);
-        return policyHolder;
-    }
-
     public static Status setStatus(String statusId){
         Status status = new Status();
         status.setId(statusId);
