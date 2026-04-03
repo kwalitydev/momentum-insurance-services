@@ -5,8 +5,11 @@ import core.beans.CustomerResponse;
 import core.beans.FileRequest;
 import core.beans.MemberRequest;
 import core.beans.PolicyRequest;
+import core.constants.ProcessActions;
+import core.constants.ProcessStates;
 import core.constants.Statuses;
 import core.threads.PostReportBuild;
+import dao.BeanFactory;
 import dao.entities.*;
 import dao.interfaces.*;
 import org.apache.logging.log4j.LogManager;
@@ -59,6 +62,8 @@ public class InsuranceUtil implements Serializable {
     private UserInterface userInterface;
     @Inject
     private ProcessWorkflowInterface processWorkflowInterface;
+    @Inject
+    BeanFactory beanFactory;
 
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -90,8 +95,9 @@ public class InsuranceUtil implements Serializable {
             LOGGER.info("Policy holder saved -> {}. traceId -> {}", savedPolicyHolder, traceId);
         }
 
-        InsurancePolicy savedInsurancePolicy = insurancePolicyInterface.saveAndFlush(insurancePolicy);
+        InsurancePolicy savedInsurancePolicy = beanFactory.merge(insurancePolicy);
         LOGGER.info("Policy saved -> {}. traceId -> {}", savedInsurancePolicy.getPolicyId(), traceId);
+
 
         return savedInsurancePolicy;
     }
@@ -99,27 +105,20 @@ public class InsuranceUtil implements Serializable {
 
     private void createProcess(String policyId) {
 
-        Optional<Users> users = userInterface.findByUserId("external");
-
         ProcessWorkflow processWorkflow = new ProcessWorkflow();
-        processWorkflow.setProcessAction(setProcessAction("ALTER"));
-        processWorkflow.setProcessState(setProcessState("AWAITING_VALIDATION"));
+        processWorkflow.setProcessAction(setProcessAction(ALTER.toString()));
+        processWorkflow.setProcessState(setProcessState(ProcessStates.AWAITING_VALIDATION.toString()));
         processWorkflow.setInputDate(today());
         processWorkflow.setChangedObjectId(policyId);
-
-        users.ifPresent(u -> {
-            processWorkflow.setCurrentDepartment(u.getDepartment());
-            processWorkflow.setUserInput(u);
-        });
-
-        ProcessWorkflow saved = processWorkflowInterface.save(processWorkflow);
+        processWorkflow.setUserInput(setUser("web"));
+        ProcessWorkflow saved = beanFactory.merge(processWorkflow);
 
         LOGGER.info("ProcessWorkflow saved! id = {}", saved.getWorkflowId());
     }
 
 
     private void saveBeneficiaries(PolicyRequest policyRequest,
-                                   InsurancePolicy savedInsurancePolicy) throws ParseException {
+                                   InsurancePolicy savedInsurancePolicy)  {
 
         for (MemberRequest mr : policyRequest.getMemberRequests()) {
 
@@ -136,11 +135,11 @@ public class InsuranceUtil implements Serializable {
 
             try {
                 b.setDateOfBirth(stringToDate(mr.getDateOfBirth()));
-            } catch (Exception e) {
+            } catch (ParseException e) {
                 LOGGER.error("Invalid DOB {}", mr.getDateOfBirth());
             }
 
-            beneficiariesInterface.save(b);
+            beanFactory.merge(b);
 
             LOGGER.info("Beneficiary saved -> {}", b.getName());
         }
@@ -158,19 +157,11 @@ public class InsuranceUtil implements Serializable {
 
         for (FileRequest fl : policyRequest.getFileRequests()) {
 
-            Optional<DocumentType> docType =
-                    documentTypeInterface.findById(fl.getDocumentTypeId());
-
-            if (!docType.isPresent()) {
-                LOGGER.warn("DocumentType not found -> {}", fl.getDocumentTypeId());
-                continue;
-            }
-
             String documentName = getLogId();
             String subFolder = formatDate(today(), SIMPLE_DATE_PATTERN);
 
             DocumentFile df = new DocumentFile();
-            df.setDocumentType(docType.get());
+            df.setDocumentType(setDocumentType(fl.getDocumentTypeId()));
             df.setCreatedDate(today());
             df.setInputter(policyRequest.getUsername());
             df.setTitle(fl.getFileName());
@@ -181,7 +172,7 @@ public class InsuranceUtil implements Serializable {
             df.setUrl(File.separator + DOCUMENT_DIR + File.separator +
                     subFolder + File.separator + documentName + ".pdf");
 
-            queryUtil.saveDocumentFile(df);
+            beanFactory.merge(df);
 
             FileUtil.createFile(fl.getImage(), documentName, DOCUMENT_DIR, subFolder);
 
