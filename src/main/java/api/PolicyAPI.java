@@ -91,6 +91,8 @@ public class PolicyAPI {
     private PostCancellation postCancellation;
     @Inject
     private PaymentScheduleInterface paymentScheduleInterface;
+    @Inject
+    private MemberPriceInterface memberPriceInterface;
 
 
 
@@ -1179,6 +1181,60 @@ public class PolicyAPI {
 
     }
 
+
+
+    @GET
+    @Path("/sub-product-beneficiaries-price")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getBeneficiariesPrice(@QueryParam("subProductId") Long subProductId,@QueryParam("benefitCycle") Long benefCycle,@QueryParam("sessionId") String sessionId,@QueryParam("username") String username,@Context HttpServletRequest headers) {
+
+        String reqRes = getLogId();
+        String methodName = "getBeneficiariesPrice";
+        String ipAddress = headers.getRemoteAddr();
+        LOGGER.info("{} is being called with parameter. subProductId -> {}, benefitCycle ->{}," +
+                " username -> {}, sessionId -> {}, logId -> {}, ipAddress -> {} ",subProductId,benefCycle, methodName, username, sessionId, reqRes, ipAddress);
+
+        Date requestTime = today();
+        Response response = Response.status(Response.Status.NO_CONTENT).build();
+        boolean queryExecuted = false;
+        String errorCause = "";
+
+        try {
+
+            List<BeneficiaryPriceResponse> beneficiaryPriceResponses =
+                    memberPriceInterface
+                            .findBySubProductAndBenefitCycleAndStatus(
+                                    setSubProduct(subProductId),
+                                    setBenefitCycle(benefCycle),
+                                    setActive()
+                            )
+                            .stream()
+                            .map(m -> new BeneficiaryPriceResponse(
+                                    m.getAmount(),
+                                    m.getBeneficiaryDescription() + "( "+m.getMinAge()+" - "+m.getMaxAge()+")"
+                            ))
+                            .collect(Collectors.toList());
+
+            LOGGER.info("MemberProductPrice returned {}",beneficiaryPriceResponses);
+                response = Response.status(Response.Status.OK).entity(beneficiaryPriceResponses).build();
+                defaultSuccess(LOGGER,reqRes);
+                queryExecuted = true;
+
+
+
+        } catch (Exception e) {
+            LOGGER.error(e);
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            errorCause = e.getCause().getMessage();
+        } finally {
+
+            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
+                    methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, ipAddress));
+        }
+        return response;
+
+    }
 
 
 }
