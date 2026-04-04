@@ -3,6 +3,11 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+.idea/
+logs/
+*.log
+*.class
+*.war
 
 # Eclipse
 .project
@@ -11,7 +16,6 @@ target/
 .buildpath
 
 # IntelliJ IDEA
-.idea/
 *.iml
 *.ipr
 *.iws
@@ -36,23 +40,17 @@ buildNumber.properties
 build/
 .settings.gradle
 .project.gradle
-*.class
 # Quarkus specific
 src/main/docker/target/
 src/main/resources/META-INF/maven/
 src/main/resources/META-INF/quarkus-prod/
 src/main/resources/META-INF/quarkus-build/
-target/
 quarkus-app/
 quarkus-run.jar
 *-runner.jar
 *-native-image-source-jar/
 *.jar.original
 *.jar.tmp
-
-# Log files
-*.log
-logs/
 
 # Operating System Files
 .DS_Store
