@@ -1,10 +1,17 @@
 package dao.entities;
 
+import core.constants.PaymentStatus;
+import dao.enums.PaymentMethodStatus;
+import lombok.Data;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
+@Data
 @Entity
 public class PaymentSchedule implements Serializable {
     @Id
@@ -28,117 +35,13 @@ public class PaymentSchedule implements Serializable {
     private Boolean normalPayment = true;
     private String errorMessage;
 
-    public Long getPaymentScheduleId() {
-        return paymentScheduleId;
-    }
-
-    public void setPaymentScheduleId(Long paymentScheduleId) {
-        this.paymentScheduleId = paymentScheduleId;
-    }
-
-    public BigDecimal getRepaymentAmount() {
-        return repaymentAmount;
-    }
-
-    public void setRepaymentAmount(BigDecimal repaymentAmount) {
-        this.repaymentAmount = repaymentAmount;
-    }
-
-    public BigDecimal getPaidAmount() {
-        return paidAmount;
-    }
-
-    public void setPaidAmount(BigDecimal paidAmount) {
-        this.paidAmount = paidAmount;
-    }
-
-    public Date getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(Date createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public Date getLastAttempt() {
-        return lastAttempt;
-    }
-
-    public void setLastAttempt(Date lastAttempt) {
-        this.lastAttempt = lastAttempt;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public String getChargeCode() {
-        return chargeCode;
-    }
-
-    public void setChargeCode(String chargeCode) {
-        this.chargeCode = chargeCode;
-    }
-
-    public InsurancePolicy getInsurancePolicy() {
-        return insurancePolicy;
-    }
-
-    public void setInsurancePolicy(InsurancePolicy insurancePolicy) {
-        this.insurancePolicy = insurancePolicy;
-    }
-
-    public String getTransactionId() {
-        return transactionId;
-    }
-
-    public void setTransactionId(String transactionId) {
-        this.transactionId = transactionId;
-    }
-
-    public String getRepaymentMonth() {
-        return repaymentMonth;
-    }
-
-    public void setRepaymentMonth(String repaymentMonth) {
-        this.repaymentMonth = repaymentMonth;
-    }
-
-    public String getMessageId() {
-        return messageId;
-    }
-
-    public void setMessageId(String messageId) {
-        this.messageId = messageId;
-    }
-
-    public String getRepaymentYear() {
-        return repaymentYear;
-    }
-
-    public void setRepaymentYear(String repaymentYear) {
-        this.repaymentYear = repaymentYear;
-    }
-
-    public Boolean getNormalPayment() {
-        return normalPayment;
-    }
-
-    public void setNormalPayment(Boolean normalPayment) {
-        this.normalPayment = normalPayment;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus paymentStatus;
+    @Enumerated(EnumType.STRING)
+    private PaymentMethodStatus paymentMethodStatus;
+    private LocalDate startPaymentDate;
+    private LocalDate endPaymentDate;
+    private LocalDateTime paymentDate;
 
     @Override
     public String toString() {

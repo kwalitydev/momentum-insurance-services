@@ -48,6 +48,7 @@ public class Util {
     public static final String EXPORT_DIR = "export";
     public static final String DOCUMENT_DIR = "documents";
     public static final String DEFAULT_CURRENCY = "MZN";
+    public static final String API_V2 = "/dashboard";
 
     public static String getCoCode(String accountNumber){
         return "MZ0010"+accountNumber.substring(0,3);
