@@ -17,7 +17,6 @@ public interface UserInterface {
     List<Users> findAll();
     Optional<Users> findByUserId(String id);
     int updateStatus(String status, String userId);
-    <S extends Users> S save(S b);
     int updateSuccessLogin(String userId,Date date);
     int updateFailedLogin(String userId);
     int updateFailedLogin(int status, Date nextLoginTime, String userId);

@@ -7,7 +7,7 @@ import java.io.Serializable;
 public class RoleMenu implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
     @Column(length = 20)
     private String permission;
     private int idMenu;

@@ -8,6 +8,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Base64;
 
+import static core.util.Util.AES_SECRET;
+
 public class AES {
 
     private static SecretKeySpec secretKey;
@@ -28,11 +30,11 @@ public class AES {
         }
     }
 
-    public static String encrypt(String strToEncrypt, String secret)
+    public static String encrypt(String strToEncrypt)
     {
         try
         {
-            setKey(secret);
+            setKey(AES_SECRET);
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
             return Base64.getEncoder().encodeToString(cipher.doFinal(strToEncrypt.getBytes(StandardCharsets.UTF_8)));
@@ -58,5 +60,9 @@ public class AES {
             System.out.println("Error while decrypting: " + e);
         }
         return null;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(encrypt("1234567"));
     }
 }

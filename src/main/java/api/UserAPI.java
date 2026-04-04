@@ -5,6 +5,7 @@ import core.constants.Statuses;
 import core.util.*;
 import dao.entities.*;
 import dao.interfaces.*;
+import dao.repositories.UserRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +31,9 @@ public class UserAPI {
     private static final Logger LOGGER = LogManager.getLogger(UserAPI.class);
     @Inject
     private UserInterface userInterface;
+
+    @Inject
+    private UserRepository repository;
     @Inject
     private RoleInterface roleInterface;
     @Inject
@@ -500,13 +504,14 @@ public class UserAPI {
                 if (!userRequest.getUser().getActiveDirectory()) {
                     password = getSaltString(6);
                     status.setId(ACTIVATING.toString());
-                    userToSave.setUserKey(AES.encrypt(password, AES_SECRET));
+                    userToSave.setUserKey(AES.encrypt(password));
                 } else {
                     status.setId(ACTIVE.toString());
 
                 }
                 userToSave.setStatus(status);
-                saved = userInterface.save(userToSave);
+
+                saved = repository.save(userToSave);
 
                 if (saved != null) {
                     LOGGER.info("User {} saved", saved.getUserId());

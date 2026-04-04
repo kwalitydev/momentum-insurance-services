@@ -36,6 +36,7 @@ dao/entities/BaseAmount.class
 core/beans/WorkflowResponse.class
 dao/repositories/StatusRepository.class
 dao/repositories/PolicyHolderRepository.class
+core/beans/MenuDTO.class
 core/constants/ProductTypes.class
 core/constants/Relationships.class
 core/beans/ProcessActionRequest.class
@@ -58,6 +59,7 @@ core/beans/PolicyCancelRequest.class
 dao/repositories/PaymentScheduleRepository.class
 core/constants/StatusType.class
 dao/repositories/InsuranceCompanyRepository.class
+api/AuthDashboardAPI.class
 dao/interfaces/DocumentFileInterface.class
 dao/interfaces/CoverageTypeRateInterface.class
 core/beans/CoverageUpdateResponse.class
@@ -97,11 +99,13 @@ dao/repositories/ReportFieldRepository.class
 dao/repositories/UserDetailsRepository.class
 dao/repositories/ProcessWorkflowRepository.class
 dao/entities/InsuranceCompany.class
+core/beans/SubMenuDTO.class
 core/beans/ClaimsTATResponse.class
 api/GenericAPI.class
 dao/entities/IDType.class
 dao/interfaces/SubProductInterface.class
 core/util/QueryUtil.class
+core/beans/SubMenuDTO$SubMenuDTOBuilder.class
 dao/repositories/RelationshipRepository.class
 dao/interfaces/FileTransferLogInterface.class
 dao/interfaces/IDTypeInterface.class
@@ -143,6 +147,7 @@ core/beans/JSONResponse.class
 dao/interfaces/PaymentScheduleInterface.class
 dao/interfaces/RelationshipInterface.class
 core/util/AES.class
+dao/enums/UserStatus.class
 core/beans/InsurancePolicyResponse.class
 dao/entities/Department.class
 core/constants/SuspensionType.class
@@ -155,9 +160,11 @@ core/beans/CorePayload.class
 core/beans/Members.class
 core/threads/PostReportBuild.class
 core/beans/LoginRequest.class
+core/beans/LoginResponseDTO$LoginResponseDTOBuilder.class
 dao/entities/NotificationType.class
 dao/interfaces/JobTitleInterface.class
 dao/entities/InsurancePolicy.class
+dao/interfaces/AuthService.class
 core/constants/PaymentMethods.class
 net/java/dev/jaxb/array/ObjectFactory.class
 dao/entities/Currency.class
@@ -170,6 +177,7 @@ dao/repositories/DocumentTypeRepository.class
 core/beans/ReportResponse.class
 core/constants/MissedPaymentTypes.class
 core/util/FileUtil.class
+core/beans/MenuDTO$MenuDTOBuilder.class
 core/beans/SubProductUpdate.class
 dao/interfaces/SubMenuInterface.class
 dao/interfaces/CurrencyInterface.class
@@ -178,6 +186,7 @@ core/sms/ApiGet.class
 core/beans/SubProductResponse.class
 dao/entities/CollectionLog.class
 dao/interfaces/NotificationInterface.class
+core/beans/LoginResponseDTO.class
 core/constants/NotificationChannels.class
 dao/interfaces/PolicyHolderInterface.class
 core/beans/ProductConfigAuthResponse.class
@@ -283,6 +292,7 @@ dao/entities/PaymentSchedule.class
 dao/interfaces/CountryMapInterface.class
 dao/entities/UserDetails.class
 dao/entities/Token.class
+core/beans/LoginResponse$LoginResponseBuilder.class
 dao/interfaces/IndustryInterface.class
 dao/interfaces/UserAttemptInterface.class
 dao/interfaces/BaseAmountInterface.class

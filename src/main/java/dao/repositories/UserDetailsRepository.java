@@ -3,6 +3,7 @@ package dao.repositories;
 
 import dao.entities.Department;
 import dao.entities.UserDetails;
+import dao.entities.Users;
 import dao.interfaces.UserDetailsInterface;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -10,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public interface UserDetailsRepository extends JpaRepository<UserDetails, String>, UserDetailsInterface {
 
@@ -24,4 +26,7 @@ public interface UserDetailsRepository extends JpaRepository<UserDetails, String
     int updateUserDetails(String email, String emailAlt, String fullName, String surname, String mobile, String mobileAlt, String userId, Date today);
     @Query("SELECT ud FROM UserDetails ud WHERE ud.users.department=?1")
     List<UserDetails> findByDepartment(Department department);
+
+    @Query("SELECT u FROM UserDetails u WHERE u.users = ?1")
+    Optional<UserDetails> findByUser(Users user);
 }

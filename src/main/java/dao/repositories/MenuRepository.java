@@ -6,20 +6,14 @@ import dao.interfaces.MenuInterface;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface MenuRepository extends JpaRepository<Menu, String>, MenuInterface {
+public interface MenuRepository extends JpaRepository<Menu, Integer>, MenuInterface {
 
-       @Query("SELECT s FROM Submenu s WHERE s.idMenu=?1")
-    List<Submenu> getSubmenus(int menuId, int lan);
-
-    @Query("SELECT m FROM Menu m")
-    List<Menu> getMenus();
-
-    @Modifying(clearAutomatically = true)
-    @Query("DELETE FROM Menu WHERE id=?1")
-    void removeMenu(int id);
+    @Query("SELECT m FROM Menu m WHERE m.id = :id")
+    Menu findMenuById(@Param("id") Integer id);
 
 
 }

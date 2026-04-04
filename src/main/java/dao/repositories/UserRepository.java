@@ -8,11 +8,12 @@ import dao.interfaces.UserInterface;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-
+@Repository
 public interface UserRepository extends JpaRepository<Users, String>, UserInterface {
 
     @Query("SELECT u,ud,r,m FROM Users u  " +
@@ -75,5 +76,8 @@ public interface UserRepository extends JpaRepository<Users, String>, UserInterf
 
     @Query("Select s FROM Status s WHERE s.description <> 'Hidden' order by 1 desc")
     List<Status> findAllStatuses();
+
+    @Query("select u from Users u left join fetch u.department d left join fetch u.status s where u.userId = ?1")
+    Optional<Users> findByUserByUserID(String userId);
 
 }

@@ -48,7 +48,7 @@ public class ClaimAPI {
     @Inject
     private PostSFTP postSFTP;
     @Inject
-    private QueryUtil queryUtil;
+    private QueryUtil  queryUtil;
     @Inject
     private BeneficiariesInterface beneficiariesInterface;
     @Inject

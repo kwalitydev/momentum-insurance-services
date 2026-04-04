@@ -1,18 +1,19 @@
 package core.util;
 
 
+import core.beans.ErrorResponse;
 import dao.entities.*;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.Interval;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -29,7 +30,9 @@ public class CoreUtil {
     }
 
     public static Date today(){
-        return new Date();
+        return  Date.from(LocalDateTime.now()
+                .atZone(ZoneId.systemDefault())
+                .toInstant());
     }
 
 
@@ -298,6 +301,22 @@ public class CoreUtil {
 
     public static Date localDateToDate(LocalDate localDate) {
         return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    }
+
+
+    public static WebApplicationException buildException(String message, int status) {
+
+        ErrorResponse error = ErrorResponse.builder()
+                .message(message)
+                .status(status)
+                .build();
+
+        return new WebApplicationException(
+                Response.status(status)
+                        .entity(error)
+                        .type(MediaType.APPLICATION_JSON)
+                        .build()
+        );
     }
 
 }
