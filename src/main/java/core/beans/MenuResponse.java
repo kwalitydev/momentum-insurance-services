@@ -13,6 +13,10 @@ public class MenuResponse implements Serializable {
     private Menu menu;
     private List<Submenu> submenus;
 
+
+
+
+
     public Menu getMenu() {
         return menu;
     }

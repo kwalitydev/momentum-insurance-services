@@ -22,7 +22,7 @@ public class APIRoot extends Application {
         classes.add(ClaimAPI.class);
         classes.add(SystemAPI.class);
         classes.add(MetricAPI.class);
-
+        classes.add(AuthDashboardAPI.class);
         return classes;
     }
 }
