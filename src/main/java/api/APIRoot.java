@@ -1,12 +1,27 @@
 package api;
 
 
+import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.servers.Server;
+
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 import java.util.HashSet;
 import java.util.Set;
 
-@ApplicationPath("/")
+
+@OpenAPIDefinition(
+        info = @Info(
+                title = "Momentum API",
+                version = "1.0"
+        ),
+        servers = {
+                @Server(url = "/momentum")
+        }
+)
+@ApplicationPath("/api")
 public class APIRoot extends Application {
 
     @Override
@@ -23,6 +38,8 @@ public class APIRoot extends Application {
         classes.add(SystemAPI.class);
         classes.add(MetricAPI.class);
         classes.add(AuthDashboardAPI.class);
+        classes.add(DashboardAPI.class);
+        classes.add(OpenApiResource.class);
         return classes;
     }
 }

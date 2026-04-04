@@ -1,16 +1,21 @@
 package dao.repositories;
 
+import core.beans.PaymentMethodSummaryDTO;
+import core.constants.PaymentStatus;
 import dao.entities.*;
 import dao.interfaces.PaymentScheduleInterface;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
-
+@Repository
 public interface PaymentScheduleRepository extends JpaRepository<PaymentSchedule, String>, PaymentScheduleInterface {
 
     @Query("SELECT ps from PaymentSchedule ps WHERE ps.insurancePolicy = ?1 AND ps.repaymentMonth=?2 AND ps.repaymentYear=?3 AND ps.status IN ?4 AND ps.normalPayment =?5")
@@ -211,11 +216,61 @@ public interface PaymentScheduleRepository extends JpaRepository<PaymentSchedule
 
 
 
+    @Query("SELECT p FROM PaymentSchedule p " +
+           "WHERE p.paymentStatus= :status " +
+           "ORDER BY p.lastAttempt DESC")
+    List<PaymentSchedule> findLastPayments(
+            @Param("status") PaymentStatus status,
+            Pageable pageable
+    );
 
 
+    @Query("SELECT p.paymentMethodStatus, " +
+           "COALESCE(SUM(p.paidAmount), 0) " +
+           "FROM PaymentSchedule p " +
+           "WHERE p.paymentStatus = :status " +
+           "AND FUNCTION('YEAR', p.paymentDate) = :year " +
+           "AND FUNCTION('MONTH', p.paymentDate) = :month " +
+           "GROUP BY p.paymentMethodStatus")
+    List<Object[]> sumPaidAmountByMethodForMonth(
+            @Param("status") PaymentStatus status,
+            @Param("year") int year,
+            @Param("month") int month
+    );
+
+    @Query("SELECT COALESCE(SUM(p.paidAmount), 0) " +
+           "FROM PaymentSchedule p " +
+           "WHERE p.paymentStatus = :status " +
+           "AND p.paymentDate >= :startDate " +
+           "AND p.paymentDate < :endDate")
+    BigDecimal sumPaidAmountForPeriod(
+            @Param("status") PaymentStatus status,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
 
 
+    @Query("SELECT p.paymentDate, p.paidAmount" +
+           "       FROM PaymentSchedule p " +
+           "       WHERE p.paymentStatus = :status " +
+           "       AND p.paymentDate >= :start " +
+           "       AND p.paymentDate < :end")
+    List<Object[]> sumPaidAmountByDay(
+            @Param("status") PaymentStatus status,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
 
-
-
+    @Query(" SELECT MONTH(p.paymentDate), COALESCE(SUM(p.paidAmount), 0)" +
+           "       FROM PaymentSchedule p " +
+           "       WHERE p.paymentStatus = :status " +
+           "       AND p.paymentDate >= :start " +
+           "       AND p.paymentDate < :end " +
+           "       GROUP BY MONTH(p.paymentDate) " +
+           "       ORDER BY MONTH(p.paymentDate)")
+    List<Object[]> sumPaidAmountByMonth(
+            @Param("status") PaymentStatus status,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
 }
