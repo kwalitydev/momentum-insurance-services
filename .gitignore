@@ -1,0 +1,63 @@
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Eclipse
+.project
+.classpath
+.settings/
+.buildpath
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# VS Code
+.vscode/
+
+# Maven
+pom.xml.tag
+pom.xml.next
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/wrapper/maven-wrapper.jar
+!/.mvn/wrapper/maven-wrapper.properties
+
+# Gradle
+.gradle/
+build/
+.settings.gradle
+.project.gradle
+*.class
+# Quarkus specific
+src/main/docker/target/
+src/main/resources/META-INF/maven/
+src/main/resources/META-INF/quarkus-prod/
+src/main/resources/META-INF/quarkus-build/
+target/
+quarkus-app/
+quarkus-run.jar
+*-runner.jar
+*-native-image-source-jar/
+*.jar.original
+*.jar.tmp
+
+# Log files
+*.log
+logs/
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# Misc
+.cache/
+.vscode-test/
