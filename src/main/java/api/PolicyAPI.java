@@ -1043,9 +1043,7 @@ public class PolicyAPI {
                 insuranceHistoryResponse.setDate(request.getCreatedDate());
                 insuranceHistoryResponse.setUsername(request.getUsers().getUserId());
                 insuranceHistoryResponse.setAction(request.getProcessAction().getActionName().toUpperCase());
-                if (request.getDepartment() != null) {
-                    insuranceHistoryResponse.setBranchName(request.getDepartment().getName());
-                }
+               insuranceHistoryResponse.setNarrative(request.getNarrative());
                 insuranceHistoryResponse.setProcessId(request.getProcessId());
 
                 Optional<UserDetails> userDetails = userDetailsInterface.findByUsers(request.getUsers());

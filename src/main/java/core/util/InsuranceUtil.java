@@ -199,14 +199,19 @@ public class InsuranceUtil implements Serializable {
         notificationUtil.postSendAmendmentSMS(traceId, insurancePolicy, customerResponse);
     }
 
-    public void logPolicyHistory(PolicyRequest policyRequest,String traceId){
-        InsurancePolicy ip = new InsurancePolicy(); ip.setPolicyId(policyRequest.getPolicyId());
-        InsurancePolicyHistory insurancePolicyHistory = new InsurancePolicyHistory(); insurancePolicyHistory.setInsurancePolicy(ip);
-        insurancePolicyHistory.setChangeDescription(policyRequest.getComments()); insurancePolicyHistory.setCreatedDate(today());
+    public void logPolicyHistory(PolicyRequest policyRequest,String traceId,String ...narrative){
+        InsurancePolicy ip = new InsurancePolicy();
+        ip.setPolicyId(policyRequest.getPolicyId());
+        InsurancePolicyHistory insurancePolicyHistory = new InsurancePolicyHistory();
+        insurancePolicyHistory.setInsurancePolicy(ip);
+        insurancePolicyHistory.setChangeDescription(policyRequest.getComments());
+        insurancePolicyHistory.setCreatedDate(today());
         insurancePolicyHistory.setUsers(setUser(policyRequest.getUsername()));
         insurancePolicyHistory.setProcessAction(setProcessAction(ALTER.toString()));
+        insurancePolicyHistory.setNarrative(narrative[0]);
         InsurancePolicyHistory InsurancePolicyHistory = insurancePolicyHistoryInterface.save(insurancePolicyHistory);
-        LOGGER.info("InsurancePolicyHistory saved {}. traceId -> {}",InsurancePolicyHistory.getInsurancePolicy(),traceId); }
+        LOGGER.info("InsurancePolicyHistory saved {}. traceId -> {}",InsurancePolicyHistory.getInsurancePolicy(),traceId);
+    }
 
 
 

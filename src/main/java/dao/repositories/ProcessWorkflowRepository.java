@@ -17,4 +17,8 @@ public interface ProcessWorkflowRepository extends JpaRepository<ProcessWorkflow
 
     @Query("Select p FROM ProcessWorkflow p WHERE p.currentDepartment =?1 AND p.processState=?2")
     List<ProcessWorkflow> findByCurrentDepartmentAndProcessState(Department currentDepartment, ProcessState processState);
+
+
+    @Query("Select p FROM ProcessWorkflow p WHERE p.processState=?1")
+    List<ProcessWorkflow> findByProcessState(ProcessState processState);
 }

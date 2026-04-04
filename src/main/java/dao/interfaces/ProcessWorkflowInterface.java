@@ -10,5 +10,6 @@ public interface ProcessWorkflowInterface {
 
     ProcessWorkflow save(ProcessWorkflow s);
     List<ProcessWorkflow> findByCurrentDepartmentAndProcessState(Department currentDepartment, ProcessState processState);
+    List<ProcessWorkflow> findByProcessState(ProcessState processState);
     int updateProcessWorkflow(ProcessState processState, Users userAuth, Date authDate, ProcessAction processAction,String comments,Long workflowId);
 }

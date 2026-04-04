@@ -3,6 +3,7 @@ package api;
 import core.beans.*;
 import core.constants.*;
 import core.util.CoreUtil;
+import core.util.InsuranceUtil;
 import core.util.QueryUtil;
 import dao.entities.*;
 import dao.interfaces.*;
@@ -35,12 +36,11 @@ public class WorkflowAPI {
     @Inject
     private UserDetailsInterface userDetailsInterface;
     @Inject
-    private ClaimInterface claimInterface;
-
-    @Inject
     private BaseAmountInterface baseAmountInterface;
     @Inject
     private InsurancePolicyInterface insurancePolicyInterface;
+    @Inject
+    private InsuranceUtil insuranceUtil;
 
 
 
@@ -69,8 +69,7 @@ public class WorkflowAPI {
 
             if(users.isPresent()){
                 LOGGER.info("searching for department {}",users.get().getDepartment());
-                List<ProcessWorkflow> processWorkflows = processWorkflowInterface.findByCurrentDepartmentAndProcessState(users.get().getDepartment(),
-                        setProcessState(processState));
+                List<ProcessWorkflow> processWorkflows = processWorkflowInterface.findByProcessState(setProcessState(processState));
 
                 for (ProcessWorkflow pw:processWorkflows) {
 
@@ -285,8 +284,6 @@ public class WorkflowAPI {
 
     }
 
-
-
     @POST
     @Path("/action/change")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -326,6 +323,15 @@ public class WorkflowAPI {
                         processActionRequest.getComment(),processActionRequest.getProcessWorkflowId());
                 if(updatedWorkflow>0){
                     LOGGER.info("ProcessWorkflow updated. id -> {}",processActionRequest.getProcessWorkflowId());
+
+                    PolicyRequest policyRequest =  new PolicyRequest();
+                    policyRequest.setPolicyId(processActionRequest.getOldPolicyNumber());
+                    policyRequest.setComments(processActionRequest.getComment());
+                    policyRequest.setUsername(processActionRequest.getUsername());
+
+                    String narrative = "Process "+processActionRequest.getAction();
+                    insuranceUtil.logPolicyHistory(policyRequest,reqRes,narrative);
+
 
                     if(processActionRequest.getNewPolicyNumber()!=null){
                         //update insurance policy

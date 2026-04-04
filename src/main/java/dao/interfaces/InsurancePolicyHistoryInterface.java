@@ -5,9 +5,7 @@ import dao.entities.InsurancePolicy;
 import dao.entities.InsurancePolicyHistory;
 import dao.entities.ProcessAction;
 import org.springframework.data.domain.Pageable;
-
 import java.util.List;
-import java.util.Optional;
 
 public interface InsurancePolicyHistoryInterface {
     <S extends InsurancePolicyHistory> S save(S a);

@@ -77,6 +77,7 @@ public class ProcessActionRequest implements Serializable {
                 ", action='" + action + '\'' +
                 ", sessionId='" + sessionId + '\'' +
                 ", newPolicyNumber='" + newPolicyNumber + '\'' +
+                ", oldPolicyNumber='" + oldPolicyNumber + '\'' +
                 '}';
     }
 }

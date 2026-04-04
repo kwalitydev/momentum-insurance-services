@@ -11,7 +11,7 @@ public class InsuranceHistoryResponse implements Serializable {
     private String fullName;
     private Date date;
     private String action;
-    private String branchName;
+    private String narrative;
     private String processId;
 
     public String getComments() {
@@ -54,12 +54,12 @@ public class InsuranceHistoryResponse implements Serializable {
         this.action = action;
     }
 
-    public String getBranchName() {
-        return branchName;
+    public String getNarrative() {
+        return narrative;
     }
 
-    public void setBranchName(String branchName) {
-        this.branchName = branchName;
+    public void setNarrative(String narrative) {
+        this.narrative = narrative;
     }
 
     public String getProcessId() {
@@ -78,7 +78,7 @@ public class InsuranceHistoryResponse implements Serializable {
                 ", fullName='" + fullName + '\'' +
                 ", date=" + date +
                 ", action='" + action + '\'' +
-                ", branchName='" + branchName + '\'' +
+                ", narrative='" + narrative + '\'' +
                 ", processId='" + processId + '\'' +
                 '}';
     }

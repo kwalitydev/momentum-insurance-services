@@ -26,6 +26,11 @@ public class ProcessWorkflowImpl implements ProcessWorkflowInterface {
     }
 
     @Override
+    public List<ProcessWorkflow> findByProcessState(ProcessState processState) {
+        return processWorkflowRepository.findByProcessState(processState);
+    }
+
+    @Override
     public int updateProcessWorkflow(ProcessState processState, Users userAuth, Date authDate, ProcessAction processAction, String comments, Long workflowId) {
         return processWorkflowRepository.updateProcessWorkflow(processState, userAuth, authDate, processAction, comments, workflowId);
     }
