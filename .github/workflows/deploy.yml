@@ -64,11 +64,12 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            /opt/jboss/bin/jboss-cli.sh --connect <<EOF
-            undeploy momentum.war || true
-            deploy /opt/jboss/standalone/deployments/momentum.war --force
-            :reload || true
-            EOF
+            export JAVA_HOME=/home/mauromauane/.sdkman/candidates/java/8.0.392-tem
+            export PATH=$JAVA_HOME/bin:$PATH
+
+            java -version
+
+            /opt/jboss/bin/jboss-cli.sh --connect --commands="undeploy momentum.war,deploy /opt/jboss/standalone/deployments/momentum.war --force,:reload"
 
       - name: Show JBoss logs
         uses: appleboy/ssh-action@v0.1.10
