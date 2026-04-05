@@ -43,7 +43,7 @@ jobs:
             export PATH=$JAVA_HOME/bin:$PATH
 
             for i in {1..30}; do
-              /opt/jboss/bin/jboss-cli.sh --connect command=:read-attribute(name=server-state) > /dev/null 2>&1
+              /opt/jboss/bin/jboss-cli.sh --connect "command=:read-attribute(name=server-state)" > /dev/null 2>&1
 
               if [ $? -eq 0 ]; then
                 echo "JBoss is ready!"
