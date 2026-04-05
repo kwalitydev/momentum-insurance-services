@@ -72,7 +72,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "target/momentum.war"
-          target: "/opt/jboss/standalone/deployments/momentum.war"
+          target: "/opt/jboss/standalone/deployments/"
 
       - name: Deploy and Reload JBoss
         uses: appleboy/ssh-action@v0.1.10
