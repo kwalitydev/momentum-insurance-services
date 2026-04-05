@@ -4,7 +4,7 @@ package api;
 import core.beans.ActivationResponseDTO;
 import core.beans.LoginRequest;
 import core.beans.LoginResponseDTO;
-import dao.interfaces.AuthService;
+import core.service.AuthService;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -14,9 +14,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import static core.util.Util.API_V2;
+import static core.util.Util.DASHBOARD;
 
-@Path(API_V2)
+@Path(DASHBOARD)
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)

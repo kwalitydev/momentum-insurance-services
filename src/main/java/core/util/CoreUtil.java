@@ -1,6 +1,10 @@
 package core.util;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import core.beans.ErrorResponse;
 import dao.entities.*;
 import org.apache.logging.log4j.Logger;
@@ -15,6 +19,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static core.util.RequestUtil.OVERRIDE_LIST;
@@ -28,6 +33,11 @@ public class CoreUtil {
     public static String getLogId(){
         return UUID.randomUUID().toString().toUpperCase();
     }
+
+    public static final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
 
     public static Date today(){
         return  Date.from(LocalDateTime.now()
@@ -317,6 +327,19 @@ public class CoreUtil {
                         .type(MediaType.APPLICATION_JSON)
                         .build()
         );
+    }
+
+    public static String generate5DigitOtp() {
+        int n = ThreadLocalRandom.current().nextInt(100_000);
+        return String.format("%05d", n);
+    }
+
+    public static String toJson(Object object) {
+        try {
+            return objectMapper.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Erro ao converter para JSON", e);
+        }
     }
 
 }

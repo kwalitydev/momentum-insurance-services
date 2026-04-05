@@ -1235,4 +1235,87 @@ public class PolicyAPI {
     }
 
 
+    @GET
+    @Path("/by-phoneNumber")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response fetchPolicyByPhoneNumber(@QueryParam("phoneNumber") String phoneNumber,
+                                             @QueryParam("sessionId") String sessionId,
+                                             @QueryParam("username") String username,
+                                             @Context HttpServletRequest headers) {
+        String reqRes = getLogId();
+        String methodName = "fetchPolicyByPhoneNumber";
+        String ipAddress = headers.getRemoteAddr();
+        LOGGER.info("{} is being called with parameter. phoneNumber -> {},  sessionId -> {}, username -> {}, logId -> {}, ipAddress -> {} ",methodName,phoneNumber, sessionId,username, reqRes, ipAddress);
+        Date requestTime = today();
+        Response response = Response.status(Response.Status.NO_CONTENT).build();
+        boolean queryExecuted = false;
+        String errorCause = "";
+
+        try {
+            List<InsurancePolicy> insurancePolicyList = this.insurancePolicyInterface.findByMobileNumber(phoneNumber);
+            if (!insurancePolicyList.isEmpty()) {
+                response = Response.status(Response.Status.OK).entity(insurancePolicyList).build();
+                defaultSuccess(LOGGER,reqRes);
+                queryExecuted = true;
+            } else {
+                response = Response.status(Response.Status.OK).build();
+            }
+        } catch (Exception e) {
+            LOGGER.error(e);
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            errorCause = e.getCause().getMessage();
+        } finally {
+
+            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
+                    methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, ipAddress));
+        }
+        return response;
+
+    }
+
+
+    @GET
+    @Path("/by-phone-number-and-policy-number")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response fetchPolicyByPhoneNumberAndInsurance(
+                                             @QueryParam("phoneNumber") String phoneNumber,
+                                             @QueryParam("insurancePolicyId") String insurancePolicyId,
+                                             @QueryParam("sessionId") String sessionId,
+                                             @QueryParam("username") String username,
+                                             @Context HttpServletRequest headers) {
+        String reqRes = getLogId();
+        String methodName = "fetchPolicyByPhoneNumberAndInsurance";
+        String ipAddress = headers.getRemoteAddr();
+        LOGGER.info("{} is being called with parameter. phoneNumber -> {}, insurancePolicyId ->{}, sessionId -> {}, username -> {}, logId -> {}, ipAddress -> {} ",methodName,phoneNumber,insurancePolicyId, sessionId,username, reqRes, ipAddress);
+        Date requestTime = today();
+        Response response = Response.status(Response.Status.NO_CONTENT).build();
+        boolean queryExecuted = false;
+        String errorCause = "";
+
+        try {
+            Optional<InsurancePolicy> insurancePolicy = this.insurancePolicyInterface.findOneWithPolicyHolder(phoneNumber, insurancePolicyId);
+            if (insurancePolicy.isPresent()) {
+                response = Response.status(Response.Status.OK).entity(insurancePolicy.get()).build();
+                defaultSuccess(LOGGER,reqRes);
+                queryExecuted = true;
+            } else {
+                response = Response.status(Response.Status.OK).build();
+            }
+        } catch (Exception e) {
+            LOGGER.error(e);
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            errorCause = e.getCause().getMessage();
+        } finally {
+
+            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
+                    methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, ipAddress));
+        }
+        return response;
+
+    }
+
+
+
 }
