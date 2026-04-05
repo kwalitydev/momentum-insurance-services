@@ -1,0 +1,81 @@
+name: Deploy to JBoss
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+
+      - name: Build with Maven
+        run: mvn clean package -DskipTests
+
+      - name: Ensure JBoss is running
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            if pgrep -f "jboss.modules" > /dev/null
+            then
+              echo "JBoss already running"
+            else
+              echo "Starting JBoss..."
+              nohup /opt/jboss/bin/standalone.sh > /opt/jboss/standalone/log/start.log 2>&1 &
+              sleep 20
+            fi
+
+      - name: Clean old deployment
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            rm -f /opt/jboss/standalone/deployments/momentum.war
+            rm -f /opt/jboss/standalone/deployments/momentum.war.*
+
+      - name: Copy WAR to server
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "target/momentum.war"
+          target: "/opt/jboss/standalone/deployments/"
+
+      - name: Deploy and Reload JBoss
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            /opt/jboss/bin/jboss-cli.sh --connect <<EOF
+            undeploy momentum.war || true
+            deploy /opt/jboss/standalone/deployments/momentum.war --force
+            :reload || true
+            EOF
+
+      - name: Show JBoss logs
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            sleep 10
+            tail -n 200 /opt/jboss/standalone/log/server.log
