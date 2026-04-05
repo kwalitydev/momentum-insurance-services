@@ -29,30 +29,31 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            if pgrep -f "jboss.modules" > /dev/null
-            then
+            echo "Checking JBoss status..."
+
+            if systemctl is-active --quiet jboss; then
               echo "JBoss already running"
             else
               echo "Starting JBoss..."
-              nohup /opt/jboss/bin/standalone.sh > /opt/jboss/standalone/log/start.log 2>&1 &
+              sudo systemctl start jboss
             fi
 
             echo "Waiting for JBoss to be ready..."
 
-            export JAVA_HOME=/home/mauromauane/.sdkman/candidates/java/8.0.392-tem
-            export PATH=$JAVA_HOME/bin:$PATH
-
-            for i in {1..30}; do
-              /opt/jboss/bin/jboss-cli.sh --connect "command=:read-attribute(name=server-state)" > /dev/null 2>&1
-
-              if [ $? -eq 0 ]; then
-                echo "JBoss is ready!"
+            for i in {1..20}; do
+              if systemctl is-active --quiet jboss; then
+                echo "JBoss is running!"
                 break
               fi
 
               echo "Waiting... ($i)"
               sleep 2
             done
+
+            if ! systemctl is-active --quiet jboss; then
+              echo "JBoss failed to start"
+              exit 1
+            fi
 
       - name: Clean old deployment
         uses: appleboy/ssh-action@v0.1.10
@@ -71,7 +72,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "target/momentum.war"
-          target: "/opt/jboss/standalone/deployments/"
+          target: "/opt/jboss/standalone/deployments/momentum.war"
 
       - name: Deploy and Reload JBoss
         uses: appleboy/ssh-action@v0.1.10
