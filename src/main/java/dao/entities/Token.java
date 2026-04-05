@@ -1,45 +1,36 @@
 package dao.entities;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import java.io.Serializable;
-import java.util.Date;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import javax.persistence.*;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+@Builder
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Token implements Serializable {
 
     @Id
-    @Column(length = 15)
-    private String id;
-    @Column(length = 100)
-    private String tokenId;
-    private Date lastUpdated;
-    private String lastTokenStatus;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    public String getId() {
-        return id;
-    }
+    @ManyToOne
+    @JoinColumn
+    private InsurancePolicy insurancePolicy;
 
-    public void setId(String id) {
-        this.id = id;
-    }
+    @Column(length = 100, nullable = false)
+    private String token;
 
-    public String getTokenId() {
-        return tokenId;
-    }
+    private LocalDateTime expiryDate;
 
-    public void setTokenId(String tokenId) {
-        this.tokenId = tokenId;
-    }
+    private LocalDateTime lastUpdated;
 
-    public Date getLastUpdated() {
-        return lastUpdated;
-    }
-
-    public void setLastUpdated(Date lastUpdated) {
-        this.lastUpdated = lastUpdated;
-    }
+    @Column(nullable = false)
+    private Boolean isUsed = false;
 }
-

@@ -5,6 +5,7 @@ import core.beans.PolicyRequest;
 import core.beans.PolicyResponse;
 import dao.entities.*;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -47,7 +48,8 @@ public interface InsurancePolicyInterface {
     List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,SubProduct subProduct,Status status);
 
 
+    List<InsurancePolicy> findByMobileNumber( String mobile);
 
-
+    Optional<InsurancePolicy> findOneWithPolicyHolder(String mobile, String insurancePolicyId);
 
 }

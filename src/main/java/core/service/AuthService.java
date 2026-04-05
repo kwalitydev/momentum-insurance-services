@@ -1,4 +1,4 @@
-package dao.interfaces;
+package core.service;
 
 
 import core.beans.*;
@@ -7,11 +7,14 @@ import core.util.CoreUtil;
 import dao.entities.*;
 import dao.enums.UserStatus;
 import dao.repositories.*;
-import javax.transaction.Transactional;
+import dao.service.ITokenService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
-
+import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -19,18 +22,25 @@ import static core.util.CoreUtil.buildException;
 
 @ApplicationScoped
 public class AuthService {
+    private static final Logger logger = LogManager.getLogger(AuthService.class);
 
     @Inject
-   private UserRepository usersRepository;
+    private UserRepository usersRepository;
 
     @Inject
-    private  StatusRepository statusRepository;
+    private ITokenService tokenService;
+
     @Inject
-    private  UserDetailsRepository userDetailsRepository;
+    private InsurancePolicyRepository insurancePolicyRepository;
+
     @Inject
-    private  RoleMenuRepository roleMenuRepository;
+    private StatusRepository statusRepository;
     @Inject
-    private  SubMenuRepository subMenuRepository;
+    private UserDetailsRepository userDetailsRepository;
+    @Inject
+    private RoleMenuRepository roleMenuRepository;
+    @Inject
+    private SubMenuRepository subMenuRepository;
 
     @Inject
     private MenuRepository menuRepository;
@@ -101,6 +111,7 @@ public class AuthService {
 
         return builder.build();
     }
+
     @Transactional
     public ActivationResponseDTO activate(String username, String password) {
 
@@ -172,6 +183,62 @@ public class AuthService {
                         : null)
                 .status(activeStatus.getDescription())
                 .build();
+    }
+
+    public Long login(String policyNumber, String phoneNumber) {
+
+        logger.info(" Attempt to login by policyNumber : {}, phoneNumber :{}", policyNumber, phoneNumber);
+        String generated5DigitOtp = CoreUtil.generate5DigitOtp();
+
+        InsurancePolicy insurancePolicy = this.insurancePolicyRepository
+                .findByPolicyIdAndPolicyHolderMobileNumber(policyNumber, phoneNumber);
+
+        if (insurancePolicy == null) {
+            throw buildException("Policy not found", 404);
+        }
+        LocalDateTime plussedMinutes = LocalDateTime.now().plusMinutes(15);
+
+        Token token = this.tokenService
+                .findFirstByInsurancePolicyAndIsUsedFalseOrderByExpiryDateDesc(insurancePolicy)
+                .orElse(null);
+
+        if (token == null) {
+            token = Token.builder()
+                    .token(generated5DigitOtp)
+                    .expiryDate(plussedMinutes)
+                    .isUsed(false)
+                    .insurancePolicy(insurancePolicy)
+                    .lastUpdated(LocalDateTime.now())
+                    .build();
+        } else {
+            token.setExpiryDate(plussedMinutes);
+            token.setToken(generated5DigitOtp);
+
+        }
+        this.tokenService.saveToken(token);
+// send sms
+        return token.getId();
+    }
+
+    public InsurancePolicy appAuthenticate(AuthAppRequest authAppRequest) {
+        logger.info(" Attempt to do OTP authentication requestBody: {}", CoreUtil.toJson(authAppRequest));
+
+        Token token = this.tokenService.fetchByTokenId(authAppRequest.getTokenId())
+                .orElseThrow(() -> buildException("Token not found", 404));
+
+        if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
+            throw buildException("Expired token", 401);
+        }
+        if (!token.getToken().equalsIgnoreCase(authAppRequest.getOtpCode())) {
+            throw buildException("Invalid Token", 401);
+        }
+
+        if (token.getIsUsed()) {
+            throw buildException("Token already used", 401);
+        }
+        this.tokenService.markAsUsed(token.getId());
+        logger.info(" OTP authentication successful for TokenId: {}", token.getId());
+        return token.getInsurancePolicy();
     }
 
 

@@ -8,11 +8,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface InsurancePolicyRepository extends JpaRepository<InsurancePolicy, String>, InsurancePolicyInterface {
@@ -109,4 +111,22 @@ public interface InsurancePolicyRepository extends JpaRepository<InsurancePolicy
            "COALESCE(SUM(CASE WHEN p.status.id = 'SUSPENDED' THEN 1 ELSE 0 END),0)) " +
            "FROM InsurancePolicy p")
     PolicyDashboardStats countDashboardStatsDTO();
+
+
+    @Query("SELECT p FROM InsurancePolicy p " +
+           "WHERE p.insurancePolicyId = :insurancePolicyId AND p.policyHolder.mobileNumber = :mobile")
+    InsurancePolicy findByPolicyIdAndPolicyHolderMobileNumber(@Param("insurancePolicyId") String insurancePolicyId,
+                                         @Param("mobile") String mobile);
+
+    @Query("SELECT p FROM InsurancePolicy p " +
+           "JOIN FETCH p.policyHolder ph " +
+           "WHERE ph.mobileNumber = :mobile")
+    List<InsurancePolicy> findByMobileNumber(@Param("mobile") String mobile);
+
+    @Query("SELECT p FROM InsurancePolicy p " +
+           "JOIN FETCH p.policyHolder ph " +
+           "WHERE ph.mobileNumber = :mobile " +
+           "AND p.insurancePolicyId = :insurancePolicyId")
+    Optional<InsurancePolicy> findOneWithPolicyHolder(@Param("mobile") String mobile,
+                                                      @Param("insurancePolicyId") String insurancePolicyId);
 }
