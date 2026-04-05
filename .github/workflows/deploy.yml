@@ -35,8 +35,18 @@ jobs:
             else
               echo "Starting JBoss..."
               nohup /opt/jboss/bin/standalone.sh > /opt/jboss/standalone/log/start.log 2>&1 &
-              sleep 20
             fi
+
+            echo "Waiting for JBoss to be ready..."
+
+            for i in {1..30}; do
+              if nc -z localhost 9990; then
+                echo "JBoss is ready!"
+                break
+              fi
+              echo "Waiting... ($i)"
+              sleep 2
+            done
 
       - name: Clean old deployment
         uses: appleboy/ssh-action@v0.1.10
