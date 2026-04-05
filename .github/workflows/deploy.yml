@@ -62,17 +62,27 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            rm -f /opt/jboss/standalone/deployments/momentum.war
+            rm -rf /opt/jboss/standalone/deployments/momentum.war
             rm -f /opt/jboss/standalone/deployments/momentum.war.*
 
-      - name: Copy WAR to server
+      - name: Copy WAR to server (temp)
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "target/momentum.war"
-          target: "/opt/jboss/standalone/deployments/"
+          target: "/tmp/"
+
+      - name: Move WAR to deployments
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            rm -rf /opt/jboss/standalone/deployments/target
+            mv /tmp/momentum.war /opt/jboss/standalone/deployments/
 
       - name: Deploy and Reload JBoss
         uses: appleboy/ssh-action@v0.1.10
