@@ -45,7 +45,6 @@ jobs:
                 echo "JBoss is running!"
                 break
               fi
-
               echo "Waiting... ($i)"
               sleep 2
             done
@@ -65,7 +64,7 @@ jobs:
             rm -rf /opt/jboss/standalone/deployments/momentum.war
             rm -f /opt/jboss/standalone/deployments/momentum.war.*
 
-      - name: Copy WAR to server (temp)
+      - name: Copy WAR to temp
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -81,25 +80,17 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            rm -rf /opt/jboss/standalone/deployments/momentum.war
             rm -rf /opt/jboss/standalone/deployments/target
             mv /tmp/target/momentum.war /opt/jboss/standalone/deployments/
 
-      - name: Deploy and Reload JBoss
+      - name: Trigger JBoss Auto Deploy
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            export JAVA_HOME=/home/mauromauane/.sdkman/candidates/java/8.0.392-tem
-            export PATH=$JAVA_HOME/bin:$PATH
-
-            for i in {1..10}; do
-              /opt/jboss/bin/jboss-cli.sh --connect --commands="undeploy momentum.war,deploy /opt/jboss/standalone/deployments/momentum.war --force,:reload" && break
-              echo "Retry deploy... ($i)"
-              sleep 5
-            done
+            touch /opt/jboss/standalone/deployments/momentum.war.dodeploy
 
       - name: Show JBoss logs
         uses: appleboy/ssh-action@v0.1.10
@@ -109,4 +100,4 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             sleep 10
-            tail -n 200 /opt/jboss/standalone/log/server.log
+            tail -n 300 /opt/jboss/standalone/log/server.log
