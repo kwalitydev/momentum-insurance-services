@@ -81,8 +81,9 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            rm -rf /opt/jboss/standalone/deployments/momentum.war
             rm -rf /opt/jboss/standalone/deployments/target
-            mv /tmp/momentum.war /opt/jboss/standalone/deployments/
+            mv /tmp/target/momentum.war /opt/jboss/standalone/deployments/
 
       - name: Deploy and Reload JBoss
         uses: appleboy/ssh-action@v0.1.10
