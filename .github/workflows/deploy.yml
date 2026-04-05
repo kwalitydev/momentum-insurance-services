@@ -39,11 +39,17 @@ jobs:
 
             echo "Waiting for JBoss to be ready..."
 
+            export JAVA_HOME=/home/mauromauane/.sdkman/candidates/java/8.0.392-tem
+            export PATH=$JAVA_HOME/bin:$PATH
+
             for i in {1..30}; do
-              if nc -z localhost 9990; then
+              /opt/jboss/bin/jboss-cli.sh --connect command=:read-attribute(name=server-state) > /dev/null 2>&1
+
+              if [ $? -eq 0 ]; then
                 echo "JBoss is ready!"
                 break
               fi
+
               echo "Waiting... ($i)"
               sleep 2
             done
@@ -77,9 +83,11 @@ jobs:
             export JAVA_HOME=/home/mauromauane/.sdkman/candidates/java/8.0.392-tem
             export PATH=$JAVA_HOME/bin:$PATH
 
-            java -version
-
-            /opt/jboss/bin/jboss-cli.sh --connect --commands="undeploy momentum.war,deploy /opt/jboss/standalone/deployments/momentum.war --force,:reload"
+            for i in {1..10}; do
+              /opt/jboss/bin/jboss-cli.sh --connect --commands="undeploy momentum.war,deploy /opt/jboss/standalone/deployments/momentum.war --force,:reload" && break
+              echo "Retry deploy... ($i)"
+              sleep 5
+            done
 
       - name: Show JBoss logs
         uses: appleboy/ssh-action@v0.1.10
