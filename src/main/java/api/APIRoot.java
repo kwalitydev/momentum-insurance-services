@@ -39,6 +39,7 @@ public class APIRoot extends Application {
         classes.add(MetricAPI.class);
         classes.add(AuthDashboardAPI.class);
         classes.add(DashboardAPI.class);
+        classes.add(AuthAppAPI.class);
         classes.add(OpenApiResource.class);
         return classes;
     }
