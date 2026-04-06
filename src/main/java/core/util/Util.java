@@ -171,6 +171,12 @@ public class Util {
         return ip;
     }
 
+    public static PolicyHolder setPolicyHolder(Long holderId){
+        PolicyHolder ph = new PolicyHolder();
+        ph.setId(holderId);
+        return ph;
+    }
+
     public static JobTitle setJobTitle(Long jobTitleId){
         JobTitle jt = new JobTitle();
         jt.setJobTitleId(jobTitleId);

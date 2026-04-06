@@ -10,9 +10,9 @@ public interface PolicyHolderInterface {
 
     PolicyHolder save(PolicyHolder policyHolder);
     PolicyHolder saveAndFlush(PolicyHolder policyHolder);
-    int updateAccount(String accountNumber, String customerId,Date dateOfBirth,String mobileNumber,Date lastUpdate,String customerName,String email,String vat,String address,Long id);
+    int updatePolicyHolder(Date dateOfBirth, String mobileNumber, Date lastUpdate, String customerName, String email, String vat, String address, Long id);
 
-    int updateAccount(String accountNumber, String customerId, Date dateOfBirth, String mobileNumber, Date lastUpdate, String customerName, String email, String vat,
-                      String address, Long jobTitleId, String documentId, Long id);
+    int updatePolicyHolder(Date dateOfBirth, String mobileNumber, Date lastUpdate, String customerName, String email, String vat,
+                           String address, Long jobTitleId, String documentId, Long id);
 
 }

@@ -16,7 +16,11 @@ public enum Statuses {
     ERROR,
     SENT,
     NOT_SENT,
-    APPROVED
+    APPROVED,
+    NEW,
+    INVOICED,
+    REGULARIZED
 
 
-}
+
+    }

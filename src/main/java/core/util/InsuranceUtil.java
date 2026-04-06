@@ -1,7 +1,6 @@
 package core.util;
 
 
-import core.beans.CustomerResponse;
 import core.beans.FileRequest;
 import core.beans.MemberRequest;
 import core.beans.PolicyRequest;
@@ -21,7 +20,6 @@ import java.io.File;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.Date;
 
 import static core.constants.ProcessActions.ALTER;
 import static core.util.CoreUtil.*;
@@ -37,7 +35,7 @@ public class InsuranceUtil implements Serializable {
     @Inject
     private InsurancePolicyHistoryInterface insurancePolicyHistoryInterface;
     @Inject
-    private NotificationUtil notificationUtil;
+    private InsuranceOutstandingAmountInterface outstandingAmountInterface;
     @Inject
     BeanFactory beanFactory;
 
@@ -154,24 +152,6 @@ public class InsuranceUtil implements Serializable {
         }
     }
 
-    public void updatePolicy(PolicyRequest policyRequest, InsurancePolicy insurancePolicy, String traceId) throws Exception {
-        CustomerResponse customerResponse = null;
-        Date expiryDate;
-        int updatedAccount = policyHolderInterface.updateAccount(customerResponse.getCoreCustomer().getAccountId(), customerResponse.getCoreCustomer().getCustomerId(), stringToDate(customerResponse.getCoreCustomer().getDateOfBirth()), customerResponse.getCoreCustomer().getMobileNumber(), today(), customerResponse.getCoreCustomer().getCustomerName(), customerResponse.getCoreCustomer().getEmail(), customerResponse.getCoreCustomer().getVat(), customerResponse.getCoreCustomer().getAddress(), insurancePolicy.getPolicyHolder().getId());
-        if (updatedAccount > 0) {
-            LOGGER.info("Account successfully updated. traceId -> {}", traceId);
-        } else {
-            LOGGER.info("Account not updated. traceId -> {}", traceId);
-        }
-        if (policyRequest.getEndDate() == null) {
-            expiryDate = insurancePolicy.getExpiryDate();
-        } else {
-            expiryDate = stringToDate(policyRequest.getEndDate());
-        } /* int updatePolicy = insurancePolicyInterface.updatePolicy(today(), policyRequest.getUsername(), null, policyRequest.getTotalAmount()), setSubProduct(policyRequest.getPackageId()), expiryDate, policyRequest.getPolicyId()); if (updatePolicy > 0) { LOGGER.info("Policy successfully updated. traceId -> {}",traceId); } else { LOGGER.info("Policy not updated. traceId -> {}",traceId); } */
-        logPolicyHistory(policyRequest, traceId);
-        handleBeneficiaries(policyRequest, traceId);
-        notificationUtil.postSendAmendmentSMS(traceId, insurancePolicy, customerResponse);
-    }
 
     public void logPolicyHistory(PolicyRequest policyRequest,String traceId,String ...narrative){
         InsurancePolicy ip = new InsurancePolicy();
@@ -197,29 +177,20 @@ public class InsuranceUtil implements Serializable {
             LOGGER.info("InsuranceBalance saved for policy {}. Id ->{} traceId -> {}", insurancePolicy.getPolicyId(),savedBalance.getInsuranceBalanceId(), traceId);
         }
 
+        @Transactional(Transactional.TxType.REQUIRES_NEW)
+        public void saveOutstandingAmount(String insurancePolicyId, BigDecimal amount, String traceId,String description,String transactionType) {
+        InsuranceOutstandingAmount insuranceOutstandingAmount = new InsuranceOutstandingAmount();
+        insuranceOutstandingAmount.setInsurancePolicy(setInsurancePolicy(insurancePolicyId));
+        insuranceOutstandingAmount.setAmount(amount);
+        insuranceOutstandingAmount.setDescription(description);
+        insuranceOutstandingAmount.setStatus(setStatus(Statuses.NEW.toString()));
+        insuranceOutstandingAmount.setEntryDate(today());
+        insuranceOutstandingAmount.setTransactionType(transactionType);
+        insuranceOutstandingAmount.setLastUpdatedDate(today());
 
-    private void handleBeneficiaries(PolicyRequest policyRequest,String traceId) throws Exception {
-        for (MemberRequest mr : policyRequest.getMemberRequests()) {
-            Status status = new Status();
-            status.setId(Statuses.ACTIVE.toString());
-            InsurancePolicy insP = new InsurancePolicy();
-            insP.setPolicyId(policyRequest.getPolicyId());
-            if (mr.getBeneficiaryId() == null) {
-                // setBeneficiaries(policyRequest, policyRequest.getCustomerResponse(), insP, mr, status);
-                // } else { LOGGER.debug("Beneficiary {} is already added. traceId -> {}", mr.getBeneficiaryId(),traceId);
-                // } } if (policyRequest.getRemovedMembers() != null)
-                // { for (Long removalId : policyRequest.getRemovedMembers())
-                // { Status status = new Status(); status.setId(Statuses.REMOVED.toString());
-                // int updatedBeneficiary = beneficiariesInterface.updateBeneficiary(today(), policyRequest.getUsername(), status, removalId);
-                // if (updatedBeneficiary > 0) { LOGGER.info("Policy successfully removed. traceId -> {}",traceId);
-                // } else { LOGGER.info("Policy not removed. traceId -> {}",traceId);
-                // }
-                // }
-                // }
-                //
-                // else {
-                // LOGGER.debug("No members to be removed! traceId -> {}",traceId); } }
-            }
+        InsuranceOutstandingAmount saved = beanFactory.merge(insuranceOutstandingAmount);
+
         }
-    }
+
+
 }

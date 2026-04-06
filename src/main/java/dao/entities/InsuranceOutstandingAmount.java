@@ -17,7 +17,7 @@ public class InsuranceOutstandingAmount implements Serializable {
     @OneToOne
     private InsurancePolicy insurancePolicy;
     private String transactionType; // e.g "creditor" or "debtor"
-    private Date description;
+    private String description;
     private Date lastUpdatedDate;
     private Date entryDate;
     @OneToOne
@@ -55,13 +55,6 @@ public class InsuranceOutstandingAmount implements Serializable {
         this.transactionType = transactionType;
     }
 
-    public Date getDescription() {
-        return description;
-    }
-
-    public void setDescription(Date description) {
-        this.description = description;
-    }
 
     public Date getLastUpdatedDate() {
         return lastUpdatedDate;
@@ -81,6 +74,14 @@ public class InsuranceOutstandingAmount implements Serializable {
 
     public Status getStatus() {
         return status;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public void setStatus(Status status) {

@@ -7,10 +7,8 @@ import core.threads.PostCancellation;
 import core.threads.PostReportBuild;
 import core.util.*;
 import dao.BeanFactory;
-import dao.entities.Currency;
 import dao.entities.*;
 import dao.interfaces.*;
-import dao.repositories.SubProductAccountRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,6 +22,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
@@ -61,24 +60,11 @@ public class PolicyAPI {
     @Inject
     private ProcessWorkflowImpl processWorkflowInterface;
     @Inject
-    private SubProductAccountInterface subProductAccountInterface;
-    @Inject
     private InsurancePolicyHistoryInterface insurancePolicyHistoryInterface;
     @Inject
     private UserDetailsInterface userDetailsInterface;
     @Resource(name = "java:comp/DefaultManagedExecutorService")
     private ManagedExecutorService executorService;
-    @Inject
-    private RelationshipInterface relationshipInterface;
-    @Inject
-    private SubProductAccountRepository subProductAccountRepository;
-    @Inject
-    private TermInterface termInterface;
-    @Inject
-    private FrequencyInterface frequencyInterface;
-
-    @Inject
-    private CoverageOptionInterface coverageOptionInterface;
     @Inject
     private BeanFactory beanFactory;
     @Inject
@@ -93,6 +79,8 @@ public class PolicyAPI {
     private PaymentScheduleInterface paymentScheduleInterface;
     @Inject
     private MemberPriceInterface memberPriceInterface;
+    @Inject
+    private PolicyHolderInterface policyHolderInterface;
 
 
 
@@ -552,36 +540,104 @@ public class PolicyAPI {
     @Path("/update")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updatePolicy(PolicyRequest policyRequest,@Context HttpServletRequest headers) {
+    public Response updatePolicy(PolicyUpdateRequest policyUpdateRequest,@Context HttpServletRequest headers) {
 
         String traceId = getLogId();
         String methodName = "updatePolicy";
         Response response = Response.status(Response.Status.BAD_REQUEST).build();
-        if(policyRequest!=null) {
-            defaultObjectRequest(LOGGER,traceId,policyRequest.toString(),methodName,headers.getRemoteAddr());
+        if(policyUpdateRequest!=null) {
+            defaultObjectRequest(LOGGER,traceId,policyUpdateRequest.toString(),methodName,headers.getRemoteAddr());
 
             Date requestTime = today();
-
-
             boolean queryExecuted = false;
             String errorCause = "";
             PolicyResponse policyResponse = new PolicyResponse();
 
             try {
 
-                Optional<InsurancePolicy> insurancePolicyDB = insurancePolicyInterface.findByPolicyId(policyRequest.getPolicyId());
-                if (insurancePolicyDB.isPresent()) {
+                LOGGER.info("Updating Insurance Policy with id {} ", policyUpdateRequest.getPolicyId());
+                    int updated = insurancePolicyInterface.updatePolicy(policyUpdateRequest.getTotalAmount(),
+                            today(),policyUpdateRequest.getUsername(), policyUpdateRequest.getPolicyId());
+                    if(updated>0){
+                        LOGGER.info("Insurance Policy Updated");
+                    }
+                    else{
+                        LOGGER.info("No update made to Insurance Policy");
+                    }
 
-                    insuranceUtil.updatePolicy(policyRequest,insurancePolicyDB.get(),traceId);
-                    policyResponse.setPolicyId(policyRequest.getPolicyId());
-                    policyResponse.setStatus(true);
-                    response = Response.status(Response.Status.OK).entity(policyResponse).build();
-                    queryExecuted = true;
+                    /** TOO: check date of birth **/
+                    LOGGER.info("Updating Policy Holder with id {} ", policyUpdateRequest.getHolderId());
+                    int updatePolicyHolder = policyHolderInterface.updatePolicyHolder(today(), policyUpdateRequest.getMainPhone(), today(),
+                            policyUpdateRequest.getFullName()+" "+policyUpdateRequest.getSurname(),
+                            policyUpdateRequest.getEmail(),
+                            policyUpdateRequest.getNuit(),
+                            policyUpdateRequest.getAddress(),
+                            Long.parseLong(policyUpdateRequest.getJobTitle()),
+                            policyUpdateRequest.getIdNumber(), policyUpdateRequest.getHolderId());
 
+                    if(updatePolicyHolder>0){
+                        LOGGER.info("Policy Holder Updated");
+                    }
+                    else{
+                        LOGGER.info("No update made to Policy Holder");
+                    }
 
-                } else {
-                    LOGGER.info("Policy not found. traceId -> {}",traceId);
+                    //Beneficiaries update
+
+                LOGGER.info("Creating new Beneficiaries for policy id {} ", policyUpdateRequest.getPolicyId());
+                 BenefRequest benefRequests = policyUpdateRequest.getBenefRequest();
+                 List<BeneficiaryRequestPayload> beneficiaryRequestPayloads = benefRequests.getNewlyAdded();
+                for (BeneficiaryRequestPayload beneficiaries  : beneficiaryRequestPayloads) {
+
+                    Beneficiaries b = new Beneficiaries();
+                    b.setPolicy(setInsurancePolicy(policyUpdateRequest.getPolicyId()));
+                    b.setName(beneficiaries.getName());
+                    b.setDocumentNumber(beneficiaries.getDocNumber());
+                    b.setRelationShip(setRelationShip(Long.parseLong(beneficiaries.getRelationShipId())));
+                    b.setIdType(setIDType(beneficiaries.getIdTypeId()));
+                    b.setStudent(beneficiaries.getBenStudent());
+                    b.setTotalCharge(beneficiaries.getTotalCharge());
+                    b.setCreatedDate(today());
+                    b.setLastUpdated(today());
+                    b.setStatus(setActive());
+
+                    try {
+                        b.setDateOfBirth(stringToDate(beneficiaries.getDateOfBirth()));
+                    } catch (ParseException e) {
+                        LOGGER.error("Invalid DOB {}", beneficiaries.getDateOfBirth());
+                    }
+
+                    beanFactory.merge(b);
+                    Beneficiaries savedBeneficiaries = beneficiariesInterface.save(b);
+                    LOGGER.info("Beneficiary saved! name = {}, traceId -> {}", savedBeneficiaries.getName(),traceId);
+
                 }
+
+                LOGGER.info("Removing Beneficiaries for policy id {} ", policyUpdateRequest.getPolicyId());
+                List<BeneficiaryRequestPayload> benToBeRemoved = benefRequests.getToBeRemoved();
+                for (BeneficiaryRequestPayload beneficiaries  : benToBeRemoved) {
+
+                    int removed = beneficiariesInterface.updateBeneficiary(today(), policyUpdateRequest.getUsername(),
+                            setStatus(Statuses.REMOVED.toString()), beneficiaries.getBeneficiaryId());
+                    if(removed>0){
+                        LOGGER.info("Beneficiary removed! id = {}, traceId -> {}", beneficiaries.getBeneficiaryId(),traceId);
+                    }
+                    else{
+                        LOGGER.info("No update made to Beneficiary! id = {}, traceId -> {}", beneficiaries.getBeneficiaryId(),traceId);
+                    }
+                }
+
+
+                PolicyRequest policyRequest = new PolicyRequest();
+                policyRequest.setPolicyId(policyUpdateRequest.getPolicyId());
+                policyRequest.setComments(policyUpdateRequest.getComments());
+                policyRequest.setUsername(policyUpdateRequest.getUsername());
+                LOGGER.info("Logging policy history for policy id {} ", policyUpdateRequest.getPolicyId());
+                insuranceUtil.logPolicyHistory(policyRequest,traceId,"Alteração de beneficiários");
+              //  notificationUtil.postSendAmendmentSMS(traceId, insurancePolicy, customerResponse);
+                response = Response.status(Response.Status.OK).entity(policyResponse).build();
+                queryExecuted = true;
+
 
 
             } catch (Exception e) {
@@ -590,8 +646,8 @@ public class PolicyAPI {
                 errorCause = e.getMessage();
             } finally {
 
-                queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, policyRequest.getUsername(),
-                        methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, policyRequest.getSessionId(), headers.getRemoteAddr()));
+                queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, policyUpdateRequest.getUsername(),
+                        methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, policyUpdateRequest.getSessionId(), headers.getRemoteAddr()));
             }
         }
         else {
@@ -600,6 +656,7 @@ public class PolicyAPI {
         return response;
 
     }
+
 
 
 
@@ -952,59 +1009,6 @@ public class PolicyAPI {
 
 
 
-    @GET
-    @Path("/accounts/details")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getAccountDetails(@QueryParam("subProductId") Long subProductId,
-                                      @QueryParam("sessionId") String sessionId,
-                                      @QueryParam("username") String username,
-                                      @QueryParam("currencyId") String currencyId,
-                                      @Context HttpServletRequest headers) {
-
-        String reqRes = getLogId();
-        String methodName = "getAccountDetails";
-        String ipAddress = headers.getRemoteAddr();
-        LOGGER.info("{} is being called with parameter.  subProductId -> {} ,currencyId -> {}, username -> {}, sessionId -> {}, logId -> {}, ipAddress -> {} ",
-                subProductId, currencyId, methodName, username, sessionId, reqRes, headers.getRemoteAddr());
-
-        Date requestTime = today();
-        Response response = Response.status(Response.Status.NO_CONTENT).build();
-        boolean queryExecuted = false;
-        String errorCause = "";
-
-        try {
-
-            Optional<SubProductAccount> subProductAccount = subProductAccountInterface.findBySubProductAndCurrencyAndStatus(
-                    setSubProduct(subProductId),
-                    setCurrency(currencyId),
-                    setActive()
-
-            );
-
-            if (subProductAccount.isPresent()) {
-                response = Response.status(Response.Status.OK).entity(subProductAccount.get()).build();
-            } else {
-                response = Response.status(Response.Status.OK).entity(null).build();
-            }
-
-
-            queryExecuted = true;
-
-
-        } catch (Exception e) {
-            LOGGER.error(e);
-            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-            errorCause = e.getCause().getMessage();
-        } finally {
-
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
-                    methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, ipAddress));
-        }
-
-        return response;
-
-    }
 
     @GET
     @Path("/insurance/history")

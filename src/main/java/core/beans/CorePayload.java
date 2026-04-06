@@ -1,7 +1,6 @@
 package core.beans;
 
 import dao.entities.InsurancePolicy;
-import dao.entities.SubProductAccount;
 
 public class CorePayload {
 
