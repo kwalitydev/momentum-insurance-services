@@ -35,7 +35,7 @@ public class AuthService {
     @Inject
     private MenuRepository menuRepository;
 
-    @Transactional
+
     public LoginResponseDTO authenticate(String username, String password) {
 
         Users user = usersRepository.findByUserByUserID(username)
@@ -65,7 +65,6 @@ public class AuthService {
                     .collect(Collectors.toList());
 
             List<Submenu> allSubmenus = subMenuRepository.findSubMenus(menuIds);
-
             Map<Integer, List<SubMenuDTO>> submenusByMenu = allSubmenus.stream()
                     .collect(Collectors.groupingBy(
                             Submenu::getIdMenu,

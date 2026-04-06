@@ -5,10 +5,8 @@ import core.beans.CustomerResponse;
 import core.beans.FileRequest;
 import core.beans.MemberRequest;
 import core.beans.PolicyRequest;
-import core.constants.ProcessActions;
 import core.constants.ProcessStates;
 import core.constants.Statuses;
-import core.threads.PostReportBuild;
 import dao.BeanFactory;
 import dao.entities.*;
 import dao.interfaces.*;
@@ -21,47 +19,25 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.io.File;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.Optional;
 
 import static core.constants.ProcessActions.ALTER;
 import static core.util.CoreUtil.*;
 import static core.util.Util.*;
 
-//@ApplicationScoped
 
 public class InsuranceUtil implements Serializable {
     private static final Logger LOGGER = LogManager.getLogger(InsuranceUtil.class);
     @Inject
     private PolicyHolderInterface policyHolderInterface;
-    @Inject
-    private InsurancePolicyInterface insurancePolicyInterface;
-
-    @Inject
-    private PaymentScheduleInterface paymentScheduleInterface;
-    @Inject
-    private CollectionLogInterface collectionLogInterface;
-    @Inject
-    private PaymentLogInterface paymentLogInterface;
-    @Inject
-    private PostReportBuild postReportBuild;
     @Resource(name = "java:comp/DefaultManagedExecutorService")
     private ManagedExecutorService executorService;
     @Inject
     private InsurancePolicyHistoryInterface insurancePolicyHistoryInterface;
     @Inject
-    private BeneficiariesInterface beneficiariesInterface;
-    @Inject
     private NotificationUtil notificationUtil;
-    @Inject
-    private QueryUtil queryUtil;
-    @Inject
-    private DocumentTypeInterface documentTypeInterface;
-    @Inject
-    private UserInterface userInterface;
-    @Inject
-    private ProcessWorkflowInterface processWorkflowInterface;
     @Inject
     BeanFactory beanFactory;
 
@@ -72,14 +48,11 @@ public class InsuranceUtil implements Serializable {
                                       PolicyRequest policyRequest,
                                       String traceId) throws Exception {
 
-        InsurancePolicy savedInsurancePolicy =
-                saveAccountAndInsurancePolicy(policyHolder, insurancePolicy, traceId);
-
+        InsurancePolicy savedInsurancePolicy = saveAccountAndInsurancePolicy(policyHolder, insurancePolicy, traceId);
         createProcess(savedInsurancePolicy.getPolicyId());
-
         saveBeneficiaries(policyRequest, savedInsurancePolicy);
-
         logDocuments(policyRequest, traceId, savedInsurancePolicy.getPolicyId());
+        logInsuranceBalance(insurancePolicy,traceId);
 
         return savedInsurancePolicy;
     }
@@ -132,6 +105,7 @@ public class InsuranceUtil implements Serializable {
             b.setTotalCharge(mr.getTotalCharge());
             b.setCreatedDate(today());
             b.setLastUpdated(today());
+            b.setStatus(setActive());
 
             try {
                 b.setDateOfBirth(stringToDate(mr.getDateOfBirth()));
@@ -213,6 +187,15 @@ public class InsuranceUtil implements Serializable {
         LOGGER.info("InsurancePolicyHistory saved {}. traceId -> {}",InsurancePolicyHistory.getInsurancePolicy(),traceId);
     }
 
+        public void logInsuranceBalance(InsurancePolicy insurancePolicy,String traceId) {
+            InsuranceBalance insuranceBalance = new InsuranceBalance();
+            insuranceBalance.setInsurancePolicy(insurancePolicy);
+            insuranceBalance.setCurrentBalance(BigDecimal.ZERO);
+            insuranceBalance.setLastUpdatedDate(today());
+
+            InsuranceBalance savedBalance = beanFactory.merge(insuranceBalance);
+            LOGGER.info("InsuranceBalance saved for policy {}. Id ->{} traceId -> {}", insurancePolicy.getPolicyId(),savedBalance.getInsuranceBalanceId(), traceId);
+        }
 
 
     private void handleBeneficiaries(PolicyRequest policyRequest,String traceId) throws Exception {

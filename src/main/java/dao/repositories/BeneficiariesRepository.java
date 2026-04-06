@@ -20,6 +20,8 @@ public interface BeneficiariesRepository extends JpaRepository<Beneficiaries, St
     @Query("update Beneficiaries set lastUpdated=?1, userId=?2, status=?3 where beneficiaryId=?4")
     int updateBeneficiary(Date lastUpdated, String userId, Status status, Long beneficiaryId);
 
+    @Query("SELECT b FROM Beneficiaries b WHERE (b.insurancePolicy.policyId =?1 OR b.insurancePolicy.insurancePolicyId =?1) AND b.status = ?2 ORDER BY b.createdDate")
+    List<Beneficiaries> findByInsurancePolicyAndStatus(String policyId,Status status);
     @Query("SELECT b FROM Beneficiaries b WHERE b.insurancePolicy =?1 AND b.relationShip.description IN ?2 AND b.status = ?3 ORDER BY b.name")
     List<Beneficiaries> findByRelationship(InsurancePolicy insurancePolicy,List<String> relationShips,Status status);
 

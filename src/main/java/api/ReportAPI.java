@@ -2,10 +2,7 @@ package api;
 
 import core.beans.*;
 import core.constants.*;
-import core.util.CoreUtil;
-import core.util.FileUtil;
-import core.util.QueryUtil;
-import core.util.Util;
+import core.util.*;
 import dao.entities.*;
 import dao.entities.Currency;
 import dao.interfaces.*;
@@ -31,6 +28,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -81,6 +79,8 @@ public class ReportAPI {
     private BenefitInterface benefitInterface;
     @Inject
     private ProductConfigInterface productConfigInterface;
+    @Inject
+    private ApplicationInterface applicationInterface;
 
     @GET
     @Path("/policies-list")
@@ -544,18 +544,27 @@ public class ReportAPI {
 
            if(insurancePolicy.isPresent()){
                insurancePolicyResponse.setInsurancePolicy(insurancePolicy.get());
+
                Optional<MemberProductPrice> memberProductPrice = memberPriceInterface.findByCurrencyAndSubProductAndStatus(
                        insurancePolicy.get().getCurrency(),
                        insurancePolicy.get().getSubProduct(),
-
                        setActive()
 
                );
                memberProductPrice.ifPresent(insurancePolicyResponse::setMemberProductPrice);
 
-               Optional<UserDetails> userDetails = userDetailsInterface.findByUsers(
-                       insurancePolicy.get().getUsers());
+               Optional<UserDetails> userDetails = userDetailsInterface.findByUsers(insurancePolicy.get().getUsers());
                userDetails.ifPresent(details -> insurancePolicyResponse.setCreatedByName(details.getFullName() + " " + details.getSurname()));
+
+               Optional<Application> application = applicationInterface.findByAppId(RequestUtil.APP_ID);
+               if(application.isPresent()){
+                   String interval = getCurrentMonthInterval(application.get().getCollectionDays());
+                   String nextMonthInterval = getNextMonthInterval(application.get().getCollectionDays());
+                   insurancePolicyResponse.setCollectionDays(interval);
+                   insurancePolicyResponse.setNextMonthCollectionDays(nextMonthInterval);
+                   insurancePolicyResponse.setCollectionDay(isTodayCollectionDay(application.get().getCollectionDays()));
+                   insurancePolicyResponse.setAfterCollectionDay(isTodayCollectionDay(application.get().getCollectionDays()));
+               }
 
                LOGGER.info("getPolicies returned {}",insurancePolicyResponse);
                response = Response.status(Response.Status.OK).entity(insurancePolicyResponse).build();

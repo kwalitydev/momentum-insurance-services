@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -282,5 +283,81 @@ public class Util {
 
         Random r = new Random();
         return r.nextInt((max - min) + 1) + min;
+    }
+
+
+    public static String getCurrentMonthInterval(String collectionDays) {
+
+        if (collectionDays == null || collectionDays.trim().isEmpty()) {
+            throw new IllegalArgumentException("Collection days cannot be empty");
+        }
+
+        int firstDay = Arrays.stream(collectionDays.split(","))
+                .map(String::trim)
+                .mapToInt(Integer::parseInt)
+                .min()
+                .getAsInt();
+
+        LocalDate now = LocalDate.now();
+
+        int lastDay = now.lengthOfMonth();
+        int month = now.getMonthValue();
+        int year = now.getYear();
+
+        return String.format("%d - %02d/%02d/%d", firstDay, lastDay, month, year);
+    }
+
+
+    public static String getNextMonthInterval(String collectionDays) {
+
+        if (collectionDays == null || collectionDays.trim().isEmpty()) {
+            throw new IllegalArgumentException("Collection days cannot be empty");
+        }
+
+        int firstDay = Arrays.stream(collectionDays.split(","))
+                .map(String::trim)
+                .mapToInt(Integer::parseInt)
+                .min()
+                .getAsInt();
+
+        LocalDate nextMonth = LocalDate.now().plusMonths(1);
+
+        int lastDay = nextMonth.lengthOfMonth();
+        int month = nextMonth.getMonthValue();
+        int year = nextMonth.getYear();
+
+        return String.format("%d - %02d/%02d/%d", firstDay, lastDay, month, year);
+    }
+
+    public static boolean isTodayCollectionDay(String collectionDays) {
+
+        if (collectionDays == null || collectionDays.trim().isEmpty()) {
+            return false;
+        }
+
+        int today = LocalDate.now().getDayOfMonth();
+
+        return Arrays.stream(collectionDays.split(","))
+                .map(String::trim)
+                .mapToInt(Integer::parseInt)
+                .anyMatch(day -> day == today);
+    }
+
+
+    public static boolean isAfterCollectionPeriod(String collectionDays) {
+
+        if (collectionDays == null || collectionDays.trim().isEmpty()) {
+            throw new IllegalArgumentException("Collection days cannot be empty");
+        }
+
+        int firstCollectionDay = Arrays.stream(collectionDays.split(","))
+                .map(String::trim)
+                .mapToInt(Integer::parseInt)
+                .min()
+                .getAsInt();
+
+        int today = LocalDate.now().getDayOfMonth();
+
+        return today >= firstCollectionDay;
     }
 }

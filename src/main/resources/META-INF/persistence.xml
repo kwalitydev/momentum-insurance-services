@@ -65,6 +65,9 @@
         <class>dao.entities.ErrorLog</class>
         <class>dao.entities.BenefitMap</class>
         <class>dao.entities.BenefitCycle</class>
+        <class>dao.entities.InsuranceOutstandingAmount</class>
+        <class>dao.entities.InsuranceStatementEntry</class>
+        <class>dao.entities.InsuranceBalance</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
 
         <properties>

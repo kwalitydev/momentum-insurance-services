@@ -335,7 +335,8 @@ public class PolicyAPI {
 
         String reqRes = getLogId();
         String methodName = "getBeneficiaries";
-        LOGGER.info("{} is being called with parameter. insurancePolicyId -> {}, username -> {}, sessionId -> {}, logId -> {}, ipAddress -> {} ",insurancePolicyId, methodName, username, sessionId, reqRes, headers.getRemoteAddr());
+        LOGGER.info("{} is being called with parameter. insurancePolicyId -> {}, username -> {}, sessionId -> {}, logId -> {}, ipAddress -> {} ",
+                 methodName, insurancePolicyId,username, sessionId, reqRes, headers.getRemoteAddr());
 
         Date requestTime = today();
         Response response = Response.status(Response.Status.NO_CONTENT).build();
@@ -343,10 +344,7 @@ public class PolicyAPI {
         String errorCause = "";
 
         try {
-            InsurancePolicy insurancePolicy = new InsurancePolicy();
-            insurancePolicy.setPolicyId(insurancePolicyId);
-
-            List<Beneficiaries> beneficiaries = beneficiariesInterface.findByInsurancePolicyAndStatus(insurancePolicy, setActive());
+            List<Beneficiaries> beneficiaries = beneficiariesInterface.findByInsurancePolicyAndStatus(setInsurancePolicy(insurancePolicyId), setActive());
             response = Response.status(Response.Status.OK).entity(beneficiaries).build();
             defaultSuccess(LOGGER,reqRes);
             queryExecuted = true;
