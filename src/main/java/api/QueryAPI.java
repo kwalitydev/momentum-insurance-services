@@ -38,8 +38,6 @@ public class QueryAPI {
     @Inject
     private IDTypeInterface idTypeInterface;
     @Inject
-    private SubProductAccountInterface subProductAccountInterface;
-    @Inject
     private InsurancePolicyInterface insurancePolicyInterface;
     @Inject
     private PaymentScheduleInterface paymentScheduleInterface;
@@ -143,45 +141,6 @@ public class QueryAPI {
         return response;
 
     }
-
-    @GET
-    @Path("/product-account-list")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getProductAccounts( @QueryParam("sessionId") String sessionId,
-                               @QueryParam("username") String username,
-                               @Context HttpServletRequest headers) {
-
-        String reqRes = getLogId();
-        String methodName = "getProductAccounts";
-        defaultNoParamRequest(LOGGER,reqRes,sessionId,username,methodName,headers.getRemoteAddr());
-
-        Date requestTime = today();
-        Response response = Response.status(Response.Status.NO_CONTENT).build();
-        boolean queryExecuted = false;
-        String errorCause = "";
-
-        try {
-
-            List<SubProductAccount> subProductAccounts = subProductAccountInterface.findByStatus(setStatus(Statuses.ACTIVE.toString()));
-            defaultSuccess(LOGGER,reqRes);
-            response = Response.status(Response.Status.OK).entity(subProductAccounts).build();
-            queryExecuted = true;
-
-        } catch (Exception e) {
-            LOGGER.error(reqRes,e);
-            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-            errorCause = e.getCause().getMessage();
-        } finally {
-
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
-                    methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId,reqRes));
-        }
-        return response;
-
-    }
-
-
 
 
     @GET

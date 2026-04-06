@@ -12,8 +12,7 @@ public class FileTransferLog implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long fileId;
     private String fileName;
-    @OneToOne
-    private Claim claim;
+
     private Boolean fileGenerated;
     @OneToOne
     private Status status;
@@ -37,13 +36,6 @@ public class FileTransferLog implements Serializable {
         this.fileName = fileName;
     }
 
-    public Claim getClaim() {
-        return claim;
-    }
-
-    public void setClaim(Claim claim) {
-        this.claim = claim;
-    }
 
     public Boolean getFileGenerated() {
         return fileGenerated;
@@ -90,7 +82,6 @@ public class FileTransferLog implements Serializable {
         return "FileTransferLog{" +
                 "fileId=" + fileId +
                 ", fileName='" + fileName + '\'' +
-                ", claim=" + claim +
                 ", fileGenerated=" + fileGenerated +
                 ", status=" + status +
                 ", errorMessage='" + errorMessage + '\'' +

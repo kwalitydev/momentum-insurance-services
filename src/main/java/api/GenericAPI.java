@@ -1,7 +1,5 @@
 package api;
 
-import core.beans.InsuranceSync;
-import core.beans.PolicySyncRequest;
 import core.util.CoreUtil;
 import core.util.QueryUtil;
 import dao.entities.*;
@@ -23,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 
 import static core.util.CoreUtil.*;
 import static core.util.Util.*;
@@ -51,8 +48,6 @@ public class GenericAPI {
     private ManagedExecutorService executorService;
     @Inject
     private TaskInterface taskInterface;
-    @Inject
-    private SubProductAccountInterface subProductAccountInterface;
 
 
     @GET
@@ -256,61 +251,6 @@ public class GenericAPI {
     }
 
 
-    @POST
-    @Path("/sync/policy/status")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response updatePolicyStatus(PolicySyncRequest policySyncRequest, @Context HttpServletRequest headers) {
-        String logId = getLogId();
-        Date requestTime = today();
-        String methodName = "SyncPolicyStatus";
-        Response response = Response.status(Response.Status.NO_CONTENT).build();
-        boolean queryExecuted = false;
-        String ipAddress = headers.getRemoteAddr();
-        String errorCause = "";
-        try {
-            LOGGER.info("{}} webservice is being called with parameters. Request {}, IpAddress = {}, traceId -> {} ",methodName, policySyncRequest, ipAddress,logId);
-
-            Optional<Users> users = userInterface.findByUserId(policySyncRequest.getUsername());
-            if(users.isPresent()) {
-
-                for (InsuranceSync is: policySyncRequest.getPolicies()) {
-
-                    InsuranceSync insuranceSync = new InsuranceSync();
-                    insuranceSync.setAccountNumber(is.getAccountNumber());
-                    insuranceSync.setPolicyId(is.getPolicyId());
-                    insuranceSync.setMigrationStatus(policySyncRequest.getMigrationStatus());
-                  //  Callable<String> callable = () -> postInsuranceSync.apply(insuranceSync);
-                 //   executorService.submit(callable);
-
-                }
-
-
-            }
-            else {
-                LOGGER.info("User {} not found.",policySyncRequest.getUsername());
-            }
-
-            queryExecuted = true;
-            response = Response.status(Response.Status.OK).entity(true).build();
-            defaultSuccess(LOGGER,logId);
-        }
-        catch (Exception e){
-            LOGGER.error(e);
-            errorCause = e.getMessage();
-            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
-        finally {
-
-
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(logId, requestTime, policySyncRequest.getUsername(),
-                    methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause,
-                    null,ipAddress,false,"SyncPolicyStatus",policySyncRequest.toString()));
-        }
-
-        return response;
-
-    }
 
     @POST
     @Path("/tasks/cycle")
@@ -381,71 +321,5 @@ public class GenericAPI {
 
     }
 
-    @POST
-    @Path("/sub-product/update")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Transactional
-    public Response setSubProductAccount(SubProductAccount subProductAccount) {
 
-        String reqRes = getLogId();
-        String methodName = "setSubProductAccount";
-        LOGGER.info("{} is being called with parameters. request -> {}, logId -> {} ",
-                subProductAccount, methodName, reqRes);
-
-        Response response = Response.status(Response.Status.NO_CONTENT).build();
-
-
-        try {
-
-            int updated = subProductAccountInterface.updateSuProductAccount(subProductAccount.getAccountId(),subProductAccount.getStatus(),subProductAccount.getProductAccountId());
-
-            if (updated > 0) {
-
-                LOGGER.info("SubProduct updated");
-                Optional<SubProductAccount> subProductAccount1 = subProductAccountInterface.findBySubProduct(subProductAccount.getSubProduct());
-
-                if(subProductAccount1.isPresent()){
-                    response = Response.status(Response.Status.OK).entity(subProductAccount1.get()).build();
-                }
-
-            } else {
-
-                response = Response.status(Response.Status.OK).entity(false).build();
-            }
-
-        } catch (Exception e) {
-            LOGGER.error(e);
-            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
-
-        return response;
-
-    }
-
-
-    @GET
-    @Path("/sub-product/find")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getSubProductAccount(@QueryParam("subproduct") String subproduct,@QueryParam("currency") String currency,@QueryParam("status") String status) {
-
-        String methodName = "getSubProductAccount";
-
-        LOGGER.info("{} is being called with parameter.  taskId -> {} ",methodName,subproduct);
-
-        try {
-
-            List<SubProductAccount> subProductAccount1 = subProductAccountInterface.
-                    findBySubProductAndCurrencyAndStatusList(setSubProduct(Long.parseLong(subproduct)),setCurrency(currency),setStatus(status));
-
-            return Response.status(Response.Status.OK).entity(subProductAccount1).build();
-
-
-        } catch (Exception e) {
-            LOGGER.error(e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
-
-    }
 }

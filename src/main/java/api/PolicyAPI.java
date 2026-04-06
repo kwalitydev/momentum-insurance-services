@@ -4,7 +4,6 @@ import core.beans.*;
 import core.constants.*;
 import core.impl.ProcessWorkflowImpl;
 import core.threads.PostCancellation;
-import core.threads.PostReportBuild;
 import core.util.*;
 import dao.BeanFactory;
 import dao.entities.*;
@@ -71,8 +70,6 @@ public class PolicyAPI {
     private InsuranceUtil insuranceUtil;
     @Inject
     private NotificationUtil notificationUtil;
-    @Inject
-    private PostReportBuild postReportBuild;
     @Inject
     private PostCancellation postCancellation;
     @Inject
@@ -611,6 +608,8 @@ public class PolicyAPI {
                     Beneficiaries savedBeneficiaries = beneficiariesInterface.save(b);
                     LOGGER.info("Beneficiary saved! name = {}, traceId -> {}", savedBeneficiaries.getName(),traceId);
 
+                    insuranceUtil.saveOutstandingAmount(policyUpdateRequest.getPolicyId(),beneficiaries.getTotalCharge(),traceId,"Beneficiary inclusion "+beneficiaries.getName(),"CREDIT");
+
                 }
 
                 LOGGER.info("Removing Beneficiaries for policy id {} ", policyUpdateRequest.getPolicyId());
@@ -621,6 +620,8 @@ public class PolicyAPI {
                             setStatus(Statuses.REMOVED.toString()), beneficiaries.getBeneficiaryId());
                     if(removed>0){
                         LOGGER.info("Beneficiary removed! id = {}, traceId -> {}", beneficiaries.getBeneficiaryId(),traceId);
+                        insuranceUtil.saveOutstandingAmount(policyUpdateRequest.getPolicyId(),beneficiaries.getTotalCharge(),traceId,"Beneficiary removal "+beneficiaries.getName(),"DEBT");
+
                     }
                     else{
                         LOGGER.info("No update made to Beneficiary! id = {}, traceId -> {}", beneficiaries.getBeneficiaryId(),traceId);
@@ -984,8 +985,7 @@ public class PolicyAPI {
                     reportRequest.setUsername(beneficiaryRequest.getUsername());
                     reportRequest.setRegenerate(true);
 
-                    Callable<String> callable = () -> postReportBuild.apply(reportRequest);
-                    executorService.submit(callable);
+
 
                 }
 

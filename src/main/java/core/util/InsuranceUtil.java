@@ -179,16 +179,23 @@ public class InsuranceUtil implements Serializable {
 
         @Transactional(Transactional.TxType.REQUIRES_NEW)
         public void saveOutstandingAmount(String insurancePolicyId, BigDecimal amount, String traceId,String description,String transactionType) {
-        InsuranceOutstandingAmount insuranceOutstandingAmount = new InsuranceOutstandingAmount();
-        insuranceOutstandingAmount.setInsurancePolicy(setInsurancePolicy(insurancePolicyId));
-        insuranceOutstandingAmount.setAmount(amount);
-        insuranceOutstandingAmount.setDescription(description);
-        insuranceOutstandingAmount.setStatus(setStatus(Statuses.NEW.toString()));
-        insuranceOutstandingAmount.setEntryDate(today());
-        insuranceOutstandingAmount.setTransactionType(transactionType);
-        insuranceOutstandingAmount.setLastUpdatedDate(today());
 
-        InsuranceOutstandingAmount saved = beanFactory.merge(insuranceOutstandingAmount);
+        try {
+            InsuranceOutstandingAmount insuranceOutstandingAmount = new InsuranceOutstandingAmount();
+            insuranceOutstandingAmount.setInsurancePolicy(setInsurancePolicy(insurancePolicyId));
+            insuranceOutstandingAmount.setAmount(amount);
+            insuranceOutstandingAmount.setDescription(description);
+            insuranceOutstandingAmount.setStatus(setStatus(Statuses.NEW.toString()));
+            insuranceOutstandingAmount.setEntryDate(today());
+            insuranceOutstandingAmount.setTransactionType(transactionType);
+            insuranceOutstandingAmount.setLastUpdatedDate(today());
+            LOGGER.info("Attempting to save InsuranceOutstandingAmount for policy {}. Amount -> {} traceId -> {}", insurancePolicyId, amount, traceId);
+            InsuranceOutstandingAmount saved = beanFactory.merge(insuranceOutstandingAmount);
+            LOGGER.info("InsuranceOutstandingAmount saved for policy {}. Id ->{} traceId -> {}", insurancePolicyId, saved.getInsuranceOutstandingAmountId(), traceId);
+        }
+        catch (Exception e){
+            LOGGER.error("Error while saving InsuranceOutstandingAmount for policy {}. Amount -> {} traceId -> {}", insurancePolicyId, amount, traceId,e);
+        }
 
         }
 

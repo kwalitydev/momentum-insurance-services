@@ -34,7 +34,6 @@ public class APIRoot extends Application {
         classes.add(WorkflowAPI.class);
         classes.add(GenericAPI.class);
         classes.add(DocumentAPI.class);
-        classes.add(ClaimAPI.class);
         classes.add(SystemAPI.class);
         classes.add(MetricAPI.class);
         classes.add(AuthDashboardAPI.class);

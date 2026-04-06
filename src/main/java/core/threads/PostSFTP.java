@@ -55,15 +55,13 @@ public class PostSFTP implements Function<SFTPContext,String> {
     }
 
     private void setupFileTransferLog(FileTransferLog fileTransferLog, SFTPContext sftpContext) {
-        fileTransferLog.setClaim(sftpContext.getClaim());
+
         fileTransferLog.setFileGenerated(true);
         fileTransferLog.setAttemptDate(today());
     }
 
     private String createDestinationPath(SFTPContext sftpContext) {
-        return sftpContext.getClaim().getInsuranceCompany().getSftpDir().toLowerCase() + File.separator +
-                sftpContext.getDocumentFile().getDocumentType().getDescription() + "_" +
-                sftpContext.getClaim().getInsurancePolicy().getPolicyId() + "_" +
+        return  sftpContext.getDocumentFile().getDocumentType().getDescription() + "_" +
                 formatDate(today(), TIMESTAMP_PATTERN) + "_" + sftpContext.getDocumentFile().getTitle();
     }
 

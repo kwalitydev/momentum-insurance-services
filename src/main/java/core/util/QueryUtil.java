@@ -152,12 +152,6 @@ public class QueryUtil {
     }
 
 
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
-    public Claim postClaimSave(Claim claim){
-        return beanFactory.merge(claim);
-
-    }
-
     public boolean isTaskEnabled(String taskId) {
         Optional<TaskConfig> tasks = taskInterface.getTasks(taskId);
         return tasks.map(TaskConfig::isEnabled).orElse(false);
