@@ -1,7 +1,9 @@
 package core.constants;
 
-public enum Frequencies {
+public enum FrequenciesEnum {
     DAILY,
     MONTHLY,
+    QUARTERLY,
+    SEMESTERLY,
     YEARLY
 }

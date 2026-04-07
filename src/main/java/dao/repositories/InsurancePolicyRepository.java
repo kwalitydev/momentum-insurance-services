@@ -129,4 +129,15 @@ public interface InsurancePolicyRepository extends JpaRepository<InsurancePolicy
            "AND p.insurancePolicyId = :insurancePolicyId")
     Optional<InsurancePolicy> findOneWithPolicyHolder(@Param("mobile") String mobile,
                                                       @Param("insurancePolicyId") String insurancePolicyId);
+
+    @Query("SELECT p FROM InsurancePolicy p " +
+           "JOIN FETCH p.benefitCycle bc " +
+           "JOIN FETCH p.policyHolder ph " +
+           "WHERE p.expiryDate > CURRENT_TIMESTAMP " +
+           "AND p.status.id = :status " )
+    List<InsurancePolicy> findActivePoliciesByStatus(@Param("status") String status);
+
+    @Query("SELECT p FROM InsurancePolicy p WHERE p.insurancePolicyId = :insurancePolicyId")
+    Optional<InsurancePolicy> findByInsurancePolicyId(@Param("insurancePolicyId") String insurancePolicyId);
+
 }

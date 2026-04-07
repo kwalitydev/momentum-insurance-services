@@ -1,6 +1,7 @@
 package api;
 
 
+import core.exception.GlobalExceptionHandler;
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
@@ -41,6 +42,7 @@ public class APIRoot extends Application {
         classes.add(DashboardAPI.class);
         classes.add(AuthAppAPI.class);
         classes.add(OpenApiResource.class);
+        classes.add(GlobalExceptionHandler.class);
         return classes;
     }
 }

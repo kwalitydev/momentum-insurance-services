@@ -51,5 +51,8 @@ public interface InsurancePolicyInterface {
     List<InsurancePolicy> findByMobileNumber( String mobile);
 
     Optional<InsurancePolicy> findOneWithPolicyHolder(String mobile, String insurancePolicyId);
+    List<InsurancePolicy> findActivePoliciesByStatus( String status);
+
+    Optional<InsurancePolicy> findByInsurancePolicyId(String insurancePolicyId);
 
 }

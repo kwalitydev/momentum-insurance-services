@@ -36,6 +36,7 @@ public class Startup implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
+
         LOGGER.info("Attempting to start Momentum Insurance Platform ...");
 
         try {
@@ -139,7 +140,6 @@ public class Startup implements ServletContextListener {
         } else {
             LOGGER.info("Setting default frequency to {}", defaultFrequency);
         }
-
         LOGGER.info("{} will start in {} s", task.getTaskId(), defaultInitialDelay);
     }
 }

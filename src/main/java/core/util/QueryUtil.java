@@ -174,7 +174,8 @@ public class QueryUtil {
 
     public boolean isTaskEnabled(String taskId) {
         Optional<TaskConfig> tasks = taskInterface.getTasks(taskId);
-        return tasks.map(TaskConfig::isEnabled).orElse(false);
+        return tasks.map(TaskConfig::isEnabled)
+                .orElse(false);
     }
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
@@ -291,6 +292,14 @@ public class QueryUtil {
 
 
 
+    private boolean isDay25(Date date) {
+        if (date == null) return false;
+
+        return date.toInstant()
+                       .atZone(java.time.ZoneId.systemDefault())
+                       .toLocalDate()
+                       .getDayOfMonth() == 25;
+    }
 
 
 }
