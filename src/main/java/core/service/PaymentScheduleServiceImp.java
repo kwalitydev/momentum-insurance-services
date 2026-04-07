@@ -2,14 +2,23 @@ package core.service;
 
 import core.beans.*;
 import core.constants.ChartFilter;
+import core.constants.FrequenciesEnum;
 import core.constants.PaymentStatus;
-import dao.entities.PaymentSchedule;
+import core.exception.BusinessException;
+import dao.entities.*;
 import dao.enums.PaymentMethodStatus;
+import dao.enums.TransactionType;
+import dao.enums.insuranceOutstandingEnum;
+import dao.interfaces.PaymentScheduleInterface;
 import dao.repositories.PaymentScheduleRepository;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.PageRequest;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,8 +30,21 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 
 public class PaymentScheduleServiceImp implements IPaymentScheduleService {
+    private static final Logger logger = LogManager.getLogger(PaymentScheduleServiceImp.class);
+
     @Inject
     PaymentScheduleRepository paymentScheduleRepository;
+
+    @Inject
+    private PaymentScheduleInterface paymentScheduleInterface;
+
+
+    @Inject
+    private IInsuranceOutstandingAmount IInsuranceOutstandingAmount;
+
+
+    @Inject
+    private DBTransactionService dBTransactionService;
 
     @Override
     public List<RecentPaymentDTO> getLastPayments(int limit) {
@@ -109,7 +131,6 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
     }
 
 
-
     @Override
     public PaymentChartDTO buildMonthOrYearChart(String filter) {
 
@@ -133,6 +154,78 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
                 );
         }
     }
+
+    @Transactional
+    @Override
+    public PaymentSchedule save(PaymentSchedule paymentSchedule) {
+        return paymentScheduleRepository.save(paymentSchedule);
+    }
+
+    /****
+     * Generate payment schedule to be paid
+     * @param insurancePolicy
+     */
+    @Override
+    public void createPaymentSchedule(InsurancePolicy insurancePolicy) {
+
+        logger.info("Generating payment schedule for policy {}", insurancePolicy.toString());
+
+        LocalDate today = LocalDate.now();
+
+        boolean isFirstPayment = isFirstPayment(insurancePolicy);
+
+        int currentMonth = today.getMonthValue();
+        int currentYear = today.getYear();
+
+        String month = String.valueOf(currentMonth);
+        String year = String.valueOf(currentYear);
+
+        boolean exists = paymentScheduleInterface
+                .existsByPolicyIdAndMonthAndYear(
+                        insurancePolicy.getInsurancePolicyId(), month, year);
+
+        if (exists) {
+            throw new BusinessException(Response.Status.BAD_REQUEST.getStatusCode(),
+                    "Payment schedule : " + insurancePolicy.getInsurancePolicyId() + "already exists for this month");
+        }
+
+        //   Se já não é o primeiro pagamento
+        //   E este mês não faz parte do ciclo então não cria pagamento
+        boolean shoulderGenerate = shouldGenerate(insurancePolicy.getPaymentFrequency(),
+                today,
+                insurancePolicy.getBenefitCycle());
+        
+        if (!isFirstPayment &&
+            !shoulderGenerate) {
+            logger.info(" Skipping generating payment schedule for policy {}", insurancePolicy.toString());
+            throw new BusinessException(Response.Status.BAD_REQUEST.getStatusCode(),
+                    "Payment schedule for policy :" + insurancePolicy.getInsurancePolicyId() + "  already exists for this month");
+        }
+
+        List<InsuranceOutstandingAmount> outstandingAmountList = this.IInsuranceOutstandingAmount
+                .findByInsurancePolicyId(insurancePolicy.getInsurancePolicyId(), insuranceOutstandingEnum.NEW.name());
+
+        List<Long> outstandingAmountListLisIDs = outstandingAmountList.stream()
+                .map(InsuranceOutstandingAmount::getInsuranceOutstandingAmountId)
+                .collect(Collectors.toList());
+
+
+        BigDecimal amount = calculateInstallment(insurancePolicy, outstandingAmountList);
+
+        PaymentSchedule ps = new PaymentSchedule();
+        ps.setInsurancePolicy(insurancePolicy);
+        ps.setRepaymentAmount(amount);
+        ps.setCreatedDate(new Date());
+        ps.setRepaymentMonth(month);
+        ps.setRepaymentYear(year);
+        ps.setStartPaymentDate(today);
+        ps.setPaymentStatus(PaymentStatus.PENDING);
+        ps.setNormalPayment(true);
+
+        this.dBTransactionService.saveDataBase(ps, outstandingAmountListLisIDs);
+        logger.info(" Successfully generated payment schedule for policy {}", insurancePolicy.toString());
+    }
+
     private PaymentChartDTO buildMonthChart() {
 
         LocalDate today = LocalDate.now();
@@ -231,4 +324,95 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
                 .points(points)
                 .build();
     }
+
+    private boolean isFirstPayment(InsurancePolicy policy) {
+        return !paymentScheduleInterface.existsByPolicyId(policy.getInsurancePolicyId());
+    }
+
+    private BigDecimal calculateInstallment(
+            InsurancePolicy policy,
+            List<InsuranceOutstandingAmount> outstandingAmountList) {
+
+        BigDecimal totalPolicyAmount = policy.getTotalAmount();
+
+        if (outstandingAmountList == null || outstandingAmountList.isEmpty()) {
+            return totalPolicyAmount;
+        }
+
+        BigDecimal calculatedTotal = calculateTotal(outstandingAmountList);
+
+        if (calculatedTotal == null || calculatedTotal.compareTo(BigDecimal.ZERO) == 0) {
+            return totalPolicyAmount;
+        }
+
+        BigDecimal result = totalPolicyAmount.subtract(calculatedTotal);
+
+        return result.compareTo(BigDecimal.ZERO) < 0
+                ? BigDecimal.ZERO
+                : result;
+    }
+
+    public BigDecimal calculateTotal(List<InsuranceOutstandingAmount> list) {
+        return list.stream()
+                .filter(item -> item.getAmount() != null && item.getTransactionType() != null)
+                .map(item -> item.getTransactionType() == TransactionType.CREDIT
+                        ? item.getAmount()
+                        : item.getAmount().negate())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private boolean shouldGenerate(Frequency frequency,
+                                   LocalDate today,
+                                   BenefitCycle benefitCycle) {
+
+        LocalDate start = getCycleStart(benefitCycle, today);
+
+        int monthsFromStart =
+                (today.getYear() - start.getYear()) * 12
+                + (today.getMonthValue() - start.getMonthValue());
+
+        if (monthsFromStart < 0 || monthsFromStart >= 12) {
+            return false;
+        }
+
+        FrequenciesEnum freq = FrequenciesEnum
+                .valueOf(frequency.getFrequencyId());
+
+        switch (freq) {
+
+            case MONTHLY:
+                return true;
+
+            case QUARTERLY:
+                return monthsFromStart % 3 == 0;
+
+            case SEMESTERLY:
+                return monthsFromStart % 6 == 0;
+
+            case YEARLY:
+                return monthsFromStart == 0;
+
+            default:
+                throw new IllegalArgumentException("Invalid Frequency: " + frequency);
+        }
+    }
+
+    private LocalDate getCycleStart(BenefitCycle benefitCycle, LocalDate today) {
+
+        int year = today.getYear();
+
+        switch (benefitCycle.getCycleType()) {
+
+            case "ANNUAL":
+                return LocalDate.of(year, 1, 1);
+
+            case "TRANSANUAL":
+                return (today.getMonthValue() >= 6)
+                        ? LocalDate.of(year, 6, 1)
+                        : LocalDate.of(year - 1, 6, 1);
+            default:
+                throw new IllegalArgumentException("Invalid BenefitCycle: " + benefitCycle.getCycleType());
+        }
+    }
+
 }

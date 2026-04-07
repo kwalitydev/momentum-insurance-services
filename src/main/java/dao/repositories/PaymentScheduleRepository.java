@@ -273,4 +273,36 @@ public interface PaymentScheduleRepository extends JpaRepository<PaymentSchedule
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end
     );
+
+    @Query("SELECT p FROM PaymentSchedule p " +
+           "WHERE p.insurancePolicy = :policy " +
+           "AND p.repaymentMonth = :month " +
+           "AND p.repaymentYear = :year")
+    List<PaymentSchedule> findPaymentScheduleAndMonthAndYear(
+            @Param("policy") InsurancePolicy policy,
+            @Param("month") String month,
+            @Param("year") String year);
+
+    @Query("SELECT CASE WHEN COUNT(ps) > 0 THEN true ELSE false END " +
+           "FROM PaymentSchedule ps " +
+           "WHERE ps.insurancePolicy.insurancePolicyId = :insurancePolicyId " +
+           "AND ps.repaymentMonth = :month " +
+           "AND ps.repaymentYear = :year")
+    boolean existsByPolicyIdAndMonthAndYear(
+            @Param("insurancePolicyId") String insurancePolicyId,
+            @Param("month") String month,
+            @Param("year") String year
+    );
+
+    @Query("SELECT CASE WHEN COUNT(ps) > 0 THEN true ELSE false END " +
+           "FROM PaymentSchedule ps " +
+           "WHERE ps.insurancePolicy.insurancePolicyId = :insurancePolicyId ")
+    boolean existsByPolicyId(@Param("insurancePolicyId") String insurancePolicyId);
+
+    @Query("SELECT ps FROM PaymentSchedule ps " +
+           "WHERE ps.insurancePolicy.insurancePolicyId = :insurancePolicyId " +
+           "AND ps.paymentStatus = :paymentStatus")
+    List<PaymentSchedule> findByPolicyAndPaymentStatus(
+            @Param("insurancePolicyId") String insurancePolicyId,
+            @Param("paymentStatus") PaymentStatus paymentStatus );
 }

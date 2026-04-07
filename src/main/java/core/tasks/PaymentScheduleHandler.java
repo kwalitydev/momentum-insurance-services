@@ -1,102 +1,92 @@
 package core.tasks;
 
-
 import core.constants.Statuses;
+import core.exception.BusinessException;
+import core.service.IPaymentScheduleService;
 import core.util.QueryUtil;
-import dao.entities.*;
-import dao.interfaces.*;
+import dao.entities.InsurancePolicy;
+import dao.entities.TaskConfig;
+import dao.interfaces.InsurancePolicyInterface;
+import dao.interfaces.TaskInterface;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.inject.Inject;
-import java.util.*;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.TimerTask;
+
 import static core.constants.Tasks.PAYMENT_SCHEDULE_HANDLER;
-import static core.util.CoreUtil.*;
-import static core.util.Util.*;
 
 public class PaymentScheduleHandler extends TimerTask {
-    private static final Logger LOGGER = LogManager.getLogger(PaymentScheduleHandler.class);
 
-    @Inject
-    private ErrorLogInterface errorLogInterface;
-    @Inject
-    private InsurancePolicyInterface insurancePolicyInterface;
+    private static final Logger logger = LogManager.getLogger(PaymentScheduleHandler.class);
+
     @Inject
     private QueryUtil queryUtil;
     @Inject
-    private PaymentScheduleInterface paymentScheduleInterface;
+    private TaskInterface taskInterface;
+    @Inject
+    private InsurancePolicyInterface getInsurancePolicyInterface;
 
+    @Inject
+    private IPaymentScheduleService iPaymentScheduleService;
 
     @Override
     public void run() {
-        try {
-            LOGGER.info("Starting timeout exception handler ...");
 
-            if (!queryUtil.isTaskEnabled(PAYMENT_SCHEDULE_HANDLER.toString())) {
-                LOGGER.warn("Task {} is not enabled", PAYMENT_SCHEDULE_HANDLER);
+        logger.info("Starting PaymentScheduleHandler...");
+
+        try {
+
+            Optional<TaskConfig> tasks = taskInterface.getTasks(PAYMENT_SCHEDULE_HANDLER.toString());
+
+            if (!tasks.isPresent() || !isExecutionDay(tasks.get().getNextRunningDate())) {
+                logger.warn("Task {} is not scheduled to run today", PAYMENT_SCHEDULE_HANDLER);
                 return;
             }
 
-            List<ErrorLog> errorLogs = errorLogInterface.findByStatus(setStatus(Statuses.PENDING.toString()));
-            LOGGER.info("Found {} errors to be handled", errorLogs.size());
+            if (!queryUtil.isTaskEnabled(PAYMENT_SCHEDULE_HANDLER.toString())) {
+                logger.warn("Task {} is not enabled", PAYMENT_SCHEDULE_HANDLER);
+                return;
+            }
 
-            for (ErrorLog error : errorLogs) {
-                String traceId = getLogId();
+            List<InsurancePolicy> insurancePolicyList = getInsurancePolicyInterface.findActivePoliciesByStatus(Statuses.ACTIVE.name());
+
+            if (insurancePolicyList == null || insurancePolicyList.isEmpty()) {
+                logger.info("No active policies found.");
+                return;
+            }
+
+            logger.info("Generating payment schedules for {} policies", insurancePolicyList.size());
+
+            for (InsurancePolicy policy : insurancePolicyList) {
+
+                try {
+                    this.iPaymentScheduleService.createPaymentSchedule(policy);
+
+                } catch (BusinessException e) {
+                    logger.warn("Business error for policy {}: {}", policy.getPolicyId(), e.getMessage());
+
+                } catch (Exception e) {
+                    logger.error("Unexpected error for policy {}", policy.getPolicyId(), e);
+                }
             }
         } catch (Exception e) {
-            LOGGER.error("Error while executing PaymentScheduleHandler Task", e);
+            logger.error("Fatal error while executing PaymentScheduleHandler", e);
         }
+
+        logger.info("Finished PaymentScheduleHandler.");
     }
 
+    private boolean isExecutionDay(Date nextRunningDate) {
+        if (nextRunningDate == null) return false;
 
-    private PaymentSchedule createPaymentSchedule(ErrorLog error, InsurancePolicy insurancePolicy, String transactionId, String messageId) {
-        PaymentSchedule paymentSchedule = new PaymentSchedule();
-        paymentSchedule.setCreatedDate(today());
-        paymentSchedule.setInsurancePolicy(insurancePolicy);
-        paymentSchedule.setLastAttempt(today());
-        paymentSchedule.setRepaymentAmount(insurancePolicy.getTotalAmount());
-        paymentSchedule.setRepaymentMonth(getCurrentMonth());
-        paymentSchedule.setRepaymentYear(getCurrentYear());
-        paymentSchedule.setNormalPayment(error.isNormalPayment());
-        paymentSchedule.setMessageId(messageId);
-        paymentSchedule.setPaidAmount(insurancePolicy.getTotalAmount());
-        paymentSchedule.setStatus(setStatus(Statuses.PAID.toString()));
-        paymentSchedule.setTransactionId(transactionId);
-        return paymentSchedule;
+        LocalDate nextDate = nextRunningDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+        return nextDate.getDayOfMonth() == 25 && LocalDate.now().isEqual(nextDate);
     }
-
-    private void updatePaymentSchedule(ErrorLog error, InsurancePolicy insurancePolicy, String transactionId) {
-        int paymentScheduleUpdated = queryUtil.updatePayment(
-                insurancePolicy.getTotalAmount(),
-                setStatus(Statuses.PAID.toString()), null, transactionId,
-                error.getPaymentScheduleId(), error.isNormalPayment()
-        );
-
-        if (paymentScheduleUpdated > 0) {
-            LOGGER.info("PaymentSchedule {} updated to PAID", paymentScheduleUpdated);
-        } else {
-            LOGGER.info("PaymentSchedule {} not updated", paymentScheduleUpdated);
-        }
-    }
-
-    private void savePaymentSchedule(ErrorLog error, InsurancePolicy insurancePolicy, PaymentSchedule paymentSchedule,String traceId) {
-        List<String> statuses = Arrays.asList(Statuses.PAID.toString(), Statuses.UNPAID.toString());
-        int alreadyAttempted = paymentScheduleInterface.findByInsurancePolicyAndMonth(
-                insurancePolicy.getPolicyId(),
-                getCurrentMonth(),
-                getCurrentYear(),
-                statuses,
-                error.isNormalPayment(),
-                insurancePolicy.getSubProduct().getSubProductId()
-        );
-
-        if (alreadyAttempted == 0) {
-            queryUtil.postPaymentScheduleSave(paymentSchedule,traceId);
-        } else {
-            LOGGER.info("{} already sync.", insurancePolicy.getPolicyId());
-        }
-    }
-
-
-
 }
