@@ -47,10 +47,6 @@ public interface InsurancePolicyRepository extends JpaRepository<InsurancePolicy
     @Query("update InsurancePolicy set lastUpdated=?1, updatedUser=?2,coverage=?3, totalAmount=?4, subProduct =?5,expiryDate=?6 where policyId=?7")
     int updatePolicy(Date lastUpdate, String users, Coverage coverage, BigDecimal totalAmount, SubProduct subProduct, Date expiryDate, String policyId);
 
-    @Query("SELECT ip FROM InsurancePolicy ip INNER JOIN Claim c ON (ip <> c.insurancePolicy AND c.status = ?4) " +
-           "WHERE ip.status = ?1 AND ip.createdDate BETWEEN ?2 AND ?3")
-    List<InsurancePolicy> getPoliciesToClaim(Status status, Date startDate, Date endDate, Status claimStatus);
-
     @Query("SELECT ip FROM InsurancePolicy ip WHERE ip.status = ?1 AND ip.createdDate BETWEEN ?2 AND ?3")
     List<InsurancePolicy> getPoliciesUnClaimed(Status status, Date startDate, Date endDate);
 
