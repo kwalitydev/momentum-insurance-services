@@ -36,7 +36,6 @@ public class Startup implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-
         LOGGER.info("Attempting to start Momentum Insurance Platform ...");
 
         try {

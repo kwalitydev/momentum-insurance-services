@@ -607,8 +607,8 @@ public class PolicyAPI {
         String traceId = getLogId();
         String methodName = "updatePolicy";
         Response response = Response.status(Response.Status.BAD_REQUEST).build();
-        if(policyRequest!=null) {
-            defaultObjectRequest(LOGGER,traceId,policyRequest.toString(),methodName,headers.getRemoteAddr());
+        if(policyUpdateRequest!=null) {
+            defaultObjectRequest(LOGGER,traceId,policyUpdateRequest.toString(),methodName,headers.getRemoteAddr());
 
             Date requestTime = today();
             boolean queryExecuted = false;
