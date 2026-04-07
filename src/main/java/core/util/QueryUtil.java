@@ -52,8 +52,6 @@ public class QueryUtil {
     @Inject
     private NotificationInterface notificationInterface;
     @Inject
-    private SubProductAccountInterface subProductAccountInterface;
-    @Inject
     private BeanFactory beanFactory;
     @Inject
     private BeneficiariesInterface beneficiariesInterface;
@@ -153,29 +151,10 @@ public class QueryUtil {
 
     }
 
-    public Product getProductById(String productId){
-        Optional<Product> product = productInterface.findByProductId(productId);
-        return product.orElse(null);
-
-    }
-
-
-    public SubProductAccount getSubProductAccount(InsurancePolicy insurancePolicy){
-        Optional<SubProductAccount> subProductAccount = subProductAccountInterface.findBySubProductAndCurrencyAndStatus(insurancePolicy.getSubProduct(),
-                insurancePolicy.getCurrency(), setActive());
-        return subProductAccount.orElse(null);
-    }
-
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
-    public Claim postClaimSave(Claim claim){
-        return beanFactory.merge(claim);
-
-    }
 
     public boolean isTaskEnabled(String taskId) {
         Optional<TaskConfig> tasks = taskInterface.getTasks(taskId);
-        return tasks.map(TaskConfig::isEnabled)
-                .orElse(false);
+        return tasks.map(TaskConfig::isEnabled).orElse(false);
     }
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
@@ -185,8 +164,6 @@ public class QueryUtil {
                 setStatus(Statuses.INACTIVE.toString()),
                 ben);
     }
-
-
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public ErrorLog postErrorLog(ErrorLog errorLog){
@@ -222,83 +199,6 @@ public class QueryUtil {
         InsurancePolicyHistory insurancePolicyHistorySaved = beanFactory.merge(insurancePolicyHistory);
 
         LOGGER.info("InsurancePolicyHistory saved {}. traceId -> {}", insurancePolicyHistorySaved.getIphId(),traceId);
-    }
-
-
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
-    public InsurancePolicy postSaveInsurance(InsurancePolicy insurancePolicy) {
-        return beanFactory.merge(insurancePolicy);
-    }
-
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
-    public PolicyHolder postSaveAccount(PolicyHolder policyHolder) {
-        return beanFactory.merge(policyHolder);
-    }
-
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
-    public void upgradeAccount(String accountNumber,String customerId,String dateOfBirth,String mobileNumber,String customerName,
-                               String email,String vat,String address,JobTitle jobTitleNew,String documentId,Long id) throws Exception{
-
-        try {
-            Long jobTitleId = null;
-            if (jobTitleNew != null) {
-                jobTitleId = jobTitleNew.getJobTitleId();
-            }
-
-            int updatedAccount = policyHolderInterface.updateAccount(accountNumber,
-                    customerId,
-                    stringToDate(dateOfBirth),
-                    mobileNumber,
-                    today(),
-                    customerName,
-                    email,
-                    vat,
-                    address, jobTitleId, documentId, id);
-
-            if (updatedAccount > 0) {
-                LOGGER.info("Account updated");
-            } else {
-                LOGGER.info("Account not updated");
-            }
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    public SubProductAccount getAccountAndBranch(Long subProductId,String currencyId){
-
-
-        Optional<SubProductAccount> subProductAccounts =  subProductAccountInterface.findBySubProductAndCurrencyAndStatus(subProductId,currencyId,setActive().getId());
-
-        if(subProductAccounts.isPresent()){
-            if(StringUtils.isNotEmpty(subProductAccounts.get().getAccountId()) && StringUtils.isNotEmpty(subProductAccounts.get().getCompanyCode())){
-                return subProductAccounts.get();
-            }
-        }
-
-        return null;
-
-    }
-
-    public List<String> getCurrencies(){
-       return currencyInterface.findCurrencies();
-    }
-
-    public List<SubProduct> getProductChild(String productId){
-        return subProductInterface.findByProduct(productId);
-    }
-
-
-
-
-    private boolean isDay25(Date date) {
-        if (date == null) return false;
-
-        return date.toInstant()
-                       .atZone(java.time.ZoneId.systemDefault())
-                       .toLocalDate()
-                       .getDayOfMonth() == 25;
     }
 
 

@@ -130,6 +130,11 @@ public interface InsurancePolicyRepository extends JpaRepository<InsurancePolicy
     Optional<InsurancePolicy> findOneWithPolicyHolder(@Param("mobile") String mobile,
                                                       @Param("insurancePolicyId") String insurancePolicyId);
 
+    @Modifying(clearAutomatically = true)
+    @Query("update InsurancePolicy set totalAmount=?1, lastUpdated=?2,updatedUser=?3 where policyId=?4")
+    int updatePolicy(BigDecimal totalAmount, Date lastUpdate,String users, String policyId);
+
+
     @Query("SELECT p FROM InsurancePolicy p " +
            "JOIN FETCH p.benefitCycle bc " +
            "JOIN FETCH p.policyHolder ph " +

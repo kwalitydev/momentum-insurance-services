@@ -55,4 +55,6 @@ public interface InsurancePolicyInterface {
 
     Optional<InsurancePolicy> findByInsurancePolicyId(String insurancePolicyId);
 
+    int updatePolicy(BigDecimal totalAmount, Date lastUpdate,String users, String policyId);
+
 }
