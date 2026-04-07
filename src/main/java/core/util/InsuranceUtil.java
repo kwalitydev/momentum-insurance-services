@@ -8,6 +8,7 @@ import core.constants.ProcessStates;
 import core.constants.Statuses;
 import dao.BeanFactory;
 import dao.entities.*;
+import dao.enums.TransactionType;
 import dao.interfaces.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -178,7 +179,7 @@ public class InsuranceUtil implements Serializable {
         }
 
         @Transactional(Transactional.TxType.REQUIRES_NEW)
-        public void saveOutstandingAmount(String insurancePolicyId, BigDecimal amount, String traceId,String description,String transactionType) {
+        public void saveOutstandingAmount(String insurancePolicyId, BigDecimal amount, String traceId, String description, TransactionType transactionType) {
 
         try {
             InsuranceOutstandingAmount insuranceOutstandingAmount = new InsuranceOutstandingAmount();

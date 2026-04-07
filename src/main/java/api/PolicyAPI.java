@@ -9,6 +9,7 @@ import core.threads.PostCancellation;
 import core.util.*;
 import dao.BeanFactory;
 import dao.entities.*;
+import dao.enums.TransactionType;
 import dao.interfaces.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -673,7 +674,7 @@ public class PolicyAPI {
                     Beneficiaries savedBeneficiaries = beneficiariesInterface.save(b);
                     LOGGER.info("Beneficiary saved! name = {}, traceId -> {}", savedBeneficiaries.getName(),traceId);
 
-                    insuranceUtil.saveOutstandingAmount(policyUpdateRequest.getPolicyId(),beneficiaries.getTotalCharge(),traceId,"Beneficiary inclusion "+beneficiaries.getName(),"CREDIT");
+                    insuranceUtil.saveOutstandingAmount(policyUpdateRequest.getPolicyId(),beneficiaries.getTotalCharge(),traceId,"Beneficiary inclusion "+beneficiaries.getName(), TransactionType.CREDIT);
 
                 }
 
@@ -685,7 +686,7 @@ public class PolicyAPI {
                             setStatus(Statuses.REMOVED.toString()), beneficiaries.getBeneficiaryId());
                     if(removed>0){
                         LOGGER.info("Beneficiary removed! id = {}, traceId -> {}", beneficiaries.getBeneficiaryId(),traceId);
-                        insuranceUtil.saveOutstandingAmount(policyUpdateRequest.getPolicyId(),beneficiaries.getTotalCharge(),traceId,"Beneficiary removal "+beneficiaries.getName(),"DEBT");
+                        insuranceUtil.saveOutstandingAmount(policyUpdateRequest.getPolicyId(),beneficiaries.getTotalCharge(),traceId,"Beneficiary removal "+beneficiaries.getName(),TransactionType.DEBT);
 
                     }
                     else{
