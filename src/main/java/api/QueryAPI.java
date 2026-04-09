@@ -1,8 +1,7 @@
 package api;
 
+import core.beans.PaymentLogResponse;
 import core.beans.SubProductResponse;
-import core.constants.RecordTypes;
-import core.constants.Statuses;
 import core.util.CoreUtil;
 import core.util.QueryUtil;
 import core.util.RequestUtil;
@@ -19,6 +18,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static core.util.CoreUtil.*;
 import static core.util.Util.*;
@@ -38,13 +38,9 @@ public class QueryAPI {
     @Inject
     private IDTypeInterface idTypeInterface;
     @Inject
-    private InsurancePolicyInterface insurancePolicyInterface;
-    @Inject
     private PaymentScheduleInterface paymentScheduleInterface;
     @Inject
     private CoverageTypeRateInterface coverageTypeRateInterface;
-    @Inject
-    private SubProductInterface subProductInterface;
     @Inject
     private TermInterface termInterface;
     @Inject
@@ -58,15 +54,15 @@ public class QueryAPI {
     @Inject
     private IndustryInterface industryInterface;
     @Inject
-    private ProductConfigInterface productConfigInterface;
-    @Inject
     private FrequencyInterface frequencyInterface;
     @Inject
     private JobTitleInterface jobTitleInterface;
     @Inject
-    private SubProductCurrencyInterface subProductCurrencyInterface;
-    @Inject
     private BenefitCycleInterface benefitCycleInterface;
+    @Inject
+    private InsuranceOutstandingAmountInterface insuranceOutstandingAmountInterface;
+    @Inject
+    private InsuranceStatementEntryInterface insuranceStatementEntryInterface;
 
     @GET
     @Path("/relationships-list")
@@ -787,6 +783,82 @@ public class QueryAPI {
 
             defaultSuccess(LOGGER,traceId);
             response = Response.status(Response.Status.OK).entity(subProductResponse).build();
+            queryExecuted = true;
+
+        } catch (Exception e) {
+
+            LOGGER.error(e);
+            LOGGER.error(e.getMessage());
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            errorCause = e.getCause().getMessage();
+
+        } finally {
+
+            queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, username,
+                    methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, headers.getRemoteAddr()));
+        }
+
+        return response;
+
+    }
+
+
+    @GET
+    @Path("/payment-log-list")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getPaymentLog( @QueryParam("startDate") String startDate,
+                                            @QueryParam("endDate") String endDate,
+                                            @QueryParam("policyId") String policyId,
+                                            @QueryParam("sessionId") String sessionId,
+                                            @QueryParam("username") String username,@Context HttpServletRequest headers) {
+
+        String traceId = getLogId();
+        String methodName = "getPaymentLog";
+
+        LOGGER.info("{} is being called with parameter. policyId -> {}, startDate -> {}, endDate -> {}, username -> {}, sessionId -> {}, logId -> {}, ipAddress -> {} ",
+                methodName, policyId,startDate,endDate,username, sessionId, traceId,headers.getRemoteAddr());
+       // defaultNoParamRequest(LOGGER,traceId,sessionId,username,methodName,headers.getRemoteAddr());
+
+        Date requestTime = today();
+        Response response = Response.status(Response.Status.NO_CONTENT).build();
+
+        boolean queryExecuted = false;
+        String errorCause = "";
+
+        try {
+
+
+            List<InsuranceStatementEntry> insuranceStatementEntries = insuranceStatementEntryInterface.findByInsurancePolicyAndEntryDateBetween(
+                    setInsurancePolicy(policyId),
+                    stringToDate(startDate),
+                    getDatePlus(stringToDate(endDate),1,Calendar.DATE)
+            );
+
+            List<PaymentLogResponse> paymentLogResponse = insuranceStatementEntries.stream()
+                    .map(entry -> {
+                        PaymentLogResponse item = new PaymentLogResponse();
+                        item.setInsuranceStatementEntryId(entry.getInsuranceStatementEntryId());
+                        item.setDebitAmount(entry.getDebitAmount());
+                        item.setCreditAmount(entry.getCreditAmount());
+                        item.setOutstandingBalance(entry.getOutstandingBalance());
+                        item.setPolicyId(entry.getInsuranceBalance().getInsurancePolicy().getInsurancePolicyId());
+                        item.setEntryDescription(entry.getEntryDescription());
+                        item.setEntryDate(entry.getEntryDate());
+                        item.setClientName(entry.getInsuranceBalance().getInsurancePolicy().getPolicyHolder().getCustomerName());
+                        item.setCurrentBalance(
+                                entry.getInsuranceBalance() != null
+                                        ? entry.getInsuranceBalance().getCurrentBalance()
+                                        : BigDecimal.ZERO
+                        );
+                        return item;
+                    })
+                    .collect(Collectors.toList());
+
+
+            LOGGER.info("{} returned -> {}, logId -> {}",methodName,paymentLogResponse,traceId);
+            defaultSuccess(LOGGER,traceId);
+            response = Response.status(Response.Status.OK).entity(paymentLogResponse).build();
             queryExecuted = true;
 
         } catch (Exception e) {

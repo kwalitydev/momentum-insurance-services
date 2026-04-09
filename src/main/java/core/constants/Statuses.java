@@ -12,7 +12,6 @@ public enum Statuses {
     UNPAID,
     SUCCESS,
     FAILED,
-    CLAIMED,
     ERROR,
     SENT,
     NOT_SENT,

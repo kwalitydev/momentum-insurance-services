@@ -4,8 +4,7 @@ public enum ObjectTypes {
     PRODUCT_CONFIG_CHANGE("Parâmetos de validação"),
     ACCOUNT("Contas"),
     MEMBER_PRICE("Preço por membro"),
-    COVERAGE("Cobertura"),
-    CLAIMS("Reivindicações");
+    COVERAGE("Cobertura");
 
 
     private final String objectTye;

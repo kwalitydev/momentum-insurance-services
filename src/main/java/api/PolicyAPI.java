@@ -537,6 +537,7 @@ public class PolicyAPI {
     @Path("/update")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @Transactional
     public Response updatePolicy(PolicyUpdateRequest policyUpdateRequest,@Context HttpServletRequest headers) {
 
         String traceId = getLogId();
@@ -636,6 +637,9 @@ public class PolicyAPI {
                 LOGGER.info("Logging policy history for policy id {} ", policyUpdateRequest.getPolicyId());
                 insuranceUtil.logPolicyHistory(policyRequest,traceId,"Alteração de beneficiários");
               //  notificationUtil.postSendAmendmentSMS(traceId, insurancePolicy, customerResponse);
+                policyResponse.setPolicyId(policyUpdateRequest.getPolicyId());
+                policyResponse.setStatus(true);
+
                 response = Response.status(Response.Status.OK).entity(policyResponse).build();
                 queryExecuted = true;
 
@@ -644,7 +648,6 @@ public class PolicyAPI {
             } catch (Exception e) {
                 LOGGER.error(traceId,e);
                 response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-                errorCause = e.getMessage();
             } finally {
 
                 queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, policyUpdateRequest.getUsername(),

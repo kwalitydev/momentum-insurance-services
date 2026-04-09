@@ -35,11 +35,7 @@ public class InsurancePolicy {
     private Frequency paymentFrequency;
     @OneToOne
     private ProcessWorkflow processWorkflow;
-    @OneToOne
-    private Coverage coverage;
     private String simulationId;
-    @OneToOne
-    private CoverageType coverageType;
     @OneToOne
     private BenefitCycle benefitCycle;
     private String suspensionType = SuspensionType.NO_SUSPENSION.toString();
@@ -173,13 +169,6 @@ public class InsurancePolicy {
         this.processWorkflow = processWorkflow;
     }
 
-    public Coverage getCoverage() {
-        return coverage;
-    }
-
-    public void setCoverage(Coverage coverage) {
-        this.coverage = coverage;
-    }
 
     public String getSimulationId() {
         return simulationId;
@@ -189,13 +178,6 @@ public class InsurancePolicy {
         this.simulationId = simulationId;
     }
 
-    public CoverageType getCoverageType() {
-        return coverageType;
-    }
-
-    public void setCoverageType(CoverageType coverageType) {
-        this.coverageType = coverageType;
-    }
 
     public String getInsurancePolicyId() {
         return insurancePolicyId;
@@ -241,9 +223,7 @@ public class InsurancePolicy {
                 ", expiryDate=" + expiryDate +
                 ", paymentFrequency=" + paymentFrequency +
                 ", processWorkflow=" + processWorkflow +
-                ", coverage=" + coverage +
                 ", simulationId='" + simulationId + '\'' +
-                ", coverageType=" + coverageType +
                 ", benefitCycle=" + benefitCycle +
                 ", suspensionType='" + suspensionType + '\'' +
                 '}';

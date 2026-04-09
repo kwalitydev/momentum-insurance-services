@@ -56,8 +56,8 @@ public class WorkflowAPI {
         String reqRes = getLogId();
         Date requestTime = today();
         String methodName = "getPendingRequests";
-        LOGGER.info("{} is being called with parameter. username -> {}, sessionId -> {}, logId -> {}, ipAddress -> {} ",
-                methodName, username, sessionId, reqRes,headers.getRemoteAddr());
+        LOGGER.info("{} is being called with parameter. username -> {}, sessionId -> {}, logId -> {}, ipAddress -> {}, processState -> {} ",
+                methodName, username, sessionId, reqRes,headers.getRemoteAddr(),processState);
 
         Response response = Response.status(Response.Status.NO_CONTENT).build();
         boolean queryExecuted = false;

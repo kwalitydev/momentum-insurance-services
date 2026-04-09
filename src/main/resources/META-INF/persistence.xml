@@ -36,7 +36,6 @@
         <class>dao.entities.ProcessState</class>
         <class>dao.entities.ProcessWorkflow</class>
         <class>dao.entities.Product</class>
-        <class>dao.entities.SubProductAccount</class>
         <class>dao.entities.ProductConfig</class>
         <class>dao.entities.RelationShip</class>
         <class>dao.entities.Frequency</class>
@@ -44,7 +43,6 @@
         <class>dao.entities.DocumentFile</class>
         <class>dao.entities.DocumentType</class>
         <class>dao.entities.CoreErrorMapping</class>
-        <class>dao.entities.Claim</class>
         <class>dao.entities.InsuranceCompany</class>
         <class>dao.entities.CoverageTypeRate</class>
         <class>dao.entities.FileTransferLog</class>
@@ -61,7 +59,6 @@
         <class>dao.entities.PolicySyncHistory</class>
         <class>dao.entities.SoundDetail</class>
         <class>dao.entities.CoverageOption</class>
-        <class>dao.entities.ClaimCoverage</class>
         <class>dao.entities.ErrorLog</class>
         <class>dao.entities.BenefitMap</class>
         <class>dao.entities.BenefitCycle</class>
