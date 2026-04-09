@@ -2,11 +2,14 @@ package api;
 
 import core.beans.*;
 import core.constants.*;
+import core.exception.BusinessException;
 import core.impl.ProcessWorkflowImpl;
+import core.service.IPaymentScheduleService;
 import core.threads.PostCancellation;
 import core.util.*;
 import dao.BeanFactory;
 import dao.entities.*;
+import dao.enums.TransactionType;
 import dao.interfaces.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -79,17 +82,19 @@ public class PolicyAPI {
     @Inject
     private PolicyHolderInterface policyHolderInterface;
 
+    @Inject
+    private IPaymentScheduleService iPaymentScheduleService;
 
 
     @GET
     @Path("/products-list")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getProducts(@QueryParam("sessionId") String sessionId,@QueryParam("username") String username,@Context HttpServletRequest headers) {
+    public Response getProducts(@QueryParam("sessionId") String sessionId, @QueryParam("username") String username, @Context HttpServletRequest headers) {
 
         String traceId = getLogId();
         String methodName = "getProducts";
-        defaultNoParamRequest(LOGGER,traceId,sessionId,username,methodName, headers.getRemoteAddr());
+        defaultNoParamRequest(LOGGER, traceId, sessionId, username, methodName, headers.getRemoteAddr());
 
         Date requestTime = today();
         Response response = Response.status(Response.Status.NO_CONTENT).build();
@@ -100,7 +105,7 @@ public class PolicyAPI {
             List<Product> products = productInterface.findAllByOrderByName();
             response = Response.status(Response.Status.OK).entity(products).build();
             queryExecuted = true;
-            defaultSuccess(LOGGER,traceId);
+            defaultSuccess(LOGGER, traceId);
         } catch (Exception e) {
             LOGGER.error(e);
             response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -267,6 +272,67 @@ public class PolicyAPI {
 
     }
 
+
+    @POST
+    @Path("/create-payment-schedule")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createPaymentSchedule(createPaymentScheduleRequest createPaymentScheduleRequest, @Context HttpServletRequest headers) {
+
+        String traceId = getLogId();
+        String methodName = "createPaymentSchedule";
+        Response response = Response.status(Response.Status.NO_CONTENT).build();
+        if (createPaymentScheduleRequest != null) {
+
+            defaultObjectRequest(LOGGER, traceId, createPaymentScheduleRequest.toString(), methodName, headers.getRemoteAddr());
+
+            Date requestTime = today();
+            boolean queryExecuted = false;
+            String errorCause = "";
+            PaymentSchedule paymentSchedules = null;
+            try {
+
+                Optional<InsurancePolicy> insurancePolicy = insurancePolicyInterface.findByInsurancePolicyId(createPaymentScheduleRequest.getInsurancePolicyId());
+
+                if (insurancePolicy.isPresent()) {
+                    this.iPaymentScheduleService.createPaymentSchedule(insurancePolicy.get());
+                    paymentSchedules = paymentScheduleInterface.findByPolicyAndPaymentStatus(createPaymentScheduleRequest.getInsurancePolicyId(), PaymentStatus.PENDING).iterator().next();
+                } else {
+                    response = Response.status(Response.Status.NOT_FOUND).build();
+
+                }
+
+                response = Response.status(Response.Status.OK).entity(paymentSchedules).build();
+                queryExecuted = true;
+
+
+            } catch (BusinessException e) {
+
+                core.exception.ErrorResponse errorResponse = new core.exception
+                        .ErrorResponse(e.getCode(), e.getMessage());
+
+                response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
+                LOGGER.error(traceId, e);
+                errorCause = e.getMessage();
+
+            } catch (Exception e) {
+
+                LOGGER.error(traceId, e);
+                response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+                errorCause = e.getMessage();
+
+            } finally {
+
+                queryUtil.saveLog(setWebserviceLog(traceId, requestTime, "web", methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, createPaymentScheduleRequest.getSessionId(), headers.getRemoteAddr(), false, "Create Payment Schedule", null));
+
+
+            }
+        } else {
+            LOGGER.info("Invalid payload");
+        }
+        return response;
+
+    }
 
 
     @GET
@@ -609,7 +675,7 @@ public class PolicyAPI {
                     Beneficiaries savedBeneficiaries = beneficiariesInterface.save(b);
                     LOGGER.info("Beneficiary saved! name = {}, traceId -> {}", savedBeneficiaries.getName(),traceId);
 
-                    insuranceUtil.saveOutstandingAmount(policyUpdateRequest.getPolicyId(),beneficiaries.getTotalCharge(),traceId,"Beneficiary inclusion "+beneficiaries.getName(),"CREDIT");
+                    insuranceUtil.saveOutstandingAmount(policyUpdateRequest.getPolicyId(),beneficiaries.getTotalCharge(),traceId,"Beneficiary inclusion "+beneficiaries.getName(), TransactionType.CREDIT);
 
                 }
 
@@ -621,7 +687,7 @@ public class PolicyAPI {
                             setStatus(Statuses.REMOVED.toString()), beneficiaries.getBeneficiaryId());
                     if(removed>0){
                         LOGGER.info("Beneficiary removed! id = {}, traceId -> {}", beneficiaries.getBeneficiaryId(),traceId);
-                        insuranceUtil.saveOutstandingAmount(policyUpdateRequest.getPolicyId(),beneficiaries.getTotalCharge(),traceId,"Beneficiary removal "+beneficiaries.getName(),"DEBT");
+                        insuranceUtil.saveOutstandingAmount(policyUpdateRequest.getPolicyId(),beneficiaries.getTotalCharge(),traceId,"Beneficiary removal "+beneficiaries.getName(),TransactionType.DEBT);
 
                     }
                     else{

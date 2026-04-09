@@ -1,4 +1,4 @@
-package dao.service;
+package core.service;
 
 import dao.entities.InsurancePolicy;
 import dao.entities.Token;

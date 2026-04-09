@@ -61,10 +61,4 @@ public class AES {
         }
         return null;
     }
-
-    public static void main(String[] args) {
-        System.out.println(encrypt("1234567"));
-
-      //  System.out.println(AES.decrypt("DbO/vcvxJi9bYcgJ3VgY9Q==",secretKey));
-    }
 }

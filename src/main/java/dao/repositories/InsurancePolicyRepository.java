@@ -130,4 +130,15 @@ public interface InsurancePolicyRepository extends JpaRepository<InsurancePolicy
     @Query("update InsurancePolicy set totalAmount=?1, lastUpdated=?2,updatedUser=?3 where policyId=?4")
     int updatePolicy(BigDecimal totalAmount, Date lastUpdate,String users, String policyId);
 
+
+    @Query("SELECT p FROM InsurancePolicy p " +
+           "JOIN FETCH p.benefitCycle bc " +
+           "JOIN FETCH p.policyHolder ph " +
+           "WHERE p.expiryDate > CURRENT_TIMESTAMP " +
+           "AND p.status.id = :status " )
+    List<InsurancePolicy> findActivePoliciesByStatus(@Param("status") String status);
+
+    @Query("SELECT p FROM InsurancePolicy p WHERE p.insurancePolicyId = :insurancePolicyId")
+    Optional<InsurancePolicy> findByInsurancePolicyId(@Param("insurancePolicyId") String insurancePolicyId);
+
 }

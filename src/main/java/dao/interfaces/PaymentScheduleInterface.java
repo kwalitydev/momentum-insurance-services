@@ -1,7 +1,9 @@
 package dao.interfaces;
 
 
+import core.constants.PaymentStatus;
 import dao.entities.*;
+import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -9,7 +11,6 @@ import java.util.List;
 
 public interface PaymentScheduleInterface {
 
-    PaymentSchedule save(PaymentSchedule paymentSchedule);
     BigDecimal getTotalCollected(Date startDate, Date endDate, Status status,SubProduct subProduct);
     BigDecimal getTotalCollected(Date startDate,Date endDate, SubProduct subProduct);
 
@@ -41,5 +42,10 @@ public interface PaymentScheduleInterface {
     List<Object[]> getCollectedPremium(String startDate,String endDate);
     List<Object[]> getCollectedProgress(String startDate,String endDate);
     List<Object[]> getCollectionStatus(String startDate,String endDate);
+    List<PaymentSchedule> findPaymentScheduleAndMonthAndYear(InsurancePolicy policy, String month, String year);
+    boolean existsByPolicyIdAndMonthAndYear(String policyId, String month, String year);
 
+    boolean existsByPolicyId( String policyId);
+
+    List<PaymentSchedule> findByPolicyAndPaymentStatus(String insurancePolicyId, PaymentStatus paymentStatus );
 }
