@@ -84,6 +84,8 @@ public class PolicyAPI {
 
     @Inject
     private IPaymentScheduleService iPaymentScheduleService;
+    @Inject
+    private PolicyChangeControlInterface policyChangeControlInterface;
 
 
     @GET
@@ -649,8 +651,8 @@ public class PolicyAPI {
                     //Beneficiaries update
 
                 LOGGER.info("Creating new Beneficiaries for policy id {} ", policyUpdateRequest.getPolicyId());
-                 BenefRequest benefRequests = policyUpdateRequest.getBenefRequest();
-                 List<BeneficiaryRequestPayload> beneficiaryRequestPayloads = benefRequests.getNewlyAdded();
+                 BenefRequest benefRequest = policyUpdateRequest.getBenefRequest();
+                 List<BeneficiaryRequestPayload> beneficiaryRequestPayloads = benefRequest.getNewlyAdded();
                 for (BeneficiaryRequestPayload beneficiaries  : beneficiaryRequestPayloads) {
 
                     Beneficiaries b = new Beneficiaries();
@@ -671,7 +673,6 @@ public class PolicyAPI {
                         LOGGER.error("Invalid DOB {}", beneficiaries.getDateOfBirth());
                     }
 
-                    beanFactory.merge(b);
                     Beneficiaries savedBeneficiaries = beneficiariesInterface.save(b);
                     LOGGER.info("Beneficiary saved! name = {}, traceId -> {}", savedBeneficiaries.getName(),traceId);
 
@@ -680,7 +681,7 @@ public class PolicyAPI {
                 }
 
                 LOGGER.info("Removing Beneficiaries for policy id {} ", policyUpdateRequest.getPolicyId());
-                List<BeneficiaryRequestPayload> benToBeRemoved = benefRequests.getToBeRemoved();
+                List<BeneficiaryRequestPayload> benToBeRemoved = benefRequest.getToBeRemoved();
                 for (BeneficiaryRequestPayload beneficiaries  : benToBeRemoved) {
 
                     int removed = beneficiariesInterface.updateBeneficiary(today(), policyUpdateRequest.getUsername(),
@@ -693,6 +694,14 @@ public class PolicyAPI {
                     else{
                         LOGGER.info("No update made to Beneficiary! id = {}, traceId -> {}", beneficiaries.getBeneficiaryId(),traceId);
                     }
+                }
+
+                if(beneficiaryRequestPayloads.size()>0 || benToBeRemoved.size()>0){
+                    PolicyChangeControl policyChangeControl = new PolicyChangeControl();
+                    policyChangeControl.setInsurancePolicy(setInsurancePolicy(policyUpdateRequest.getPolicyId()));
+                    policyChangeControl.setChangeDate(today());
+                    policyChangeControlInterface.save(policyChangeControl);
+                    LOGGER.info("Policy Control record created for policy id {}", policyUpdateRequest.getPolicyId());
                 }
 
 

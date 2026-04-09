@@ -345,7 +345,7 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
             return totalPolicyAmount;
         }
 
-        BigDecimal result = totalPolicyAmount.subtract(calculatedTotal);
+        BigDecimal result = totalPolicyAmount.add(calculatedTotal);
 
         return result.compareTo(BigDecimal.ZERO) < 0
                 ? BigDecimal.ZERO

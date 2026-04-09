@@ -63,6 +63,8 @@ public class QueryUtil {
     private CurrencyInterface currencyInterface;
     @Inject
     private PolicyHolderInterface policyHolderInterface;
+    @Inject
+    private PolicyChangeControlInterface policyChangeControlInterface;
 
     private static final Logger LOGGER = LogManager.getLogger(QueryUtil.class);
 
@@ -199,6 +201,12 @@ public class QueryUtil {
         InsurancePolicyHistory insurancePolicyHistorySaved = beanFactory.merge(insurancePolicyHistory);
 
         LOGGER.info("InsurancePolicyHistory saved {}. traceId -> {}", insurancePolicyHistorySaved.getIphId(),traceId);
+    }
+
+
+    // startDate is the last payment day and endDate is the date that should generate the invoice
+    public boolean hasPolicyChanged(String policyId,Date startDate,Date endDate){
+        return policyChangeControlInterface.existsPolicyChangeInPeriod(setInsurancePolicy(policyId),startDate,endDate);
     }
 
 

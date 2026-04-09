@@ -83,10 +83,13 @@ public class PaymentScheduleHandler extends TimerTask {
     }
 
     private boolean isExecutionDay(Date nextRunningDate) {
-        if (nextRunningDate == null) return false;
+        /** TODO: get the execution day from the task configuration instead of hardcoding it to 25th of each month */
+        if (nextRunningDate == null){
+          //  return LocalDate.now().isEqual(nextDate);
+        }
 
         LocalDate nextDate = nextRunningDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
-        return nextDate.getDayOfMonth() == 25 && LocalDate.now().isEqual(nextDate);
+        return nextDate.getDayOfMonth() == 25;
     }
 }
