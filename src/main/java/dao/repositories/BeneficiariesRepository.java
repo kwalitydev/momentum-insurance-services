@@ -5,14 +5,13 @@ import dao.interfaces.BeneficiariesInterface;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
-import javax.persistence.Column;
-import javax.persistence.OneToOne;
-import java.math.BigDecimal;
+
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-
+@Repository
 public interface BeneficiariesRepository extends JpaRepository<Beneficiaries, String>, BeneficiariesInterface {
 
 
@@ -49,6 +48,11 @@ public interface BeneficiariesRepository extends JpaRepository<Beneficiaries, St
 
     @Query("SELECT b FROM Beneficiaries b WHERE TRUNC(b.dateOfBirth) = TO_DATE(?1,'dd/mm/yyyy') and b.insurancePolicy.status =?2 AND b.relationShip.relationShipId IN ?3 AND b.insurancePolicy.subProduct.subProductId =?4")
     List<Beneficiaries> findByDOB(String dob,Status status,List<Long> relationShips,Long subProductId);
+
+    @Query("SELECT b FROM Beneficiaries b " +
+           "WHERE b.insurancePolicy.insurancePolicyId = :insurancePolicyId")
+    List<Beneficiaries> findByInsurancePolicyId(
+            @Param("insurancePolicyId") String insurancePolicyId);
 
 
 }

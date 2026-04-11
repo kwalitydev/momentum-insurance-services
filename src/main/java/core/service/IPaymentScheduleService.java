@@ -1,9 +1,7 @@
 package core.service;
 
-import core.beans.MonthlyCollectionSummaryDTO;
-import core.beans.MonthlySummeryDTO;
-import core.beans.PaymentChartDTO;
-import core.beans.RecentPaymentDTO;
+import core.beans.*;
+import core.constants.PaymentStatus;
 import dao.entities.InsurancePolicy;
 import dao.entities.PaymentSchedule;
 
@@ -21,5 +19,8 @@ public interface IPaymentScheduleService {
     PaymentSchedule save(PaymentSchedule paymentSchedule);
 
     void createPaymentSchedule(InsurancePolicy insurancePolicy);
+
+    PaymentScheduleDetails findPaymentDetailsByInsurancePolicy(String insurancePolicyId, List<PaymentStatus> paymentStatuses);
+
 
 }

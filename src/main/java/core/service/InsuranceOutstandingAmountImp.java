@@ -1,6 +1,7 @@
 package core.service;
 
 import dao.entities.InsuranceOutstandingAmount;
+import dao.entities.PaymentSchedule;
 import dao.repositories.InsuranceOutstandingAmountRepository;
 import org.springframework.stereotype.Service;
 
@@ -33,8 +34,8 @@ public class InsuranceOutstandingAmountImp implements IInsuranceOutstandingAmoun
 
     @Transactional
     @Override
-    public int updateInsuranceOutstandingByID(List<Long> ids, String status, Date lastUpdatedDate) {
-        return insuranceOutstandingAmountRepository.updateInsuranceOutstandingByID(ids, status, lastUpdatedDate);
+    public int updateInsuranceOutstandingByID(List<Long> ids, String status, Date lastUpdatedDate, PaymentSchedule paymentSchedule) {
+        return insuranceOutstandingAmountRepository.updateInsuranceOutstandingByID(ids, status, lastUpdatedDate,paymentSchedule);
     }
 
 

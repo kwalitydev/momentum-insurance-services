@@ -301,8 +301,8 @@ public interface PaymentScheduleRepository extends JpaRepository<PaymentSchedule
 
     @Query("SELECT ps FROM PaymentSchedule ps " +
            "WHERE ps.insurancePolicy.insurancePolicyId = :insurancePolicyId " +
-           "AND ps.paymentStatus = :paymentStatus")
+           "AND ps.paymentStatus IN :paymentStatuses")
     List<PaymentSchedule> findByPolicyAndPaymentStatus(
             @Param("insurancePolicyId") String insurancePolicyId,
-            @Param("paymentStatus") PaymentStatus paymentStatus );
+            @Param("paymentStatuses") List<PaymentStatus> paymentStatuses);
 }

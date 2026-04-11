@@ -25,7 +25,7 @@ public class DBTransactionService {
 
         if (!outstandingAmountListLisIDs.isEmpty()) {
             this.IInsuranceOutstandingAmount.updateInsuranceOutstandingByID(outstandingAmountListLisIDs,
-                    insuranceOutstandingEnum.INVOICED.name(), CoreUtil.today());
+                    insuranceOutstandingEnum.INVOICED.name(), CoreUtil.today(),ps);
         }
 
     }

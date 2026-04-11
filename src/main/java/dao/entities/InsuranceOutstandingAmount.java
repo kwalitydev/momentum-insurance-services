@@ -18,6 +18,10 @@ public class InsuranceOutstandingAmount implements Serializable {
     @ManyToOne
     @JoinColumn
     private InsurancePolicy insurancePolicy;
+
+    @ManyToOne
+    @JoinColumn
+    private PaymentSchedule paymentSchedule;
     @Enumerated(EnumType.STRING)
     private TransactionType transactionType; // e.g "creditor" or "debtor"
     private String description;
@@ -30,14 +34,15 @@ public class InsuranceOutstandingAmount implements Serializable {
     @Override
     public String toString() {
         return "InsuranceOutstandingAmount{" +
-                "insuranceOutstandingAmountId=" + insuranceOutstandingAmountId +
-                ", amount=" + amount +
-                ", insurancePolicy=" + insurancePolicy +
-                ", transactionType='" + transactionType + '\'' +
-                ", description=" + description +
-                ", lastUpdatedDate=" + lastUpdatedDate +
-                ", entryDate=" + entryDate +
-                ", status=" + status +
-                '}';
+               "insuranceOutstandingAmountId=" + insuranceOutstandingAmountId +
+               ", amount=" + amount +
+               ", insurancePolicy=" + insurancePolicy +
+               ", PaymentSchedule=" + paymentSchedule +
+               ", transactionType=" + transactionType +
+               ", description='" + description + '\'' +
+               ", lastUpdatedDate=" + lastUpdatedDate +
+               ", entryDate=" + entryDate +
+               ", status=" + status +
+               '}';
     }
 }

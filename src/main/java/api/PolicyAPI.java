@@ -3,6 +3,7 @@ package api;
 import core.beans.*;
 import core.constants.*;
 import core.exception.BusinessException;
+import core.exception.ErrorResponse;
 import core.impl.ProcessWorkflowImpl;
 import core.service.IPaymentScheduleService;
 import core.threads.PostCancellation;
@@ -112,7 +113,7 @@ public class PolicyAPI {
             errorCause = e.getMessage();
         } finally {
 
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, username,
+            queryUtil.saveLog(setWebserviceLog(traceId, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, headers.getRemoteAddr()));
         }
 
@@ -147,7 +148,7 @@ public class PolicyAPI {
             errorCause = e.getMessage();
         } finally {
 
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, username,
+            queryUtil.saveLog(setWebserviceLog(traceId, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, headers.getRemoteAddr()));
         }
 
@@ -187,7 +188,7 @@ public class PolicyAPI {
             errorCause = e.getMessage();
         } finally {
 
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, username,
+            queryUtil.saveLog(setWebserviceLog(traceId, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, ipAddress));
         }
 
@@ -258,7 +259,7 @@ public class PolicyAPI {
 
         } finally {
 
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, "web",
+            queryUtil.saveLog(setWebserviceLog(traceId, requestTime, "web",
                             methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, policyRequest.getSessionId(),
                             headers.getRemoteAddr(), false, "Create Policy",  null));
 
@@ -296,7 +297,9 @@ public class PolicyAPI {
 
                 if (insurancePolicy.isPresent()) {
                     this.iPaymentScheduleService.createPaymentSchedule(insurancePolicy.get());
-                    paymentSchedules = paymentScheduleInterface.findByPolicyAndPaymentStatus(createPaymentScheduleRequest.getInsurancePolicyId(), PaymentStatus.PENDING).iterator().next();
+                    paymentSchedules = paymentScheduleInterface
+                            .findByPolicyAndPaymentStatus(createPaymentScheduleRequest.getInsurancePolicyId(), Collections.singletonList(PaymentStatus.PENDING))
+                            .iterator().next();
                 } else {
                     response = Response.status(Response.Status.NOT_FOUND).build();
 
@@ -308,8 +311,7 @@ public class PolicyAPI {
 
             } catch (BusinessException e) {
 
-                core.exception.ErrorResponse errorResponse = new core.exception
-                        .ErrorResponse(e.getCode(), e.getMessage());
+                ErrorResponse errorResponse = new ErrorResponse(e.getCode(), e.getMessage());
 
                 response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
                 LOGGER.error(traceId, e);
@@ -371,12 +373,13 @@ public class PolicyAPI {
             errorCause = e.getCause().getMessage();
         } finally {
 
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
+            queryUtil.saveLog(setWebserviceLog(reqRes, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, ipAddress));
         }
         return response;
 
     }
+
 
     @GET
     @Path("/beneficiaries-list")
@@ -407,7 +410,7 @@ public class PolicyAPI {
             errorCause = e.getMessage();
         } finally {
 
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
+            queryUtil.saveLog(setWebserviceLog(reqRes, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, headers.getRemoteAddr()));
         }
         return response;
@@ -485,7 +488,7 @@ public class PolicyAPI {
 
             } finally {
 
-                queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, policyCancelRequest.getUsername(),
+                queryUtil.saveLog(setWebserviceLog(reqRes, requestTime, policyCancelRequest.getUsername(),
                         methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, policyCancelRequest.getSessionId(), headers.getRemoteAddr()));
             }
         }
@@ -538,7 +541,7 @@ public class PolicyAPI {
             errorCause = e.getCause().getMessage();
         } finally {
 
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
+            queryUtil.saveLog(setWebserviceLog(reqRes, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, headers.getRemoteAddr()));
         }
 
@@ -592,7 +595,7 @@ public class PolicyAPI {
             errorCause = e.getCause().getMessage();
         } finally {
 
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
+            queryUtil.saveLog(setWebserviceLog(reqRes, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, headers.getRemoteAddr()));
         }
         return response;
@@ -713,7 +716,7 @@ public class PolicyAPI {
                 errorCause = e.getMessage();
             } finally {
 
-                queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, policyUpdateRequest.getUsername(),
+                queryUtil.saveLog(setWebserviceLog(traceId, requestTime, policyUpdateRequest.getUsername(),
                         methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, policyUpdateRequest.getSessionId(), headers.getRemoteAddr()));
             }
         }
@@ -761,7 +764,7 @@ public class PolicyAPI {
             errorCause = e.getCause().getMessage();
         } finally {
 
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, username,
+            queryUtil.saveLog(setWebserviceLog(traceId, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, headers.getRemoteAddr()));
         }
 
@@ -857,7 +860,7 @@ public class PolicyAPI {
                 errorCause = e.getCause().getMessage();
             } finally {
 
-                queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, subProductUpdate.getUsername(),
+                queryUtil.saveLog(setWebserviceLog(traceId, requestTime, subProductUpdate.getUsername(),
                         methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, subProductUpdate.getSessionId(), headers.getRemoteAddr()));
             }
         }
@@ -960,7 +963,7 @@ public class PolicyAPI {
                 errorCause = e.getCause().getMessage();
             } finally {
 
-                queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, subProductUpdate.getUsername(),
+                queryUtil.saveLog(setWebserviceLog(traceId, requestTime, subProductUpdate.getUsername(),
                         methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, subProductUpdate.getSessionId(), headers.getRemoteAddr()));
             }
         }
@@ -1064,7 +1067,7 @@ public class PolicyAPI {
                 errorCause = e.getCause().getMessage();
             } finally {
 
-                queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, beneficiaryRequest.getUsername(),
+                queryUtil.saveLog(setWebserviceLog(traceId, requestTime, beneficiaryRequest.getUsername(),
                         methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, beneficiaryRequest.getSessionId(), headers.getRemoteAddr()));
             }
         }
@@ -1133,7 +1136,7 @@ public class PolicyAPI {
             errorCause = e.getMessage();
         } finally {
 
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
+            queryUtil.saveLog(setWebserviceLog(reqRes, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, ipAddress));
         }
         LOGGER.info("Response {}, Response Id = {}", statuses, reqRes);
@@ -1202,7 +1205,7 @@ public class PolicyAPI {
             errorCause = e.getMessage();
         } finally {
 
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, policyReopenRequest.getUsername(),
+            queryUtil.saveLog(setWebserviceLog(reqRes, requestTime, policyReopenRequest.getUsername(),
                     methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, policyReopenRequest.getSessionId(), ipAddress));
         }
 
@@ -1240,7 +1243,7 @@ public class PolicyAPI {
             errorCause = e.getCause().getMessage();
         } finally {
 
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
+            queryUtil.saveLog(setWebserviceLog(reqRes, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, ipAddress));
         }
         return response;
@@ -1295,7 +1298,7 @@ public class PolicyAPI {
             errorCause = e.getCause().getMessage();
         } finally {
 
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
+            queryUtil.saveLog(setWebserviceLog(reqRes, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, ipAddress));
         }
         return response;
@@ -1335,7 +1338,7 @@ public class PolicyAPI {
             errorCause = e.getCause().getMessage();
         } finally {
 
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
+            queryUtil.saveLog(setWebserviceLog(reqRes, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, ipAddress));
         }
         return response;
@@ -1377,11 +1380,73 @@ public class PolicyAPI {
             errorCause = e.getCause().getMessage();
         } finally {
 
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
+            queryUtil.saveLog(setWebserviceLog(reqRes, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, ipAddress));
         }
         return response;
 
+    }
+
+    @GET
+    @Path("/payment-details")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response findPaymentDetails(
+            @QueryParam("insurancePolicyId") String insurancePolicyId,
+            @QueryParam("paymentStatuses") List<PaymentStatus> paymentStatuses,
+            @QueryParam("sessionId") String sessionId,
+            @QueryParam("username") String username,
+            @Context HttpServletRequest headers) {
+
+        String reqRes = getLogId();
+        String methodName = "findPaymentDetails";
+        String ipAddress = headers.getRemoteAddr();
+
+        LOGGER.info("{} is being called. insurancePolicyId -> {}, username -> {}, sessionId -> {}, logId -> {}, ipAddress -> {} ",
+                methodName, insurancePolicyId, username, sessionId, reqRes, ipAddress);
+
+        Date requestTime = today();
+        Response response = Response.status(Response.Status.NO_CONTENT).build();
+
+        boolean queryExecuted = false;
+        String errorCause = "";
+
+        try {
+            PaymentScheduleDetails result =
+                    iPaymentScheduleService.findPaymentDetailsByInsurancePolicy(
+                            insurancePolicyId,
+                            paymentStatuses
+                    );
+
+            if (result != null) {
+                response = Response.status(Response.Status.OK).entity(result).build();
+                queryExecuted = true;
+                defaultSuccess(LOGGER, reqRes);
+            } else {
+                response = Response.status(Response.Status.NO_CONTENT).build();
+            }
+
+        } catch (Exception e) {
+            LOGGER.error("Error in {}: {}", methodName, e.getMessage(), e);
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            errorCause = e.getMessage();
+        } finally {
+
+            queryUtil.saveLog(setWebserviceLog(
+                    reqRes,
+                    requestTime,
+                    username,
+                    methodName,
+                    response.getStatus(),
+                    queryExecuted,
+                    HttpMethod.GET,
+                    errorCause,
+                    sessionId,
+                    ipAddress
+            ));
+        }
+
+        return response;
     }
 
 

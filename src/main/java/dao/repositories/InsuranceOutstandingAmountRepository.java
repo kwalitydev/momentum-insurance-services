@@ -2,6 +2,7 @@ package dao.repositories;
 
 import dao.entities.InsuranceOutstandingAmount;
 
+import dao.entities.PaymentSchedule;
 import dao.interfaces.InsuranceOutstandingAmountInterface;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -24,14 +25,22 @@ public interface InsuranceOutstandingAmountRepository extends JpaRepository<Insu
     List<InsuranceOutstandingAmount> findByInsurancePolicyId( @Param("insurancePolicyId") String insurancePolicyId,
                                                               @Param("status") String status);
 
+
     @Modifying
     @Query("UPDATE InsuranceOutstandingAmount i " +
-           "SET i.status = :status, i.lastUpdatedDate = :lastUpdatedDate " +
+           "SET i.status = :status, " +
+           "i.lastUpdatedDate = :lastUpdatedDate, " +
+           "i.paymentSchedule = :paymentSchedule " +
            "WHERE i.insuranceOutstandingAmountId IN :ids")
-    int updateInsuranceOutstandingByID(@Param("ids") List<Long> ids,
-                    @Param("status") String status,
-                    @Param("lastUpdatedDate") Date lastUpdatedDate);
+    int updateInsuranceOutstandingByID(
+            @Param("ids") List<Long> ids,
+            @Param("status") String status,
+            @Param("lastUpdatedDate") Date lastUpdatedDate,
+            @Param("paymentSchedule") PaymentSchedule paymentSchedule);
 
-
+    @Query("SELECT i FROM InsuranceOutstandingAmount i " +
+           "WHERE i.paymentSchedule.paymentScheduleId = :paymentScheduleId")
+    List<InsuranceOutstandingAmount> findByPaymentScheduleId(
+            @Param("paymentScheduleId") Long paymentScheduleId);
 
 }
