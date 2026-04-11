@@ -18,7 +18,6 @@ public interface InsurancePolicyInterface {
     InsurancePolicy saveAndFlush(InsurancePolicy s);
     Optional<InsurancePolicy> findByPolicyId(String policyId);
     Optional<InsurancePolicy> findBySimulationId(String policyId);
-
     List<InsurancePolicy> findByDateInterval(Date startDate,Date endDate);
     List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,SubProduct subProduct);
     List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Status status);

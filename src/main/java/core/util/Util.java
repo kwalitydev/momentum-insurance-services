@@ -44,7 +44,6 @@ public class Util {
 
     //Messages
     public static final String REPORT_DIR = "reports";
-    public static final String CLAIMS_DIR = "claims";
     public static final String QUOTATION_DIR = "quotations";
     public static final String TEMPLATE_DIR = "templates";
     public static final String EXPORT_DIR = "export";

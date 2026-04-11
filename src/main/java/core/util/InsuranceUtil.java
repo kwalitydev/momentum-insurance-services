@@ -178,7 +178,7 @@ public class InsuranceUtil implements Serializable {
             LOGGER.info("InsuranceBalance saved for policy {}. Id ->{} traceId -> {}", insurancePolicy.getPolicyId(),savedBalance.getInsuranceBalanceId(), traceId);
         }
 
-        @Transactional(Transactional.TxType.REQUIRES_NEW)
+
         public void saveOutstandingAmount(String insurancePolicyId, BigDecimal amount, String traceId, String description, TransactionType transactionType) {
 
         try {

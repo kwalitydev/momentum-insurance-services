@@ -72,7 +72,8 @@ public class DocumentAPI {
                                 @Context HttpServletRequest headers) {
 
         String logId = getLogId();
-        LOGGER.info("getPolicyDocuments webservice is being called with parameters. Request {policyId = {}}, RequestId -> {}, Ip Address = {} ", policyId, logId, headers.getRemoteAddr());
+        LOGGER.info("getPolicyDocuments webservice is being called with parameters. Request {policyId = {}}, RequestId -> {}, Ip Address = {} ",
+                policyId, logId, headers.getRemoteAddr());
 
         try {
                 List<DocumentFile> documentFiles = documentFileInterface.findByObjectId(policyId);

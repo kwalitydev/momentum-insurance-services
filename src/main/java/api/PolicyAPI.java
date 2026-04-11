@@ -1,18 +1,12 @@
 package api;
 
 import core.beans.*;
-import core.constants.OperationTypes;
-import core.constants.PaymentStatus;
-import core.constants.RequestParams;
-import core.constants.Statuses;
+import core.constants.*;
 import core.exception.BusinessException;
-import core.exception.ErrorResponse;
 import core.impl.ProcessWorkflowImpl;
 import core.service.IPaymentScheduleService;
 import core.threads.PostCancellation;
-import core.util.InsuranceUtil;
-import core.util.NotificationUtil;
-import core.util.QueryUtil;
+import core.util.*;
 import dao.BeanFactory;
 import dao.entities.*;
 import dao.enums.TransactionType;
@@ -39,8 +33,7 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import static core.constants.ProcessActions.*;
-import static core.constants.ProcessStates.APPROVED;
-import static core.constants.ProcessStates.AWAITING_APPROVAL;
+import static core.constants.ProcessStates.*;
 import static core.util.CoreUtil.*;
 import static core.util.Util.*;
 
@@ -91,6 +84,8 @@ public class PolicyAPI {
 
     @Inject
     private IPaymentScheduleService iPaymentScheduleService;
+    @Inject
+    private PolicyChangeControlInterface policyChangeControlInterface;
 
 
     @GET
@@ -119,7 +114,7 @@ public class PolicyAPI {
             errorCause = e.getMessage();
         } finally {
 
-            queryUtil.saveLog(setWebserviceLog(traceId, requestTime, username,
+            queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, headers.getRemoteAddr()));
         }
 
@@ -131,11 +126,11 @@ public class PolicyAPI {
     @Path("/products-list/attr")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getProducts(@QueryParam("sessionId") String sessionId, @QueryParam("username") String username, @QueryParam("attr") String attr, @Context HttpServletRequest headers) {
+    public Response getProducts(@QueryParam("sessionId") String sessionId,@QueryParam("username") String username,@QueryParam("attr") String attr,@Context HttpServletRequest headers) {
 
         String traceId = getLogId();
         String methodName = "getProducts";
-        defaultNoParamRequest(LOGGER, traceId, sessionId, username, methodName, headers.getRemoteAddr());
+        defaultNoParamRequest(LOGGER,traceId,sessionId,username,methodName, headers.getRemoteAddr());
 
         Date requestTime = today();
         Response response = Response.status(Response.Status.NO_CONTENT).build();
@@ -146,7 +141,7 @@ public class PolicyAPI {
             List<Product> products = productInterface.findByAttributes(attr);
             response = Response.status(Response.Status.OK).entity(products).build();
             queryExecuted = true;
-            defaultSuccess(LOGGER, traceId);
+            defaultSuccess(LOGGER,traceId);
 
         } catch (Exception e) {
             LOGGER.error(e);
@@ -154,7 +149,7 @@ public class PolicyAPI {
             errorCause = e.getMessage();
         } finally {
 
-            queryUtil.saveLog(setWebserviceLog(traceId, requestTime, username,
+            queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, headers.getRemoteAddr()));
         }
 
@@ -166,8 +161,8 @@ public class PolicyAPI {
     @Path("/sub-products-list")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getSubProducts(@QueryParam("productId") String productId, @QueryParam("sessionId") String sessionId,
-                                   @QueryParam("username") String username, @Context HttpServletRequest headers) {
+    public Response getSubProducts(@QueryParam("productId") String productId,@QueryParam("sessionId") String sessionId,
+                                   @QueryParam("username") String username,@Context HttpServletRequest headers) {
 
         String traceId = getLogId();
         String methodName = "getSubProducts";
@@ -187,14 +182,14 @@ public class PolicyAPI {
             subProducts = subProductInterface.findByProductOrderByName(product);
             response = Response.status(Response.Status.OK).entity(subProducts).build();
             queryExecuted = true;
-            defaultSuccess(LOGGER, traceId);
+            defaultSuccess(LOGGER,traceId);
         } catch (Exception e) {
             LOGGER.error(e);
             response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
             errorCause = e.getMessage();
         } finally {
 
-            queryUtil.saveLog(setWebserviceLog(traceId, requestTime, username,
+            queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, ipAddress));
         }
 
@@ -207,26 +202,26 @@ public class PolicyAPI {
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createPolicy(PolicyRequest policyRequest, @Context HttpServletRequest headers) {
+    public Response createPolicy(PolicyRequest policyRequest,@Context HttpServletRequest headers) {
 
         String traceId = getLogId();
         String methodName = "createPolicy";
         Response response = Response.status(Response.Status.NO_CONTENT).build();
-        if (policyRequest != null) {
+        if(policyRequest!=null){
 
-            defaultObjectRequest(LOGGER, traceId, policyRequest.toString(), methodName, headers.getRemoteAddr());
+        defaultObjectRequest(LOGGER,traceId,policyRequest.toString(),methodName,headers.getRemoteAddr());
 
-            Date requestTime = today();
-            boolean queryExecuted = false;
-            String errorCause = "";
-            PolicyResponse policyResponse = new PolicyResponse();
-            InsurancePolicy savedInsurancePolicy;
+        Date requestTime = today();
+        boolean queryExecuted = false;
+        String errorCause = "";
+        PolicyResponse policyResponse = new PolicyResponse();
+        InsurancePolicy savedInsurancePolicy;
 
-            try {
+        try {
                 PolicyHolder policyHolder = new PolicyHolder();
                 policyHolder.setLastUpdate(today());
                 policyHolder.setMobileNumber(policyRequest.getMainPhone());
-                policyHolder.setCustomerName(policyRequest.getFullName() + " " + policyRequest.getSurname());
+                policyHolder.setCustomerName(policyRequest.getFullName()+" "+policyRequest.getSurname());
                 policyHolder.setEmail(policyRequest.getEmail());
                 policyHolder.setDocumentId(policyRequest.getIdNumber());
                 policyHolder.setVat(policyRequest.getNuit());
@@ -248,7 +243,7 @@ public class PolicyAPI {
                 insurancePolicy.setStartDate(stringToDate(policyRequest.getStartDate()));
                 insurancePolicy.setExpiryDate(stringToDate(policyRequest.getEndDate()));
 
-                savedInsurancePolicy = insuranceUtil.postPolicy(policyHolder, insurancePolicy, policyRequest, traceId);
+                savedInsurancePolicy = insuranceUtil.postPolicy(policyHolder,insurancePolicy,policyRequest,traceId);
                 policyResponse.setPolicyId(savedInsurancePolicy.getPolicyId());
                 policyResponse.setStatus(true);
 
@@ -257,21 +252,22 @@ public class PolicyAPI {
                 notificationUtil.postSendSMS(traceId, savedInsurancePolicy);
 
 
-            } catch (Exception e) {
+        } catch (Exception e) {
 
-                LOGGER.error(traceId, e);
-                response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-                errorCause = e.getMessage();
+            LOGGER.error(traceId,e);
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            errorCause = e.getMessage();
 
-            } finally {
+        } finally {
 
-                queryUtil.saveLog(setWebserviceLog(traceId, requestTime, "web",
-                        methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, policyRequest.getSessionId(),
-                        headers.getRemoteAddr(), false, "Create Policy", null));
+            queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, "web",
+                            methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, policyRequest.getSessionId(),
+                            headers.getRemoteAddr(), false, "Create Policy",  null));
 
 
-            }
-        } else {
+         }
+        }
+        else {
             LOGGER.info("Invalid payload");
         }
         return response;
@@ -316,7 +312,8 @@ public class PolicyAPI {
 
             } catch (BusinessException e) {
 
-                ErrorResponse errorResponse = new ErrorResponse(e.getCode(), e.getMessage());
+                core.exception.ErrorResponse errorResponse = new core.exception
+                        .ErrorResponse(e.getCode(), e.getMessage());
 
                 response = Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();
                 LOGGER.error(traceId, e);
@@ -330,7 +327,7 @@ public class PolicyAPI {
 
             } finally {
 
-                queryUtil.saveLog(setWebserviceLog(traceId, requestTime, "web", methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, createInvoiceRequest.getSessionId(), headers.getRemoteAddr(), false, "Create Payment Schedule", null));
+                queryUtil.saveLog(setWebserviceLog(traceId, requestTime, "web", methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, createPaymentScheduleRequest.getSessionId(), headers.getRemoteAddr(), false, "Create Payment Schedule", null));
 
 
             }
@@ -346,12 +343,12 @@ public class PolicyAPI {
     @Path("/product-config-list")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getProductConfig(@QueryParam("subProductId") Long subProductId, @QueryParam("sessionId") String sessionId, @QueryParam("username") String username, @Context HttpServletRequest headers) {
+    public Response getProductConfig(@QueryParam("subProductId") Long subProductId,@QueryParam("sessionId") String sessionId,@QueryParam("username") String username,@Context HttpServletRequest headers) {
 
         String reqRes = getLogId();
         String methodName = "getProductConfig";
         String ipAddress = headers.getRemoteAddr();
-        LOGGER.info("{} is being called with parameter. subProductId -> {}, username -> {}, sessionId -> {}, logId -> {}, ipAddress -> {} ", subProductId, methodName, username, sessionId, reqRes, ipAddress);
+        LOGGER.info("{} is being called with parameter. subProductId -> {}, username -> {}, sessionId -> {}, logId -> {}, ipAddress -> {} ",subProductId, methodName, username, sessionId, reqRes, ipAddress);
 
         Date requestTime = today();
         Response response = Response.status(Response.Status.NO_CONTENT).build();
@@ -365,7 +362,7 @@ public class PolicyAPI {
             Optional<ProductConfig> productConfig = productConfigInterface.findBySubProductAndStatus(subProduct, setActive());
             if (productConfig.isPresent()) {
                 response = Response.status(Response.Status.OK).entity(productConfig.get()).build();
-                defaultSuccess(LOGGER, reqRes);
+                defaultSuccess(LOGGER,reqRes);
                 queryExecuted = true;
             } else {
                 response = Response.status(Response.Status.OK).build();
@@ -378,24 +375,23 @@ public class PolicyAPI {
             errorCause = e.getCause().getMessage();
         } finally {
 
-            queryUtil.saveLog(setWebserviceLog(reqRes, requestTime, username,
+            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, ipAddress));
         }
         return response;
 
     }
 
-
     @GET
     @Path("/beneficiaries-list")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getBeneficiaries(@QueryParam("insurancePolicyId") String insurancePolicyId, @QueryParam("sessionId") String sessionId, @QueryParam("username") String username, @Context HttpServletRequest headers) {
+    public Response getBeneficiaries(@QueryParam("insurancePolicyId") String insurancePolicyId,@QueryParam("sessionId") String sessionId,@QueryParam("username") String username,@Context HttpServletRequest headers) {
 
         String reqRes = getLogId();
         String methodName = "getBeneficiaries";
         LOGGER.info("{} is being called with parameter. insurancePolicyId -> {}, username -> {}, sessionId -> {}, logId -> {}, ipAddress -> {} ",
-                methodName, insurancePolicyId, username, sessionId, reqRes, headers.getRemoteAddr());
+                 methodName, insurancePolicyId,username, sessionId, reqRes, headers.getRemoteAddr());
 
         Date requestTime = today();
         Response response = Response.status(Response.Status.NO_CONTENT).build();
@@ -405,7 +401,7 @@ public class PolicyAPI {
         try {
             List<Beneficiaries> beneficiaries = beneficiariesInterface.findByInsurancePolicyAndStatus(setInsurancePolicy(insurancePolicyId), setActive());
             response = Response.status(Response.Status.OK).entity(beneficiaries).build();
-            defaultSuccess(LOGGER, reqRes);
+            defaultSuccess(LOGGER,reqRes);
             queryExecuted = true;
 
 
@@ -415,7 +411,7 @@ public class PolicyAPI {
             errorCause = e.getMessage();
         } finally {
 
-            queryUtil.saveLog(setWebserviceLog(reqRes, requestTime, username,
+            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, headers.getRemoteAddr()));
         }
         return response;
@@ -427,12 +423,12 @@ public class PolicyAPI {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
-    public Response cancelPolicy(PolicyCancelRequest policyCancelRequest, @Context HttpServletRequest headers) {
+    public Response cancelPolicy(PolicyCancelRequest policyCancelRequest,@Context HttpServletRequest headers) {
 
         String reqRes = getLogId();
         String methodName = "cancelPolicy";
         Response response = Response.status(Response.Status.BAD_REQUEST).build();
-        if (policyCancelRequest != null) {
+        if(policyCancelRequest!=null) {
             defaultObjectRequest(LOGGER, reqRes, policyCancelRequest.toString(), methodName, headers.getRemoteAddr());
 
             Date requestTime = today();
@@ -465,7 +461,7 @@ public class PolicyAPI {
 
                     InsurancePolicyHistory insurancePolicyHistorySaved = insurancePolicyHistoryInterface.save(insurancePolicyHistory);
 
-                    LOGGER.info("InsurancePolicyHistory saved {}. traceId -> {}", insurancePolicyHistorySaved.getIphId(), reqRes);
+                    LOGGER.info("InsurancePolicyHistory saved {}. traceId -> {}", insurancePolicyHistorySaved.getIphId(),reqRes);
 
                     CancellationContext cancellationContext = new CancellationContext();
                     cancellationContext.setPolicyId(policyCancelRequest.getPolicyId());
@@ -487,17 +483,18 @@ public class PolicyAPI {
 
                 queryExecuted = true;
             } catch (Exception e) {
-                LOGGER.error(reqRes, e);
+                LOGGER.error(reqRes,e);
                 response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
                 errorCause = e.getMessage();
 
             } finally {
 
-                queryUtil.saveLog(setWebserviceLog(reqRes, requestTime, policyCancelRequest.getUsername(),
+                queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, policyCancelRequest.getUsername(),
                         methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, policyCancelRequest.getSessionId(), headers.getRemoteAddr()));
             }
-        } else {
-            LOGGER.info("PolicyCancelRequest is null. traceId -> {}", reqRes);
+        }
+        else {
+            LOGGER.info("PolicyCancelRequest is null. traceId -> {}",reqRes);
         }
         return response;
 
@@ -511,12 +508,12 @@ public class PolicyAPI {
     public Response getMemberPrice(@QueryParam("subProductId") Long subProductId,
                                    @QueryParam("benefitCycle") Long benefitCycle,
                                    @QueryParam("dateOfBirth") String dateOfBirth,
-                                   @QueryParam("sessionId") String sessionId, @QueryParam("username") String username, @Context HttpServletRequest headers) {
+                                   @QueryParam("sessionId") String sessionId,@QueryParam("username") String username,@Context HttpServletRequest headers) {
 
         String reqRes = getLogId();
         String methodName = "getMemberPrice";
         LOGGER.info("{} is being called with parameter. subProductId -> {}, username -> {}, sessionId -> {}, logId -> {}, benefitCycle - {}, dateOfBirth -. {}, ipAddress -> {} ",
-                methodName, subProductId, username, sessionId, reqRes, benefitCycle, dateOfBirth, headers.getRemoteAddr());
+                methodName,subProductId, username, sessionId, reqRes,benefitCycle,dateOfBirth, headers.getRemoteAddr());
 
         Date requestTime = today();
         Response response = Response.status(Response.Status.NO_CONTENT).build();
@@ -529,23 +526,23 @@ public class PolicyAPI {
 
             int age = calculateAge(dateOfBirth);
 
-            LOGGER.info("Age is {}", age);
+            LOGGER.info("Age is {}",age);
             Optional<MemberProductPrice> memberProductPrices = memberProductPriceInterface.findBySubProduct(subProduct,
-                    age, setBenefitCycle(benefitCycle));
-            if (memberProductPrices.isPresent()) {
+                    age,setBenefitCycle(benefitCycle));
+            if(memberProductPrices.isPresent()) {
                 response = Response.status(Response.Status.OK).entity(memberProductPrices.get()).build();
             }
-            defaultSuccess(LOGGER, reqRes);
+            defaultSuccess(LOGGER,reqRes);
             queryExecuted = true;
 
 
         } catch (Exception e) {
-            LOGGER.error(reqRes, e);
+            LOGGER.error(reqRes,e);
             response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
             errorCause = e.getCause().getMessage();
         } finally {
 
-            queryUtil.saveLog(setWebserviceLog(reqRes, requestTime, username,
+            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, headers.getRemoteAddr()));
         }
 
@@ -566,13 +563,13 @@ public class PolicyAPI {
     @Path("/payment-log")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getPaymentLog(@QueryParam("startDate") String startDate, @QueryParam("endDate") String endDate, @QueryParam("policyId") String policyId, @QueryParam("sessionId") String sessionId, @QueryParam("username") String username,
-                                  @QueryParam("status") String status, @Context HttpServletRequest headers) {
+    public Response getPaymentLog(@QueryParam("startDate") String startDate,@QueryParam("endDate") String endDate,@QueryParam("policyId") String policyId,@QueryParam("sessionId") String sessionId,@QueryParam("username") String username,
+                                  @QueryParam("status") String status,@Context HttpServletRequest headers) {
 
         String reqRes = getLogId();
         String methodName = "getPaymentSchedule";
         LOGGER.info("{} is being called with parameter. startDate -> {}, endDate -> {}, policyId -> {}, username -> {}, sessionId -> {}, logId -> {}, ipAddress -> {} ",
-                methodName, startDate, endDate, policyId, username, sessionId, reqRes, headers.getRemoteAddr());
+                methodName,startDate, endDate, policyId,  username, sessionId, reqRes, headers.getRemoteAddr());
 
         Date requestTime = today();
         Response response = Response.status(Response.Status.NO_CONTENT).build();
@@ -599,7 +596,7 @@ public class PolicyAPI {
             errorCause = e.getCause().getMessage();
         } finally {
 
-            queryUtil.saveLog(setWebserviceLog(reqRes, requestTime, username,
+            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, headers.getRemoteAddr()));
         }
         return response;
@@ -610,13 +607,14 @@ public class PolicyAPI {
     @Path("/update")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updatePolicy(PolicyUpdateRequest policyUpdateRequest, @Context HttpServletRequest headers) {
+    @Transactional
+    public Response updatePolicy(PolicyUpdateRequest policyUpdateRequest,@Context HttpServletRequest headers) {
 
         String traceId = getLogId();
         String methodName = "updatePolicy";
         Response response = Response.status(Response.Status.BAD_REQUEST).build();
-        if (policyUpdateRequest != null) {
-            defaultObjectRequest(LOGGER, traceId, policyUpdateRequest.toString(), methodName, headers.getRemoteAddr());
+        if(policyUpdateRequest!=null) {
+            defaultObjectRequest(LOGGER,traceId,policyUpdateRequest.toString(),methodName,headers.getRemoteAddr());
 
             Date requestTime = today();
             boolean queryExecuted = false;
@@ -626,36 +624,38 @@ public class PolicyAPI {
             try {
 
                 LOGGER.info("Updating Insurance Policy with id {} ", policyUpdateRequest.getPolicyId());
-                int updated = insurancePolicyInterface.updatePolicy(policyUpdateRequest.getTotalAmount(),
-                        today(), policyUpdateRequest.getUsername(), policyUpdateRequest.getPolicyId());
-                if (updated > 0) {
-                    LOGGER.info("Insurance Policy Updated");
-                } else {
-                    LOGGER.info("No update made to Insurance Policy");
-                }
+                    int updated = insurancePolicyInterface.updatePolicy(policyUpdateRequest.getTotalAmount(),
+                            today(),policyUpdateRequest.getUsername(), policyUpdateRequest.getPolicyId());
+                    if(updated>0){
+                        LOGGER.info("Insurance Policy Updated");
+                    }
+                    else{
+                        LOGGER.info("No update made to Insurance Policy");
+                    }
 
-                /** TOO: check date of birth **/
-                LOGGER.info("Updating Policy Holder with id {} ", policyUpdateRequest.getHolderId());
-                int updatePolicyHolder = policyHolderInterface.updatePolicyHolder(today(), policyUpdateRequest.getMainPhone(), today(),
-                        policyUpdateRequest.getFullName() + " " + policyUpdateRequest.getSurname(),
-                        policyUpdateRequest.getEmail(),
-                        policyUpdateRequest.getNuit(),
-                        policyUpdateRequest.getAddress(),
-                        Long.parseLong(policyUpdateRequest.getJobTitle()),
-                        policyUpdateRequest.getIdNumber(), policyUpdateRequest.getHolderId());
+                    /** TOO: check date of birth **/
+                    LOGGER.info("Updating Policy Holder with id {} ", policyUpdateRequest.getHolderId());
+                    int updatePolicyHolder = policyHolderInterface.updatePolicyHolder(today(), policyUpdateRequest.getMainPhone(), today(),
+                            policyUpdateRequest.getFullName()+" "+policyUpdateRequest.getSurname(),
+                            policyUpdateRequest.getEmail(),
+                            policyUpdateRequest.getNuit(),
+                            policyUpdateRequest.getAddress(),
+                            Long.parseLong(policyUpdateRequest.getJobTitle()),
+                            policyUpdateRequest.getIdNumber(), policyUpdateRequest.getHolderId());
 
-                if (updatePolicyHolder > 0) {
-                    LOGGER.info("Policy Holder Updated");
-                } else {
-                    LOGGER.info("No update made to Policy Holder");
-                }
+                    if(updatePolicyHolder>0){
+                        LOGGER.info("Policy Holder Updated");
+                    }
+                    else{
+                        LOGGER.info("No update made to Policy Holder");
+                    }
 
-                //Beneficiaries update
+                    //Beneficiaries update
 
                 LOGGER.info("Creating new Beneficiaries for policy id {} ", policyUpdateRequest.getPolicyId());
-                BenefRequest benefRequests = policyUpdateRequest.getBenefRequest();
-                List<BeneficiaryRequestPayload> beneficiaryRequestPayloads = benefRequests.getNewlyAdded();
-                for (BeneficiaryRequestPayload beneficiaries : beneficiaryRequestPayloads) {
+                 BenefRequest benefRequest = policyUpdateRequest.getBenefRequest();
+                 List<BeneficiaryRequestPayload> beneficiaryRequestPayloads = benefRequest.getNewlyAdded();
+                for (BeneficiaryRequestPayload beneficiaries  : beneficiaryRequestPayloads) {
 
                     Beneficiaries b = new Beneficiaries();
                     b.setPolicy(setInsurancePolicy(policyUpdateRequest.getPolicyId()));
@@ -677,25 +677,34 @@ public class PolicyAPI {
 
                     beanFactory.merge(b);
                     Beneficiaries savedBeneficiaries = beneficiariesInterface.save(b);
-                    LOGGER.info("Beneficiary saved! name = {}, traceId -> {}", savedBeneficiaries.getName(), traceId);
+                    LOGGER.info("Beneficiary saved! name = {}, traceId -> {}", savedBeneficiaries.getName(),traceId);
 
-                    insuranceUtil.saveOutstandingAmount(policyUpdateRequest.getPolicyId(), beneficiaries.getTotalCharge(), traceId, "Beneficiary inclusion " + beneficiaries.getName(), TransactionType.CREDIT);
+                    insuranceUtil.saveOutstandingAmount(policyUpdateRequest.getPolicyId(),beneficiaries.getTotalCharge(),traceId,"Beneficiary inclusion "+beneficiaries.getName(), TransactionType.CREDIT);
 
                 }
 
                 LOGGER.info("Removing Beneficiaries for policy id {} ", policyUpdateRequest.getPolicyId());
-                List<BeneficiaryRequestPayload> benToBeRemoved = benefRequests.getToBeRemoved();
-                for (BeneficiaryRequestPayload beneficiaries : benToBeRemoved) {
+                List<BeneficiaryRequestPayload> benToBeRemoved = benefRequest.getToBeRemoved();
+                for (BeneficiaryRequestPayload beneficiaries  : benToBeRemoved) {
 
                     int removed = beneficiariesInterface.updateBeneficiary(today(), policyUpdateRequest.getUsername(),
                             setStatus(Statuses.REMOVED.toString()), beneficiaries.getBeneficiaryId());
-                    if (removed > 0) {
-                        LOGGER.info("Beneficiary removed! id = {}, traceId -> {}", beneficiaries.getBeneficiaryId(), traceId);
-                        insuranceUtil.saveOutstandingAmount(policyUpdateRequest.getPolicyId(), beneficiaries.getTotalCharge(), traceId, "Beneficiary removal " + beneficiaries.getName(), TransactionType.DEBT);
+                    if(removed>0){
+                        LOGGER.info("Beneficiary removed! id = {}, traceId -> {}", beneficiaries.getBeneficiaryId(),traceId);
+                        insuranceUtil.saveOutstandingAmount(policyUpdateRequest.getPolicyId(),beneficiaries.getTotalCharge(),traceId,"Beneficiary removal "+beneficiaries.getName(),TransactionType.DEBT);
 
-                    } else {
-                        LOGGER.info("No update made to Beneficiary! id = {}, traceId -> {}", beneficiaries.getBeneficiaryId(), traceId);
                     }
+                    else{
+                        LOGGER.info("No update made to Beneficiary! id = {}, traceId -> {}", beneficiaries.getBeneficiaryId(),traceId);
+                    }
+                }
+
+                if(beneficiaryRequestPayloads.size()>0 || benToBeRemoved.size()>0){
+                    PolicyChangeControl policyChangeControl = new PolicyChangeControl();
+                    policyChangeControl.setInsurancePolicy(setInsurancePolicy(policyUpdateRequest.getPolicyId()));
+                    policyChangeControl.setChangeDate(today());
+                    policyChangeControlInterface.save(policyChangeControl);
+                    LOGGER.info("Policy Control record created for policy id {}", policyUpdateRequest.getPolicyId());
                 }
 
 
@@ -704,36 +713,43 @@ public class PolicyAPI {
                 policyRequest.setComments(policyUpdateRequest.getComments());
                 policyRequest.setUsername(policyUpdateRequest.getUsername());
                 LOGGER.info("Logging policy history for policy id {} ", policyUpdateRequest.getPolicyId());
-                insuranceUtil.logPolicyHistory(policyRequest, traceId, "Alteração de beneficiários");
-                //  notificationUtil.postSendAmendmentSMS(traceId, insurancePolicy, customerResponse);
+                insuranceUtil.logPolicyHistory(policyRequest,traceId,"Alteração de beneficiários");
+              //  notificationUtil.postSendAmendmentSMS(traceId, insurancePolicy, customerResponse);
+                policyResponse.setPolicyId(policyUpdateRequest.getPolicyId());
+                policyResponse.setStatus(true);
+
                 response = Response.status(Response.Status.OK).entity(policyResponse).build();
                 queryExecuted = true;
 
 
+
             } catch (Exception e) {
-                LOGGER.error(traceId, e);
+                LOGGER.error(traceId,e);
                 response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-                errorCause = e.getMessage();
             } finally {
 
-                queryUtil.saveLog(setWebserviceLog(traceId, requestTime, policyUpdateRequest.getUsername(),
+                queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, policyUpdateRequest.getUsername(),
                         methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, policyUpdateRequest.getSessionId(), headers.getRemoteAddr()));
             }
-        } else {
-            LOGGER.info("PolicyRequest is null. traceId -> {}", traceId);
+        }
+        else {
+            LOGGER.info("PolicyRequest is null. traceId -> {}",traceId);
         }
         return response;
 
     }
 
 
+
+
+
     @GET
     @Path("/payment-log/status")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getPaymentStatus(@QueryParam("policyId") String policyId, @QueryParam("sessionId") String sessionId,
-                                     @QueryParam("username") String username, @QueryParam("status") String status,
-                                     @QueryParam("startDate") String startDate, @QueryParam("endDate") String endDate, @Context HttpServletRequest headers) {
+    public Response getPaymentStatus(@QueryParam("policyId") String policyId,@QueryParam("sessionId") String sessionId,
+                                     @QueryParam("username") String username,@QueryParam("status") String status,
+                                     @QueryParam("startDate") String startDate,@QueryParam("endDate") String endDate,@Context HttpServletRequest headers) {
 
         String traceId = getLogId();
         String methodName = "getPaymentStatus";
@@ -748,19 +764,19 @@ public class PolicyAPI {
         try {
             Date sd = stringToDateTime(startDate);
             Date ed = getDatePlus(stringToDate(endDate), 1, Calendar.DATE);
-            List<PaymentSchedule> paymentLogs = paymentScheduleInterface.findByPolicyIdAndStatus(policyId, status, sd, ed);
+            List<PaymentSchedule> paymentLogs = paymentScheduleInterface.findByPolicyIdAndStatus(policyId, status,sd,ed);
             response = Response.status(Response.Status.OK).entity(paymentLogs).build();
-            defaultSuccess(LOGGER, traceId);
+            defaultSuccess(LOGGER,traceId);
             queryExecuted = true;
 
 
         } catch (Exception e) {
-            LOGGER.error(traceId, e);
+            LOGGER.error(traceId,e);
             response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
             errorCause = e.getCause().getMessage();
         } finally {
 
-            queryUtil.saveLog(setWebserviceLog(traceId, requestTime, username,
+            queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, headers.getRemoteAddr()));
         }
 
@@ -774,7 +790,7 @@ public class PolicyAPI {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
-    public Response updateSubProduct(SubProductUpdate subProductUpdate, @Context HttpServletRequest headers) {
+    public Response updateSubProduct(SubProductUpdate subProductUpdate,@Context HttpServletRequest headers) {
 
         String traceId = getLogId();
         String methodName = "updateSubProduct";
@@ -835,7 +851,7 @@ public class PolicyAPI {
                     productConfig.setPartnerMaxAge(subProductUpdate.getPartnerMaxAge());
                     productConfig.setMemberNumberLimit(subProductUpdate.getMemberNumberLimit());
                     productConfig.setMaxBenNumber(subProductUpdate.getMaxBenNumber());
-                    // productConfig.setBenExitAge(subProductUpdate);
+                   // productConfig.setBenExitAge(subProductUpdate);
 
                     ProductConfig pc = productConfigInterface.save(productConfig);
 
@@ -856,7 +872,7 @@ public class PolicyAPI {
                 errorCause = e.getCause().getMessage();
             } finally {
 
-                queryUtil.saveLog(setWebserviceLog(traceId, requestTime, subProductUpdate.getUsername(),
+                queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, subProductUpdate.getUsername(),
                         methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, subProductUpdate.getSessionId(), headers.getRemoteAddr()));
             }
         }
@@ -871,7 +887,7 @@ public class PolicyAPI {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
-    public Response updateSubProductV2(SubProductUpdate subProductUpdate, @Context HttpServletRequest headers) {
+    public Response updateSubProductV2(SubProductUpdate subProductUpdate,@Context HttpServletRequest headers) {
 
         String traceId = getLogId();
         String methodName = "updateSubProduct";
@@ -907,7 +923,7 @@ public class PolicyAPI {
                     Optional<ProductConfig> productConfigDB = productConfigInterface.findBySubProductAndStatus(setSubProduct(subProductUpdate.getSubProductId()),
                             setActive());
 
-                    if (productConfigDB.isPresent()) {
+                    if(productConfigDB.isPresent()) {
                         ProductConfig productConfig = new ProductConfig();
                         productConfig.setSubProduct(setSubProduct(subProductUpdate.getSubProductId()));
 
@@ -939,7 +955,8 @@ public class PolicyAPI {
 
                         LOGGER.info("ProductConfiguration saved! id = {}", pc.getProductConfigId());
                         productConfigResponse.setStatus(true);
-                    } else {
+                    }
+                    else {
                         productConfigResponse.setErrorMessage("Configurações inválidas!");
                         productConfigResponse.setStatus(false);
                     }
@@ -958,7 +975,7 @@ public class PolicyAPI {
                 errorCause = e.getCause().getMessage();
             } finally {
 
-                queryUtil.saveLog(setWebserviceLog(traceId, requestTime, subProductUpdate.getUsername(),
+                queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, subProductUpdate.getUsername(),
                         methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, subProductUpdate.getSessionId(), headers.getRemoteAddr()));
             }
         }
@@ -972,14 +989,15 @@ public class PolicyAPI {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
-    public Response updateBeneficiary(BeneficiaryRequest beneficiaryRequest, @Context HttpServletRequest headers) {
+    public Response updateBeneficiary(BeneficiaryRequest beneficiaryRequest,@Context HttpServletRequest headers) {
 
         String traceId = getLogId();
         String methodName = "updateBeneficiary";
         Response response = Response.status(Response.Status.BAD_REQUEST).build();
-        if (beneficiaryRequest == null) {
-            LOGGER.info("BeneficiaryRequest is null. traceId -> {}", traceId);
-        } else {
+        if(beneficiaryRequest==null){
+            LOGGER.info("BeneficiaryRequest is null. traceId -> {}",traceId);
+        }
+        else {
             defaultObjectRequest(LOGGER, traceId, beneficiaryRequest.toString(), methodName, headers.getRemoteAddr());
 
             Date requestTime = today();
@@ -1050,6 +1068,7 @@ public class PolicyAPI {
                     reportRequest.setRegenerate(true);
 
 
+
                 }
 
                 response = Response.status(Response.Status.OK).entity(productConfigResponse).build();
@@ -1061,7 +1080,7 @@ public class PolicyAPI {
                 errorCause = e.getCause().getMessage();
             } finally {
 
-                queryUtil.saveLog(setWebserviceLog(traceId, requestTime, beneficiaryRequest.getUsername(),
+                queryUtil.saveLog(CoreUtil.setWebserviceLog(traceId, requestTime, beneficiaryRequest.getUsername(),
                         methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, beneficiaryRequest.getSessionId(), headers.getRemoteAddr()));
             }
         }
@@ -1106,7 +1125,7 @@ public class PolicyAPI {
                 insuranceHistoryResponse.setDate(request.getCreatedDate());
                 insuranceHistoryResponse.setUsername(request.getUsers().getUserId());
                 insuranceHistoryResponse.setAction(request.getProcessAction().getActionName().toUpperCase());
-                insuranceHistoryResponse.setNarrative(request.getNarrative());
+               insuranceHistoryResponse.setNarrative(request.getNarrative());
                 insuranceHistoryResponse.setProcessId(request.getProcessId());
 
                 Optional<UserDetails> userDetails = userDetailsInterface.findByUsers(request.getUsers());
@@ -1128,7 +1147,7 @@ public class PolicyAPI {
             errorCause = e.getMessage();
         } finally {
 
-            queryUtil.saveLog(setWebserviceLog(reqRes, requestTime, username,
+            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, ipAddress));
         }
         LOGGER.info("Response {}, Response Id = {}", statuses, reqRes);
@@ -1197,7 +1216,7 @@ public class PolicyAPI {
             errorCause = e.getMessage();
         } finally {
 
-            queryUtil.saveLog(setWebserviceLog(reqRes, requestTime, policyReopenRequest.getUsername(),
+            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, policyReopenRequest.getUsername(),
                     methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, policyReopenRequest.getSessionId(), ipAddress));
         }
 
@@ -1210,9 +1229,9 @@ public class PolicyAPI {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProductByType(@QueryParam("sessionId") String sessionId,
-                                     @QueryParam("username") String username,
-                                     @QueryParam("productType") String productType,
-                                     @Context HttpServletRequest headers) {
+                                @QueryParam("username") String username,
+                                @QueryParam("productType") String productType,
+                                @Context HttpServletRequest headers) {
 
         String reqRes = getLogId();
         String methodName = "getProductsByType";
@@ -1235,7 +1254,7 @@ public class PolicyAPI {
             errorCause = e.getCause().getMessage();
         } finally {
 
-            queryUtil.saveLog(setWebserviceLog(reqRes, requestTime, username,
+            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, ipAddress));
         }
         return response;
@@ -1243,17 +1262,18 @@ public class PolicyAPI {
     }
 
 
+
     @GET
     @Path("/sub-product-beneficiaries-price")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getBeneficiariesPrice(@QueryParam("subProductId") Long subProductId, @QueryParam("benefitCycle") Long benefCycle, @QueryParam("sessionId") String sessionId, @QueryParam("username") String username, @Context HttpServletRequest headers) {
+    public Response getBeneficiariesPrice(@QueryParam("subProductId") Long subProductId,@QueryParam("benefitCycle") Long benefCycle,@QueryParam("sessionId") String sessionId,@QueryParam("username") String username,@Context HttpServletRequest headers) {
 
         String reqRes = getLogId();
         String methodName = "getBeneficiariesPrice";
         String ipAddress = headers.getRemoteAddr();
         LOGGER.info("{} is being called with parameter. subProductId -> {}, benefitCycle ->{}," +
-                    " username -> {}, sessionId -> {}, logId -> {}, ipAddress -> {} ", subProductId, benefCycle, methodName, username, sessionId, reqRes, ipAddress);
+                " username -> {}, sessionId -> {}, logId -> {}, ipAddress -> {} ",subProductId,benefCycle, methodName, username, sessionId, reqRes, ipAddress);
 
         Date requestTime = today();
         Response response = Response.status(Response.Status.NO_CONTENT).build();
@@ -1272,14 +1292,15 @@ public class PolicyAPI {
                             .stream()
                             .map(m -> new BeneficiaryPriceResponse(
                                     m.getAmount(),
-                                    m.getBeneficiaryDescription() + "( " + m.getMinAge() + " - " + m.getMaxAge() + ")"
+                                    m.getBeneficiaryDescription() + "( "+m.getMinAge()+" - "+m.getMaxAge()+")"
                             ))
                             .collect(Collectors.toList());
 
-            LOGGER.info("MemberProductPrice returned {}", beneficiaryPriceResponses);
-            response = Response.status(Response.Status.OK).entity(beneficiaryPriceResponses).build();
-            defaultSuccess(LOGGER, reqRes);
-            queryExecuted = true;
+            LOGGER.info("MemberProductPrice returned {}",beneficiaryPriceResponses);
+                response = Response.status(Response.Status.OK).entity(beneficiaryPriceResponses).build();
+                defaultSuccess(LOGGER,reqRes);
+                queryExecuted = true;
+
 
 
         } catch (Exception e) {
@@ -1288,7 +1309,7 @@ public class PolicyAPI {
             errorCause = e.getCause().getMessage();
         } finally {
 
-            queryUtil.saveLog(setWebserviceLog(reqRes, requestTime, username,
+            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, ipAddress));
         }
         return response;
@@ -1307,7 +1328,7 @@ public class PolicyAPI {
         String reqRes = getLogId();
         String methodName = "fetchPolicyByPhoneNumber";
         String ipAddress = headers.getRemoteAddr();
-        LOGGER.info("{} is being called with parameter. phoneNumber -> {},  sessionId -> {}, username -> {}, logId -> {}, ipAddress -> {} ", methodName, phoneNumber, sessionId, username, reqRes, ipAddress);
+        LOGGER.info("{} is being called with parameter. phoneNumber -> {},  sessionId -> {}, username -> {}, logId -> {}, ipAddress -> {} ",methodName,phoneNumber, sessionId,username, reqRes, ipAddress);
         Date requestTime = today();
         Response response = Response.status(Response.Status.NO_CONTENT).build();
         boolean queryExecuted = false;
@@ -1317,7 +1338,7 @@ public class PolicyAPI {
             List<InsurancePolicy> insurancePolicyList = this.insurancePolicyInterface.findByMobileNumber(phoneNumber);
             if (!insurancePolicyList.isEmpty()) {
                 response = Response.status(Response.Status.OK).entity(insurancePolicyList).build();
-                defaultSuccess(LOGGER, reqRes);
+                defaultSuccess(LOGGER,reqRes);
                 queryExecuted = true;
             } else {
                 response = Response.status(Response.Status.OK).build();
@@ -1328,7 +1349,7 @@ public class PolicyAPI {
             errorCause = e.getCause().getMessage();
         } finally {
 
-            queryUtil.saveLog(setWebserviceLog(reqRes, requestTime, username,
+            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, ipAddress));
         }
         return response;
@@ -1341,15 +1362,15 @@ public class PolicyAPI {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response fetchPolicyByPhoneNumberAndInsurance(
-            @QueryParam("phoneNumber") String phoneNumber,
-            @QueryParam("insurancePolicyId") String insurancePolicyId,
-            @QueryParam("sessionId") String sessionId,
-            @QueryParam("username") String username,
-            @Context HttpServletRequest headers) {
+                                             @QueryParam("phoneNumber") String phoneNumber,
+                                             @QueryParam("insurancePolicyId") String insurancePolicyId,
+                                             @QueryParam("sessionId") String sessionId,
+                                             @QueryParam("username") String username,
+                                             @Context HttpServletRequest headers) {
         String reqRes = getLogId();
         String methodName = "fetchPolicyByPhoneNumberAndInsurance";
         String ipAddress = headers.getRemoteAddr();
-        LOGGER.info("{} is being called with parameter. phoneNumber -> {}, insurancePolicyId ->{}, sessionId -> {}, username -> {}, logId -> {}, ipAddress -> {} ", methodName, phoneNumber, insurancePolicyId, sessionId, username, reqRes, ipAddress);
+        LOGGER.info("{} is being called with parameter. phoneNumber -> {}, insurancePolicyId ->{}, sessionId -> {}, username -> {}, logId -> {}, ipAddress -> {} ",methodName,phoneNumber,insurancePolicyId, sessionId,username, reqRes, ipAddress);
         Date requestTime = today();
         Response response = Response.status(Response.Status.NO_CONTENT).build();
         boolean queryExecuted = false;

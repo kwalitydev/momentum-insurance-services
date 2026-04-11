@@ -646,7 +646,6 @@ public class ReportAPI {
         parameters.put("subproduct", Optional.ofNullable(insurancePolicyItem.getSubProduct()).map(SubProduct::getDescription).orElse("Cotação"));
         populateAccountParameters(insurancePolicyItem, parameters);
         populatePolicyParameters(insurancePolicyItem, reportRequest, parameters);
-        populateCoverageParameters(insurancePolicyItem, parameters);
         populateReportFieldParameters(insurancePolicyItem, parameters);
         populateBeneficiariesParameters(insurancePolicyItem, parameters);
 
@@ -703,22 +702,6 @@ public class ReportAPI {
         parameters.put("frequency", isNull(Optional.ofNullable(insurancePolicyItem.getPaymentFrequency()).map(Frequency::getName).orElse("")));
     }
 
-    private void populateCoverageParameters(InsurancePolicy insurancePolicyItem, Map<String, Object> parameters) {
-        BigDecimal baseAmountDecimal = insurancePolicyItem.getCoverage() != null ? insurancePolicyItem.getCoverage().getPremiumAmount() : BigDecimal.ZERO;
-        double totalPremium = insurancePolicyItem.getTotalAmount().doubleValue();
-        double premiumExtra = baseAmountDecimal.doubleValue() < totalPremium ? totalPremium - baseAmountDecimal.doubleValue() : 0;
-
-        String currencyId = Optional.ofNullable(insurancePolicyItem.getCurrency()).map(Currency::getCurrencyId).orElse("");
-        parameters.put("premiumPerEmployee", currencyId + " " + formatDouble(baseAmountDecimal.doubleValue()));
-        parameters.put("insuredCapital", isNull(Optional.ofNullable(insurancePolicyItem.getCoverage()).map(Coverage::getCoverAmount).map(amount -> currencyId + " " + formatDouble(amount.doubleValue())).orElse("")));
-        parameters.put("basePremium", currencyId + " " + formatDouble(baseAmountDecimal.doubleValue()));
-        parameters.put("totalPremium", currencyId + " " + formatDouble(totalPremium));
-        parameters.put("extraPremium", currencyId + " " + formatDouble(premiumExtra));
-        parameters.put("anualPayment", currencyId + " " + formatDouble(totalPremium * 12));
-    }
-
-  
-  
 
     private void populateReportFieldParameters(InsurancePolicy insurancePolicyItem, Map<String, Object> parameters) {
         List<ReportFieldMap> reportFieldMaps = reportFieldMapInterface.findBySubProductAndStatus(insurancePolicyItem.getSubProduct(), setActive());
@@ -981,104 +964,9 @@ public class ReportAPI {
 
                     }
 
-                    if (insurancePolicyItem.getCoverage() != null) {
-                        if (insurancePolicyItem.getCoverage().getCoverAmount() != null) {
-                            parameters.put("totalBenefit", currencyId + " " + formatDouble(insurancePolicyItem.getCoverage().getCoverAmount().doubleValue()));
-
-
-                            parameters.put("premiumPerEmployee", currencyId + " " +
-                                    "" + formatDouble(insurancePolicyItem.getCoverage().getPremiumAmount().doubleValue()));
-
-                            if (insurancePolicyItem.getCoverage().getCoverAmount() != null) {
-                                parameters.put("insuredCapital", currencyId + " " + formatDouble(insurancePolicyItem.getCoverage().getCoverAmount().doubleValue()));
-                            } else {
-                                parameters.put("insuredCapital", "");
-                            }
-                        }
-
-
-                    } else {
-                        parameters.put("totalBenefit", "");
-                    }
-
-                    BigDecimal baseAmountDecimal;
-
-                    if (insurancePolicyItem.getCoverage() != null) {
-                        if (insurancePolicyItem.getCoverage().getPremiumAmount() != null) {
-                            baseAmountDecimal = insurancePolicyItem.getCoverage().getPremiumAmount();
-
-
-                            double premiumExtra = 0;
-                            double totalPremium = insurancePolicyItem.getTotalAmount().doubleValue();
-
-                            if (baseAmountDecimal != null) {
-                                premiumExtra = totalPremium - baseAmountDecimal.doubleValue();
-                            } else {
-                                baseAmountDecimal = BigDecimal.valueOf(totalPremium);
-                            }
-                            parameters.put("basePremium", currencyId + " " + formatDouble(baseAmountDecimal.doubleValue()));
-                            parameters.put("extraPremium", currencyId + " " + formatDouble(premiumExtra));
-                        } else {
-                            parameters.put("basePremium", "");
-                            parameters.put("extraPremium", "");
-                        }
-                    } else {
-                        parameters.put("basePremium", "");
-                        parameters.put("extraPremium", "");
-                    }
 
                     parameters.put("totalPremium", currencyId + " " + formatDouble(insurancePolicyItem.getTotalAmount().doubleValue()));
                     parameters.put("anualPayment", currencyId + " " + formatDouble(insurancePolicyItem.getTotalAmount().doubleValue() * 12));
-
-                    if (insurancePolicyItem.getCoverage() != null) {
-                        if (insurancePolicyItem.getCoverage().getCoverAmount() != null) {
-
-
-                            parameters.put("totalMainMember", currencyId + " " +
-                                    "" + formatDouble(insurancePolicyItem.getCoverage().getCoverAmount().doubleValue()));
-                            parameters.put("totalCouple", currencyId + " " +
-                                    "" + formatDouble(insurancePolicyItem.getCoverage().getCoverAmount().doubleValue()));
-                            parameters.put("totalSon14to24", currencyId + " " +
-                                    "" + formatDouble(insurancePolicyItem.getCoverage().getCoverAmount().doubleValue()));
-                        } else {
-                            parameters.put("totalMainMember", "");
-                            parameters.put("totalCouple", "");
-                            parameters.put("totalSon14to24", "");
-                        }
-
-
-                        if (insurancePolicyItem.getCurrency() != null && insurancePolicyItem.getCoverage().getChildBenefitSup() != null) {
-
-                            parameters.put("totalSon4to14", currencyId + " " +
-                                    "" + formatDouble(insurancePolicyItem.getCoverage().getChildBenefitSup().doubleValue()));
-                        } else {
-                            parameters.put("totalSon4to14", "");
-                        }
-
-                        if (insurancePolicyItem.getCurrency() != null && insurancePolicyItem.getCoverage().getChildBenefitMin() != null) {
-
-                            parameters.put("totalSonLessThan4", currencyId + " " +
-                                    "" + formatDouble(insurancePolicyItem.getCoverage().getChildBenefitMin().doubleValue()));
-                        } else {
-                            parameters.put("totalSonLessThan4", "");
-                        }
-
-                        if (insurancePolicyItem.getCoverage().getCoverAmount() != null) {
-                            parameters.put("premiumPerEmployee", currencyId + " " +
-                                    "" + formatDouble(insurancePolicyItem.getCoverage().getPremiumAmount().doubleValue()));
-                        } else {
-                            parameters.put("premiumPerEmployee", "");
-                        }
-
-
-                    } else {
-                        parameters.put("totalMainMember", "");
-                        parameters.put("totalCouple", "");
-                        parameters.put("totalSon14to24", "");
-                        parameters.put("totalSon4to14", "");
-                        parameters.put("totalSonLessThan4", "");
-                    }
-
 
                     parameters.put("totalNewBornDead", insurancePolicyItem.getCurrency().getCurrencyId() + " " + "5000.00");
                     parameters.put("totalExtendedFamily", insurancePolicyItem.getCurrency().getCurrencyId() + " " + "20 000.00");
@@ -1188,39 +1076,13 @@ public class ReportAPI {
                     }
 
 
-                    if (insurancePolicyItem.getCoverageType() != null) {
-                        parameters.put("coverageType", isNull(insurancePolicyItem.getCoverageType().getDescription()));
-                        parameters.put("coverageTypeItem", "");
-                    } else {
-                        parameters.put("coverageType", "- Morte");
-                        parameters.put("coverageTypeItem", "- Invalidez e Permanente");
-                    }
-
                     JRBeanCollectionDataSource itemsJRBean = new JRBeanCollectionDataSource(members);
                     parameters.put("CollectionBeanParam", itemsJRBean);
 
                     List<String> otherFamily = Collections.singletonList(Relationships.OTHER.getRelationship());
 
                     List<Beneficiaries> otherBeneficiaries = beneficiariesInterface.findByRelationship(insurancePolicyItem, otherFamily, setActive());
-               /* if(insurancePolicyItem.getInsuredAmount()!=null){
-                    parameters.put("baseInsured", currencyId+" "+ formatDouble(insurancePolicyItem.getInsuredAmount().doubleValue()));
-                }
-                else{
-                if(insurancePolicyItem.getSubProduct().getProduct().getProductId().equals(Products.FUNERAL.toString())){
-                    parameters.put("baseInsured", String.valueOf(nearBeneficiaries.size()+1));
-                    parameters.put("baseExtras", String.valueOf(otherBeneficiaries.size()));
-                }
-                else{
-                    if(insurancePolicyItem.getCoverage()!=null) {
-                        if (insurancePolicyItem.getCoverage().getCoverAmount() != null) {
-                            parameters.put("baseInsured",currencyId+" "+ formatDouble(insurancePolicyItem.getCoverage().getCoverAmount().doubleValue()));
-                        } else {
-                            parameters.put("baseInsured", currencyId+" "+formatDouble(benBaseAmount));
-                        }
-                    }
-                    parameters.put("baseExtras", isNull(""));
-                }
-                }*/
+
                     parameters.put("baseInsured", String.valueOf(nearBeneficiaries.size() + 1));
                     parameters.put("baseExtras", String.valueOf(otherBeneficiaries.size()));
 
