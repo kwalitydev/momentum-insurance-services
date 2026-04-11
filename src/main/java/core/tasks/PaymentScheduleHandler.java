@@ -6,6 +6,7 @@ import core.service.IPaymentScheduleService;
 import core.util.QueryUtil;
 import dao.entities.InsurancePolicy;
 import dao.entities.TaskConfig;
+import dao.enums.InvoiceType;
 import dao.interfaces.InsurancePolicyInterface;
 import dao.interfaces.TaskInterface;
 import org.apache.logging.log4j.LogManager;
@@ -14,10 +15,7 @@ import org.apache.logging.log4j.Logger;
 import javax.inject.Inject;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.TimerTask;
+import java.util.*;
 
 import static core.constants.Tasks.PAYMENT_SCHEDULE_HANDLER;
 
@@ -65,15 +63,19 @@ public class PaymentScheduleHandler extends TimerTask {
 
             for (InsurancePolicy policy : insurancePolicyList) {
 
-                try {
-                    this.iPaymentScheduleService.createPaymentSchedule(policy);
+                Arrays.asList(InvoiceType.values()).forEach(invoiceType -> {
+                    try {
+                        this.iPaymentScheduleService.processInvoice(policy,invoiceType);
 
-                } catch (BusinessException e) {
-                    logger.warn("Business error for policy {}: {}", policy.getPolicyId(), e.getMessage());
+                    } catch (BusinessException e) {
+                        logger.warn("Business error for policy {}: {}", policy.getPolicyId(), e.getMessage());
 
-                } catch (Exception e) {
-                    logger.error("Unexpected error for policy {}", policy.getPolicyId(), e);
-                }
+                    } catch (Exception e) {
+                        logger.error("Unexpected error for policy {}", policy.getPolicyId(), e);
+                    }
+                });
+
+
             }
         } catch (Exception e) {
             logger.error("Fatal error while executing PaymentScheduleHandler", e);

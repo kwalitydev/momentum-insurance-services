@@ -5,7 +5,10 @@ import core.constants.ChartFilter;
 import core.constants.FrequenciesEnum;
 import core.constants.PaymentStatus;
 import core.exception.BusinessException;
+import core.util.CoreUtil;
+import core.util.Util;
 import dao.entities.*;
+import dao.enums.InvoiceType;
 import dao.enums.PaymentMethodStatus;
 import dao.enums.TransactionType;
 import dao.enums.insuranceOutstandingEnum;
@@ -179,13 +182,12 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
      * @param insurancePolicy
      */
     @Override
-    public void createPaymentSchedule(InsurancePolicy insurancePolicy) {
+    public void processInvoice(InsurancePolicy insurancePolicy, InvoiceType type) {
 
         logger.info("Generating payment schedule for policy {}", insurancePolicy.toString());
 
         LocalDate today = LocalDate.now();
 
-        boolean isFirstPayment = isFirstPayment(insurancePolicy);
 
         int currentMonth = today.getMonthValue();
         int currentYear = today.getYear();
@@ -207,6 +209,8 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
         boolean shoulderGenerate = shouldGenerate(insurancePolicy.getPaymentFrequency(),
                 today,
                 insurancePolicy.getBenefitCycle());
+
+        boolean isFirstPayment = isFirstPayment(insurancePolicy);
 
         if (!isFirstPayment &&
             !shoulderGenerate) {
@@ -231,7 +235,6 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
         ps.setCreatedDate(new Date());
         ps.setRepaymentMonth(month);
         ps.setRepaymentYear(year);
-        ps.setStartPaymentDate(today);
         ps.setPaymentStatus(PaymentStatus.PENDING);
         ps.setNormalPayment(true);
 
@@ -271,7 +274,7 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
                             .name(b.getName())
                             .totalCharge(b.getTotalCharge())
                             .status(b.getStatus().getDescription())
-                            .dateOfBirth(b.getDateOfBirth())
+                            .dateOfBirth(Util.formatDate(b.getDateOfBirth()))
                             .build()
                     )
                     .collect(Collectors.toList());
