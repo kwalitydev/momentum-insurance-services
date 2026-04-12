@@ -233,7 +233,7 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
         }
 
         boolean exists = paymentScheduleInterface
-                .existsByPolicyIdAndMonthAndYear(insurancePolicyId, month, year);
+                .existsByPolicyIdAndMonthAndYear(insurancePolicyId, month, year, invoiceType);
 
         logger.debug("{} - Payment already exists for month/year: {}", method, exists);
 
@@ -261,10 +261,14 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
                     "Payment schedule for policy: " + insurancePolicyId + " is not due this cycle");
         }
 
+        String status = invoiceType == InvoiceType.PROFORMA ?
+                insuranceOutstandingEnum.NEW.name() :
+                InvoiceType.PROFORMA.name();
+
         List<InsuranceOutstandingAmount> outstandingAmountList =
                 IInsuranceOutstandingAmount.findByInsurancePolicyId(
                         insurancePolicyId,
-                        insuranceOutstandingEnum.NEW.name()
+                        status
                 );
 
         logger.info("{} - Outstanding records found: {}", method, outstandingAmountList.size());
@@ -287,7 +291,7 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
         logger.debug("{} - PaymentSchedule prepared: insurancePolicyId={}, amount={}, month={}, year={}",
                 method, insurancePolicyId, amount, month, year);
 
-        dBTransactionService.processAndPersistPaymentSchedule(newSchedule,outstandingAmountList,invoiceType);
+        dBTransactionService.processAndPersistPaymentSchedule(newSchedule, outstandingAmountList, invoiceType);
 
         logger.info("{} - Success - Payment schedule created for insurancePolicyId: {}", method, insurancePolicyId);
     }

@@ -66,7 +66,6 @@ public class DBTransactionService {
         List<PaymentSchedule> proformasToExpire = outstandingList.stream()
                 .map(InsuranceOutstandingAmount::getPaymentSchedule)
                 .filter(Objects::nonNull)
-                .filter(ps -> ps.getInvoiceType() == InvoiceType.PROFORMA)
                 .distinct()
                 .collect(Collectors.toList());
 
@@ -89,7 +88,6 @@ public class DBTransactionService {
             return Collections.emptyList();
         }
         return outstandingList.stream()
-                .filter(o -> o.getPaymentSchedule() != null)
                 .map(InsuranceOutstandingAmount::getInsuranceOutstandingAmountId)
                 .collect(Collectors.toList());
     }
