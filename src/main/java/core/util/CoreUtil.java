@@ -52,8 +52,14 @@ public class CoreUtil {
     }
 
     public static Date stringToDate(String dateString) throws ParseException {
-        SimpleDateFormat formatter = new SimpleDateFormat(SIMPLE_DATE_PATTERN);
-        return formatter.parse(dateString);
+        try {
+            SimpleDateFormat formatter = new SimpleDateFormat(SIMPLE_DATE_PATTERN);
+            return formatter.parse(dateString);
+        }
+        catch (ParseException e){
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static Date stringToDate(String dateString,String dateFormat) throws ParseException {

@@ -2,6 +2,9 @@ package api;
 
 
 import core.beans.AuthAppRequest;
+import core.beans.LoginAppRequest;
+import core.beans.LoginOTPResponse;
+import core.beans.LoginResponse;
 import core.service.AuthService;
 import dao.entities.InsurancePolicy;
 
@@ -25,14 +28,16 @@ public class AuthAppAPI {
 
     @POST
     @Path("/auth/login")
-    public Response loginByNumberAndPhoneNumber(@QueryParam("policyNumber") String policyNumber,
-                                                @QueryParam("phoneNumber") String phoneNumber) {
-        Response validationError = validate(policyNumber, phoneNumber);
+    public Response loginByNumberAndPhoneNumber(LoginAppRequest loginAppRequest) {
+        Response validationError = validate(loginAppRequest.getPolicyNumber(), loginAppRequest.getPhoneNumber());
         if (validationError != null) {
             return validationError;
         }
-        Long tokenId = authService.login(policyNumber, phoneNumber);
-        return Response.ok(success("tokenId", tokenId)).build();
+        Long tokenId = authService.login(loginAppRequest.getPolicyNumber(), loginAppRequest.getPhoneNumber());
+        LoginOTPResponse loginOTPResponse = new LoginOTPResponse();
+        loginOTPResponse.setTokenId(tokenId);
+        loginOTPResponse.setStatus("SUCCESS");
+        return Response.ok(loginOTPResponse).build();
     }
 
 

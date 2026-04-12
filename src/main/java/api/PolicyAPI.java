@@ -221,13 +221,14 @@ public class PolicyAPI {
                 PolicyHolder policyHolder = new PolicyHolder();
                 policyHolder.setLastUpdate(today());
                 policyHolder.setMobileNumber(policyRequest.getMainPhone());
-                policyHolder.setCustomerName(policyRequest.getFullName()+" "+policyRequest.getSurname());
+                policyHolder.setCustomerName(policyRequest.getFullName());
                 policyHolder.setEmail(policyRequest.getEmail());
                 policyHolder.setDocumentId(policyRequest.getIdNumber());
                 policyHolder.setVat(policyRequest.getNuit());
                 policyHolder.setAddress(policyRequest.getAddress());
                 policyHolder.setJobTitle(setJobTitle(policyRequest.getJobTitle()));
                 policyHolder.setAltMobileNumber(policyRequest.getAltPhone());
+                policyHolder.setDateOfBirth(stringToDate(policyRequest.getDateOfBirth()));
 
                 InsurancePolicy insurancePolicy = new InsurancePolicy();
                 insurancePolicy.setPolicyId(genPolicyId("M"));
