@@ -13,7 +13,6 @@ public class PolicyRequest implements Serializable {
     private List<Long> removedMembers;
     private List<FileRequest> fileRequests;
     private String fullName;
-    private String surname;
     private String email;
     private String address;
     private String idNumber;
@@ -31,6 +30,7 @@ public class PolicyRequest implements Serializable {
     private String policyId;
     private String username;
     private String comments;
+    private String dateOfBirth;
 
     public List<MemberRequest> getMemberRequests() {
         return memberRequests;
@@ -54,14 +54,6 @@ public class PolicyRequest implements Serializable {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
-    }
-
-    public String getSurname() {
-        return surname;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
     }
 
     public String getEmail() {
@@ -208,13 +200,21 @@ public class PolicyRequest implements Serializable {
         this.removedMembers = removedMembers;
     }
 
+    public String getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(String dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
     @Override
     public String toString() {
         return "PolicyRequest{" +
                 "memberRequests=" + memberRequests +
+                ", removedMembers=" + removedMembers +
                 ", fileRequests=" + fileRequests +
                 ", fullName='" + fullName + '\'' +
-                ", surname='" + surname + '\'' +
                 ", email='" + email + '\'' +
                 ", address='" + address + '\'' +
                 ", idNumber='" + idNumber + '\'' +
@@ -231,6 +231,8 @@ public class PolicyRequest implements Serializable {
                 ", sessionId='" + sessionId + '\'' +
                 ", policyId='" + policyId + '\'' +
                 ", username='" + username + '\'' +
+                ", comments='" + comments + '\'' +
+                ", dateOfBirth='" + dateOfBirth + '\'' +
                 '}';
     }
 }

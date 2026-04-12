@@ -2,6 +2,7 @@ package dao.entities;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
@@ -24,6 +25,7 @@ public class PolicyHolder implements Serializable {
     private String occupation;
     private String documentTypeId;
     private String vat;
+    private BigDecimal totalCharge;
     @OneToOne
     private JobTitle jobTitle;
 
@@ -149,6 +151,14 @@ public class PolicyHolder implements Serializable {
         this.altMobileNumber = altMobileNumber;
     }
 
+    public BigDecimal getTotalCharge() {
+        return totalCharge;
+    }
+
+    public void setTotalCharge(BigDecimal totalCharge) {
+        this.totalCharge = totalCharge;
+    }
+
     @Override
     public String toString() {
         return "PolicyHolder{" +
@@ -166,6 +176,7 @@ public class PolicyHolder implements Serializable {
                 ", occupation='" + occupation + '\'' +
                 ", documentTypeId='" + documentTypeId + '\'' +
                 ", vat='" + vat + '\'' +
+                ", totalCharge=" + totalCharge +
                 ", jobTitle=" + jobTitle +
                 '}';
     }
