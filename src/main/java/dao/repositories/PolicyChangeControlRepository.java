@@ -12,7 +12,6 @@ import java.util.Date;
 @Repository
 public interface PolicyChangeControlRepository extends JpaRepository<PolicyChangeControl, String>, PolicyChangeControlInterface {
 
-
-    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM PolicyChangeControl p WHERE p.insurancePolicy.insurancePolicyId = ?1 AND p.changeDate BETWEEN ?2 AND ?3")
-    boolean existsPolicyChangeInPeriod(String insurancePolicy, Date startDate, Date endDate);
+    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM PolicyChangeControl p WHERE p.insurancePolicy.insurancePolicyId = ?1 AND  CONVERT(date, p.changeDate) BETWEEN ?2 AND ?3")
+    boolean existsPolicyChangeInPeriod(String insurancePolicy, String startDate, String endDate);
 }

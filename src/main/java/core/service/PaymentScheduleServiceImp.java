@@ -5,6 +5,7 @@ import core.constants.ChartFilter;
 import core.constants.FrequenciesEnum;
 import core.constants.PaymentStatus;
 import core.exception.BusinessException;
+import core.util.CoreUtil;
 import core.util.Util;
 import dao.entities.*;
 import dao.enums.InvoiceType;
@@ -221,7 +222,7 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
             }
 
             boolean existsPolicyChangeInPeriod = policyChangeControlInterface
-                    .existsPolicyChangeInPeriod(insurancePolicyId, lastPaidDate, Util.convertToDate(today));
+                    .existsPolicyChangeInPeriod(insurancePolicyId, Util.formatDate(lastPaidDate), Util.formatDate(CoreUtil.today()));
 
             logger.debug("{} - Policy change exists in period: {}", method, existsPolicyChangeInPeriod);
 
@@ -328,6 +329,7 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
                             .name(b.getName())
                             .totalCharge(b.getTotalCharge())
                             .status(b.getStatus().getDescription())
+                            .description(b.getRelationShip().getDescription())
                             .dateOfBirth(Util.formatDate(b.getDateOfBirth()))
                             .build()
                     )
@@ -368,6 +370,7 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
                                 .repaymentAmount(ps.getRepaymentAmount())
                                 .paidAmount(ps.getPaidAmount())
                                 .repaymentMonth(ps.getRepaymentMonth())
+                                .invoiceType(ps.getInvoiceType() == null ? null : ps.getInvoiceType().name())
                                 .repaymentYear(ps.getRepaymentYear())
                                 .paymentStatus(ps.getPaymentStatus().name())
                                 .outstandingAmounts(outstandingDTOList)

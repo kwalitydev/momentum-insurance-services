@@ -2,8 +2,10 @@ package core.service;
 
 
 import core.beans.*;
+import core.mapper.MapperUtils;
 import core.util.AES;
 import core.util.CoreUtil;
+import core.util.Util;
 import dao.entities.*;
 import dao.enums.UserStatus;
 import dao.repositories.*;
@@ -43,6 +45,10 @@ public class AuthService {
 
     @Inject
     private MenuRepository menuRepository;
+
+    @Inject
+    private BeneficiariesRepository beneficiariesRepository;
+
 
 
     public LoginResponseDTO authenticate(String username, String password) {
@@ -218,8 +224,10 @@ public class AuthService {
         return token.getId();
     }
 
-    public InsurancePolicy appAuthenticate(AuthAppRequest authAppRequest) {
-        logger.info(" Attempt to do OTP authentication requestBody: {}", CoreUtil.toJson(authAppRequest));
+    public PolicyDetailsDTO appAuthenticate(AuthAppRequest authAppRequest) {
+        String method = "appAuthenticate";
+
+        logger.info(" {} , Attempt to do OTP authentication requestBody: {}",method, CoreUtil.toJson(authAppRequest));
 
         Token token = this.tokenService.fetchByTokenId(authAppRequest.getTokenId())
                 .orElseThrow(() -> buildException("Token not found", 404));
@@ -236,7 +244,30 @@ public class AuthService {
         }
         this.tokenService.markAsUsed(token.getId());
         logger.info(" OTP authentication successful for TokenId: {}", token.getId());
-        return token.getInsurancePolicy();
+
+        InsurancePolicy insurancePolicy = token.getInsurancePolicy();
+
+        List<Beneficiaries> beneficiariesList =
+                beneficiariesRepository.findByInsurancePolicyId(insurancePolicy.getInsurancePolicyId());
+
+        List<BeneficiaryDTO> beneficiaries = beneficiariesList.stream()
+                .map(b -> BeneficiaryDTO.builder()
+                        .name(b.getName())
+                        .totalCharge(b.getTotalCharge())
+                        .status(b.getStatus().getDescription())
+                        .description(b.getRelationShip().getDescription())
+                        .dateOfBirth(Util.formatDate(b.getDateOfBirth()))
+                        .build()
+                )
+                .collect(Collectors.toList());
+
+
+        PolicyDetailsDTO policyDetailsDTO = MapperUtils
+                .mapToPolicyDetailsDTO(insurancePolicy, beneficiaries);
+
+        logger.info("{} - Successful retrieved: {}", method, policyDetailsDTO.toString());
+
+        return policyDetailsDTO;
     }
 
 

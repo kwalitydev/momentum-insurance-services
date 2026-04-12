@@ -13,6 +13,7 @@ public class PaymentScheduleDTO implements Serializable {
     private BigDecimal paidAmount;
     private String repaymentMonth;
     private String repaymentYear;
+    private String invoiceType;
     private String paymentStatus;
     private List<InsuranceOutstandingAmountDTO> outstandingAmounts;
 }
