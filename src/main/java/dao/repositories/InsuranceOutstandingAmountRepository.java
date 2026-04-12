@@ -28,7 +28,7 @@ public interface InsuranceOutstandingAmountRepository extends JpaRepository<Insu
 
     @Modifying
     @Query("UPDATE InsuranceOutstandingAmount i " +
-           "SET i.status = :status, " +
+           "SET i.status.id = :status, " +
            "i.lastUpdatedDate = :lastUpdatedDate, " +
            "i.paymentSchedule = :paymentSchedule " +
            "WHERE i.insuranceOutstandingAmountId IN :ids")

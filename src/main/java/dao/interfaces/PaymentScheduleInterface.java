@@ -44,7 +44,7 @@ public interface PaymentScheduleInterface {
     List<Object[]> getCollectedProgress(String startDate,String endDate);
     List<Object[]> getCollectionStatus(String startDate,String endDate);
     List<PaymentSchedule> findPaymentScheduleAndMonthAndYear(InsurancePolicy policy, String month, String year);
-    boolean existsByPolicyIdAndMonthAndYear(String policyId, String month, String year);
+    boolean existsByPolicyIdAndMonthAndYear(String policyId, String month, String year,InvoiceType invoiceType);
 
     boolean existsByPolicyId( String policyId);
 
