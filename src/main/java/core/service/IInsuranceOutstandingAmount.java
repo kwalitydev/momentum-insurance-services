@@ -1,6 +1,7 @@
 package core.service;
 
 import dao.entities.InsuranceOutstandingAmount;
+import dao.entities.PaymentSchedule;
 
 import java.util.Date;
 import java.util.List;
@@ -11,6 +12,6 @@ public interface IInsuranceOutstandingAmount {
 
     List<InsuranceOutstandingAmount> findByInsurancePolicyId(String insurancePolicyId, String status);
 
-    int updateInsuranceOutstandingByID(List<Long> ids, String status, Date lastUpdatedDate);
+    int updateInsuranceOutstandingByID(List<Long> ids, String status, Date lastUpdatedDate, PaymentSchedule paymentSchedule);
 
 }

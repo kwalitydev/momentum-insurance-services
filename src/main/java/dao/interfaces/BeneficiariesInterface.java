@@ -30,4 +30,6 @@ public interface BeneficiariesInterface {
 
     List<Beneficiaries> findByProduct(Status status);
     List<Beneficiaries> findByDOB(String dob,Status status,List<Long> relationShips,Long subProductId);
+
+    List<Beneficiaries> findByInsurancePolicyId(String insurancePolicyId);
 }

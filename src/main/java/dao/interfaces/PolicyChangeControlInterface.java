@@ -9,6 +9,6 @@ import java.util.Date;
 public interface PolicyChangeControlInterface {
 
     PolicyChangeControl save(PolicyChangeControl pcc);
-    boolean existsPolicyChangeInPeriod(InsurancePolicy insurancePolicy, Date startDate, Date endDate);
+    boolean existsPolicyChangeInPeriod(String insurancePolicy, String startDate, String endDate);
 
 }

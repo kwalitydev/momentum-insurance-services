@@ -3,6 +3,7 @@ package dao.interfaces;
 
 import core.constants.PaymentStatus;
 import dao.entities.*;
+import dao.enums.InvoiceType;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
@@ -47,5 +48,6 @@ public interface PaymentScheduleInterface {
 
     boolean existsByPolicyId( String policyId);
 
-    List<PaymentSchedule> findByPolicyAndPaymentStatus(String insurancePolicyId, PaymentStatus paymentStatus );
+    List<PaymentSchedule> findByPolicyAndPaymentStatus(String insurancePolicyId, List<PaymentStatus> paymentStatuses);
+    List<PaymentSchedule> findLatestByStatus(InvoiceType status);
 }

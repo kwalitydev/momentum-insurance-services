@@ -1,13 +1,13 @@
 package dao.entities;
 
 import core.constants.PaymentStatus;
+import dao.enums.InvoiceType;
 import dao.enums.PaymentMethodStatus;
 import lombok.Data;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -23,8 +23,6 @@ public class PaymentSchedule implements Serializable {
     private Date lastAttempt;
     @OneToOne
     private Status status;
-    @Column(length = 25)
-    private String chargeCode;
     @OneToOne
     private InsurancePolicy insurancePolicy;
     @Column(length = 25)
@@ -34,13 +32,12 @@ public class PaymentSchedule implements Serializable {
     private String messageId;
     private Boolean normalPayment = true;
     private String errorMessage;
-
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
     @Enumerated(EnumType.STRING)
     private PaymentMethodStatus paymentMethodStatus;
-    private LocalDate startPaymentDate;
-    private LocalDate endPaymentDate;
+    @Enumerated(EnumType.STRING)
+    private InvoiceType  invoiceType ;
     private LocalDateTime paymentDate;
 
     @Override
@@ -52,7 +49,7 @@ public class PaymentSchedule implements Serializable {
                 ", createdDate=" + createdDate +
                 ", lastAttempt=" + lastAttempt +
                 ", status=" + status +
-                ", chargeCode='" + chargeCode + '\'' +
+                ", invoiceType='" + invoiceType + '\'' +
                 ", insurancePolicy=" + insurancePolicy +
                 ", transactionId='" + transactionId + '\'' +
                 ", repaymentMonth='" + repaymentMonth + '\'' +

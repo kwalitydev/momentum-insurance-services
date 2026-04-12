@@ -280,14 +280,14 @@ public class PolicyAPI {
     @Path("/create-payment-schedule")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createPaymentSchedule(createPaymentScheduleRequest createPaymentScheduleRequest, @Context HttpServletRequest headers) {
+    public Response createPaymentSchedule(createInvoiceRequest createInvoiceRequest, @Context HttpServletRequest headers) {
 
         String traceId = getLogId();
         String methodName = "createPaymentSchedule";
         Response response = Response.status(Response.Status.NO_CONTENT).build();
-        if (createPaymentScheduleRequest != null) {
+        if (createInvoiceRequest != null) {
 
-            defaultObjectRequest(LOGGER, traceId, createPaymentScheduleRequest.toString(), methodName, headers.getRemoteAddr());
+            defaultObjectRequest(LOGGER, traceId, createInvoiceRequest.toString(), methodName, headers.getRemoteAddr());
 
             Date requestTime = today();
             boolean queryExecuted = false;
@@ -295,11 +295,13 @@ public class PolicyAPI {
             PaymentSchedule paymentSchedules = null;
             try {
 
-                Optional<InsurancePolicy> insurancePolicy = insurancePolicyInterface.findByInsurancePolicyId(createPaymentScheduleRequest.getInsurancePolicyId());
+                Optional<InsurancePolicy> insurancePolicy = insurancePolicyInterface.findByInsurancePolicyId(createInvoiceRequest.getInsurancePolicyId());
 
                 if (insurancePolicy.isPresent()) {
-                    this.iPaymentScheduleService.createPaymentSchedule(insurancePolicy.get());
-                    paymentSchedules = paymentScheduleInterface.findByPolicyAndPaymentStatus(createPaymentScheduleRequest.getInsurancePolicyId(), PaymentStatus.PENDING).iterator().next();
+                    this.iPaymentScheduleService.processInvoice(insurancePolicy.get(), createInvoiceRequest.getInvoiceType());
+                    paymentSchedules = paymentScheduleInterface
+                            .findByPolicyAndPaymentStatus(createInvoiceRequest.getInsurancePolicyId(), Collections.singletonList(PaymentStatus.PENDING))
+                            .iterator().next();
                 } else {
                     response = Response.status(Response.Status.NOT_FOUND).build();
 
@@ -326,7 +328,7 @@ public class PolicyAPI {
 
             } finally {
 
-                queryUtil.saveLog(setWebserviceLog(traceId, requestTime, "web", methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, createPaymentScheduleRequest.getSessionId(), headers.getRemoteAddr(), false, "Create Payment Schedule", null));
+                queryUtil.saveLog(setWebserviceLog(traceId, requestTime, "web", methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, createInvoiceRequest.getSessionId(), headers.getRemoteAddr(), false, "Create Payment Schedule", null));
 
 
             }
@@ -336,7 +338,6 @@ public class PolicyAPI {
         return response;
 
     }
-
 
     @GET
     @Path("/product-config-list")
@@ -674,6 +675,7 @@ public class PolicyAPI {
                         LOGGER.error("Invalid DOB {}", beneficiaries.getDateOfBirth());
                     }
 
+                    beanFactory.merge(b);
                     Beneficiaries savedBeneficiaries = beneficiariesInterface.save(b);
                     LOGGER.info("Beneficiary saved! name = {}, traceId -> {}", savedBeneficiaries.getName(),traceId);
 
@@ -981,6 +983,7 @@ public class PolicyAPI {
         return response;
 
     }
+
     @POST
     @Path("/update/beneficiary")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -1085,8 +1088,6 @@ public class PolicyAPI {
         return response;
 
     }
-
-
 
 
     @GET
@@ -1379,7 +1380,7 @@ public class PolicyAPI {
             Optional<InsurancePolicy> insurancePolicy = this.insurancePolicyInterface.findOneWithPolicyHolder(phoneNumber, insurancePolicyId);
             if (insurancePolicy.isPresent()) {
                 response = Response.status(Response.Status.OK).entity(insurancePolicy.get()).build();
-                defaultSuccess(LOGGER,reqRes);
+                defaultSuccess(LOGGER, reqRes);
                 queryExecuted = true;
             } else {
                 response = Response.status(Response.Status.OK).build();
@@ -1390,13 +1391,74 @@ public class PolicyAPI {
             errorCause = e.getCause().getMessage();
         } finally {
 
-            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
+            queryUtil.saveLog(setWebserviceLog(reqRes, requestTime, username,
                     methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, ipAddress));
         }
         return response;
 
     }
 
+    @GET
+    @Path("/payment-details")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response findPaymentDetails(
+            @QueryParam("insurancePolicyId") String insurancePolicyId,
+            @QueryParam("paymentStatuses") List<PaymentStatus> paymentStatuses,
+            @QueryParam("sessionId") String sessionId,
+            @QueryParam("username") String username,
+            @Context HttpServletRequest headers) {
+
+        String reqRes = getLogId();
+        String methodName = "findPaymentDetails";
+        String ipAddress = headers.getRemoteAddr();
+
+        LOGGER.info("{} is being called. insurancePolicyId -> {}, username -> {}, sessionId -> {}, logId -> {}, ipAddress -> {} ",
+                methodName, insurancePolicyId, username, sessionId, reqRes, ipAddress);
+
+        Date requestTime = today();
+        Response response = Response.status(Response.Status.NO_CONTENT).build();
+
+        boolean queryExecuted = false;
+        String errorCause = "";
+
+        try {
+            PaymentScheduleDetails result =
+                    iPaymentScheduleService.findPaymentDetailsByInsurancePolicy(
+                            insurancePolicyId,
+                            paymentStatuses
+                    );
+
+            if (result != null) {
+                response = Response.status(Response.Status.OK).entity(result).build();
+                queryExecuted = true;
+                defaultSuccess(LOGGER, reqRes);
+            } else {
+                response = Response.status(Response.Status.NO_CONTENT).build();
+            }
+
+        } catch (Exception e) {
+            LOGGER.error("Error in {}: {}", methodName, e.getMessage(), e);
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            errorCause = e.getMessage();
+        } finally {
+
+            queryUtil.saveLog(setWebserviceLog(
+                    reqRes,
+                    requestTime,
+                    username,
+                    methodName,
+                    response.getStatus(),
+                    queryExecuted,
+                    HttpMethod.GET,
+                    errorCause,
+                    sessionId,
+                    ipAddress
+            ));
+        }
+
+        return response;
+    }
 
 
 }

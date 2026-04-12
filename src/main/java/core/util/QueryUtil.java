@@ -205,8 +205,8 @@ public class QueryUtil {
 
 
     // startDate is the last payment day and endDate is the date that should generate the invoice
-    public boolean hasPolicyChanged(String policyId,Date startDate,Date endDate){
-        return policyChangeControlInterface.existsPolicyChangeInPeriod(setInsurancePolicy(policyId),startDate,endDate);
+    public boolean hasPolicyChanged(String policyId,String startDate,String endDate){
+        return policyChangeControlInterface.existsPolicyChangeInPeriod(policyId,startDate,endDate);
     }
 
 

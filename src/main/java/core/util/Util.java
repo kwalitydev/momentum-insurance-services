@@ -12,6 +12,7 @@ import org.joda.time.Interval;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.time.temporal.TemporalAdjusters;
@@ -365,5 +366,23 @@ public class Util {
         int today = LocalDate.now().getDayOfMonth();
 
         return today >= firstCollectionDay;
+    }
+
+
+    public static String formatDate(Date date) {
+        if (date == null) return null;
+
+        return date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    }
+
+    public static Date convertToDate(LocalDate localDate) {
+        if (localDate == null) return null;
+
+        return Date.from(
+                localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
+        );
     }
 }

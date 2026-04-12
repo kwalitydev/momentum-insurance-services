@@ -1,10 +1,7 @@
 package api;
 
 
-import core.beans.AuthAppRequest;
-import core.beans.LoginAppRequest;
-import core.beans.LoginOTPResponse;
-import core.beans.LoginResponse;
+import core.beans.*;
 import core.service.AuthService;
 import dao.entities.InsurancePolicy;
 
@@ -44,9 +41,9 @@ public class AuthAppAPI {
     @POST
     @Path("/auth/token")
     public Response activate(AuthAppRequest authAppRequest) {
-        InsurancePolicy insurancePolicy = authService.appAuthenticate(
+        PolicyDetailsDTO policyDetailsDTO = authService.appAuthenticate(
                 authAppRequest);
-        return Response.ok(insurancePolicy).build();
+        return Response.ok(policyDetailsDTO).build();
     }
 
 

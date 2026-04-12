@@ -1,5 +1,6 @@
 package core.beans;
 
+import dao.enums.InvoiceType;
 import lombok.*;
 
 import java.io.Serializable;
@@ -8,7 +9,8 @@ import java.io.Serializable;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class createPaymentScheduleRequest implements Serializable {
+public class createInvoiceRequest implements Serializable {
     private String sessionId;
     private String insurancePolicyId;
+    private InvoiceType  invoiceType;
 }
