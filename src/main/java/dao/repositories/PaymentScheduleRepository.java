@@ -3,6 +3,7 @@ package dao.repositories;
 import core.beans.PaymentMethodSummaryDTO;
 import core.constants.PaymentStatus;
 import dao.entities.*;
+import dao.enums.InvoiceType;
 import dao.interfaces.PaymentScheduleInterface;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -305,4 +306,11 @@ public interface PaymentScheduleRepository extends JpaRepository<PaymentSchedule
     List<PaymentSchedule> findByPolicyAndPaymentStatus(
             @Param("insurancePolicyId") String insurancePolicyId,
             @Param("paymentStatuses") List<PaymentStatus> paymentStatuses);
+
+    @Query("SELECT ps FROM PaymentSchedule ps " +
+           "WHERE ps.invoiceType = :status " +
+           "ORDER BY ps.createdDate DESC")
+
+    List<PaymentSchedule> findLatestByStatus(
+            @Param("status") InvoiceType status);
 }

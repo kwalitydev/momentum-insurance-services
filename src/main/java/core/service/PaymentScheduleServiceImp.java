@@ -5,7 +5,6 @@ import core.constants.ChartFilter;
 import core.constants.FrequenciesEnum;
 import core.constants.PaymentStatus;
 import core.exception.BusinessException;
-import core.util.CoreUtil;
 import core.util.Util;
 import dao.entities.*;
 import dao.enums.InvoiceType;
@@ -14,6 +13,7 @@ import dao.enums.TransactionType;
 import dao.enums.insuranceOutstandingEnum;
 import dao.interfaces.InsurancePolicyInterface;
 import dao.interfaces.PaymentScheduleInterface;
+import dao.interfaces.PolicyChangeControlInterface;
 import dao.repositories.BeneficiariesRepository;
 import dao.repositories.InsuranceOutstandingAmountRepository;
 import dao.repositories.PaymentScheduleRepository;
@@ -61,6 +61,9 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
 
     @Inject
     private DBTransactionService dBTransactionService;
+
+    @Inject
+    private PolicyChangeControlInterface policyChangeControlInterface;
 
     @Override
     public List<RecentPaymentDTO> getLastPayments(int limit) {
@@ -182,64 +185,115 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
      * @param insurancePolicy
      */
     @Override
-    public void processInvoice(InsurancePolicy insurancePolicy, InvoiceType type) {
+    public void processInvoice(InsurancePolicy insurancePolicy, InvoiceType invoiceType) {
 
-        logger.info("Generating payment schedule for policy {}", insurancePolicy.toString());
+        String method = "processInvoice";
+        String insurancePolicyId = insurancePolicy.getInsurancePolicyId();
+        String policyId = insurancePolicyId;
+
+        logger.info("{} - Start - policyId: {}, invoiceType: {}", method, policyId, invoiceType);
 
         LocalDate today = LocalDate.now();
+        String month = String.valueOf(today.getMonthValue());
+        String year = String.valueOf(today.getYear());
 
+        logger.debug("{} - Current date info - month: {}, year: {}", method, month, year);
 
-        int currentMonth = today.getMonthValue();
-        int currentYear = today.getYear();
+        if (invoiceType.equals(InvoiceType.PROFORMA)) {
 
-        String month = String.valueOf(currentMonth);
-        String year = String.valueOf(currentYear);
+            logger.info("{} - Processing PROFORMA validation for policyId: {}", method, policyId);
+
+            PaymentSchedule paymentSchedule = paymentScheduleInterface
+                    .findLatestByStatus(InvoiceType.INVOICE)
+                    .stream()
+                    .findFirst()
+                    .orElse(null);
+
+            Date lastPaidDate;
+
+            if (paymentSchedule == null || paymentSchedule.getPaymentDate() == null) {
+                logger.warn("{} - No previous PAID schedule found, using today as lastPaidDate", method);
+                lastPaidDate = insurancePolicy.getStartDate();
+            } else {
+                lastPaidDate = Util.convertToDate(
+                        paymentSchedule.getPaymentDate().toLocalDate());
+                logger.debug("{} - Last paid date found: {}", method, lastPaidDate);
+            }
+
+            boolean existsPolicyChangeInPeriod = policyChangeControlInterface
+                    .existsPolicyChangeInPeriod(insurancePolicyId, lastPaidDate, Util.convertToDate(today));
+
+            logger.debug("{} - Policy change exists in period: {}", method, existsPolicyChangeInPeriod);
+
+            if (!existsPolicyChangeInPeriod) {
+                logger.error("{} - No policy change found for PROFORMA. policyId: {}", method, policyId);
+                throw new BusinessException(Response.Status.BAD_REQUEST.getStatusCode(),
+                        "Payment schedule: " + policyId + " has no policy change.");
+            }
+        }
 
         boolean exists = paymentScheduleInterface
-                .existsByPolicyIdAndMonthAndYear(
-                        insurancePolicy.getInsurancePolicyId(), month, year);
+                .existsByPolicyIdAndMonthAndYear(policyId, month, year);
+
+        logger.debug("{} - Payment already exists for month/year: {}", method, exists);
 
         if (exists) {
-            throw new BusinessException(Response.Status.BAD_REQUEST.getStatusCode(),
-                    "Payment schedule : " + insurancePolicy.getInsurancePolicyId() + "already exists for this month");
-        }
+            logger.error("{} - Payment already exists for policyId: {}, month: {}, year: {}",
+                    method, policyId, month, year);
 
-        //   Se já não é o primeiro pagamento
-        //   E este mês não faz parte do ciclo então não cria pagamento
-        boolean shoulderGenerate = shouldGenerate(insurancePolicy.getPaymentFrequency(),
-                today,
-                insurancePolicy.getBenefitCycle());
+            throw new BusinessException(Response.Status.BAD_REQUEST.getStatusCode(),
+                    "Payment schedule: " + policyId + " already exists for this month");
+        }
 
         boolean isFirstPayment = isFirstPayment(insurancePolicy);
+        boolean shouldGenerate = shouldGenerate(
+                insurancePolicy.getPaymentFrequency(),
+                today,
+                insurancePolicy.getBenefitCycle()
+        );
 
-        if (!isFirstPayment &&
-            !shoulderGenerate) {
-            logger.info(" Skipping generating payment schedule for policy {}", insurancePolicy.toString());
+        logger.debug("{} - isFirstPayment: {}, shouldGenerate: {}", method, isFirstPayment, shouldGenerate);
+
+        if (!isFirstPayment && !shouldGenerate) {
+            logger.warn("{} - Skipping generation. policyId: {}", method, policyId);
+
             throw new BusinessException(Response.Status.BAD_REQUEST.getStatusCode(),
-                    "Payment schedule for policy :" + insurancePolicy.getInsurancePolicyId() + "  already exists for this month");
+                    "Payment schedule for policy: " + policyId + " is not due this cycle");
         }
 
-        List<InsuranceOutstandingAmount> outstandingAmountList = this.IInsuranceOutstandingAmount
-                .findByInsurancePolicyId(insurancePolicy.getInsurancePolicyId(), insuranceOutstandingEnum.NEW.name());
+        List<InsuranceOutstandingAmount> outstandingAmountList =
+                IInsuranceOutstandingAmount.findByInsurancePolicyId(
+                        policyId,
+                        insuranceOutstandingEnum.NEW.name()
+                );
+
+        logger.info("{} - Outstanding records found: {}", method, outstandingAmountList.size());
 
         List<Long> outstandingAmountListLisIDs = outstandingAmountList.stream()
+                .filter(outstandingAmount -> outstandingAmount.getPaymentSchedule() != null)
                 .map(InsuranceOutstandingAmount::getInsuranceOutstandingAmountId)
                 .collect(Collectors.toList());
 
-
         BigDecimal amount = calculateInstallment(insurancePolicy, outstandingAmountList);
+
+        logger.info("{} - Calculated installment amount: {}", method, amount);
 
         PaymentSchedule ps = new PaymentSchedule();
         ps.setInsurancePolicy(insurancePolicy);
         ps.setRepaymentAmount(amount);
         ps.setCreatedDate(new Date());
+        ps.setInvoiceType(invoiceType);
         ps.setRepaymentMonth(month);
         ps.setRepaymentYear(year);
         ps.setPaymentStatus(PaymentStatus.PENDING);
         ps.setNormalPayment(true);
 
-        this.dBTransactionService.saveDataBase(ps, outstandingAmountListLisIDs);
-        logger.info(" Successfully generated payment schedule for policy {}", insurancePolicy.toString());
+        logger.debug("{} - PaymentSchedule prepared: policyId={}, amount={}, month={}, year={}",
+                method, policyId, amount, month, year);
+
+        dBTransactionService.saveDataBase(ps, outstandingAmountListLisIDs);
+
+        logger.info("{} - Success - Payment schedule created for policyId: {}", method, policyId);
     }
 
     @Override
@@ -325,7 +379,7 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
                     .policyId(insurancePolicy.getPolicyId())
                     .insurancePolicyId(insurancePolicy.getInsurancePolicyId())
                     .totalAmount(insurancePolicy.getTotalAmount())
-                    .PaymentSchedules(paymentScheduleDTOList)
+                    .paymentSchedules(paymentScheduleDTOList)
                     .beneficiaries(beneficiaries)
                     .build();
 

@@ -22,7 +22,6 @@ public class DBTransactionService {
     @Transactional()
     public void saveDataBase(PaymentSchedule ps, List<Long> outstandingAmountListLisIDs) {
         this.paymentScheduleService.save(ps);
-
         if (!outstandingAmountListLisIDs.isEmpty()) {
             this.IInsuranceOutstandingAmount.updateInsuranceOutstandingByID(outstandingAmountListLisIDs,
                     insuranceOutstandingEnum.INVOICED.name(), CoreUtil.today(),ps);

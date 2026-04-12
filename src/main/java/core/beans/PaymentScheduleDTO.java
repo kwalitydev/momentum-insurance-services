@@ -14,5 +14,5 @@ public class PaymentScheduleDTO implements Serializable {
     private String repaymentMonth;
     private String repaymentYear;
     private String paymentStatus;
-    public List<InsuranceOutstandingAmountDTO> outstandingAmounts;
+    private List<InsuranceOutstandingAmountDTO> outstandingAmounts;
 }

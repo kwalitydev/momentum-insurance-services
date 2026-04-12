@@ -52,7 +52,8 @@ public class PaymentScheduleHandler extends TimerTask {
                 return;
             }
 
-            List<InsurancePolicy> insurancePolicyList = getInsurancePolicyInterface.findActivePoliciesByStatus(Statuses.ACTIVE.name());
+            List<InsurancePolicy> insurancePolicyList = getInsurancePolicyInterface
+                    .findActivePoliciesByStatus(Statuses.ACTIVE.name());
 
             if (insurancePolicyList == null || insurancePolicyList.isEmpty()) {
                 logger.info("No active policies found.");
@@ -92,6 +93,6 @@ public class PaymentScheduleHandler extends TimerTask {
 
         LocalDate nextDate = nextRunningDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
-        return nextDate.getDayOfMonth() == 25;
+        return nextDate.getDayOfMonth() == 25 || nextDate.getDayOfMonth() == 10;
     }
 }

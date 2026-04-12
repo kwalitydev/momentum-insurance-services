@@ -377,4 +377,12 @@ public class Util {
                 .toLocalDate()
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     }
+
+    public static Date convertToDate(LocalDate localDate) {
+        if (localDate == null) return null;
+
+        return Date.from(
+                localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
+        );
+    }
 }

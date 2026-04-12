@@ -327,7 +327,7 @@ public class PolicyAPI {
 
             } finally {
 
-                queryUtil.saveLog(setWebserviceLog(traceId, requestTime, "web", methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, createPaymentScheduleRequest.getSessionId(), headers.getRemoteAddr(), false, "Create Payment Schedule", null));
+                queryUtil.saveLog(setWebserviceLog(traceId, requestTime, "web", methodName, response.getStatus(), queryExecuted, HttpMethod.POST, errorCause, createInvoiceRequest.getSessionId(), headers.getRemoteAddr(), false, "Create Payment Schedule", null));
 
 
             }
@@ -337,7 +337,6 @@ public class PolicyAPI {
         return response;
 
     }
-
 
     @GET
     @Path("/product-config-list")
