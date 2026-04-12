@@ -75,11 +75,4 @@ public class AuthAppAPI {
         res.put("message", message);
         return res;
     }
-
-    private Map<String, Object> success(String key, Object value) {
-        Map<String, Object> res = new HashMap<>();
-        res.put("status", "SUCCESS");
-        res.put(key, value);
-        return res;
-    }
 }

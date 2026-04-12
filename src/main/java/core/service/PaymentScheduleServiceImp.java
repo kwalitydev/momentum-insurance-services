@@ -190,9 +190,8 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
 
         String method = "processInvoice";
         String insurancePolicyId = insurancePolicy.getInsurancePolicyId();
-        String policyId = insurancePolicyId;
 
-        logger.info("{} - Start - policyId: {}, invoiceType: {}", method, policyId, invoiceType);
+        logger.info("{} - Start - insurancePolicyId: {}, invoiceType: {}", method, insurancePolicyId, invoiceType);
 
         LocalDate today = LocalDate.now();
         String month = String.valueOf(today.getMonthValue());
@@ -202,7 +201,7 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
 
         if (invoiceType.equals(InvoiceType.PROFORMA)) {
 
-            logger.info("{} - Processing PROFORMA validation for policyId: {}", method, policyId);
+            logger.info("{} - Processing PROFORMA validation for insurancePolicyId: {}", method, insurancePolicyId);
 
             PaymentSchedule paymentSchedule = paymentScheduleInterface
                     .findLatestByStatus(InvoiceType.INVOICE)
@@ -227,23 +226,23 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
             logger.debug("{} - Policy change exists in period: {}", method, existsPolicyChangeInPeriod);
 
             if (!existsPolicyChangeInPeriod) {
-                logger.error("{} - No policy change found for PROFORMA. policyId: {}", method, policyId);
+                logger.error("{} - No policy change found for PROFORMA. insurancePolicyId: {}", method, insurancePolicyId);
                 throw new BusinessException(Response.Status.BAD_REQUEST.getStatusCode(),
-                        "Payment schedule: " + policyId + " has no policy change.");
+                        "Payment schedule: " + insurancePolicyId + " has no policy change.");
             }
         }
 
         boolean exists = paymentScheduleInterface
-                .existsByPolicyIdAndMonthAndYear(policyId, month, year);
+                .existsByPolicyIdAndMonthAndYear(insurancePolicyId, month, year);
 
         logger.debug("{} - Payment already exists for month/year: {}", method, exists);
 
         if (exists) {
-            logger.error("{} - Payment already exists for policyId: {}, month: {}, year: {}",
-                    method, policyId, month, year);
+            logger.error("{} - Payment already exists for insurancePolicyId: {}, month: {}, year: {}",
+                    method, insurancePolicyId, month, year);
 
             throw new BusinessException(Response.Status.BAD_REQUEST.getStatusCode(),
-                    "Payment schedule: " + policyId + " already exists for this month");
+                    "Payment schedule: " + insurancePolicyId + " already exists for this month");
         }
 
         boolean isFirstPayment = isFirstPayment(insurancePolicy);
@@ -256,45 +255,41 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
         logger.debug("{} - isFirstPayment: {}, shouldGenerate: {}", method, isFirstPayment, shouldGenerate);
 
         if (!isFirstPayment && !shouldGenerate) {
-            logger.warn("{} - Skipping generation. policyId: {}", method, policyId);
+            logger.warn("{} - Skipping generation. insurancePolicyId: {}", method, insurancePolicyId);
 
             throw new BusinessException(Response.Status.BAD_REQUEST.getStatusCode(),
-                    "Payment schedule for policy: " + policyId + " is not due this cycle");
+                    "Payment schedule for policy: " + insurancePolicyId + " is not due this cycle");
         }
 
         List<InsuranceOutstandingAmount> outstandingAmountList =
                 IInsuranceOutstandingAmount.findByInsurancePolicyId(
-                        policyId,
+                        insurancePolicyId,
                         insuranceOutstandingEnum.NEW.name()
                 );
 
         logger.info("{} - Outstanding records found: {}", method, outstandingAmountList.size());
 
-        List<Long> outstandingAmountListLisIDs = outstandingAmountList.stream()
-                .filter(outstandingAmount -> outstandingAmount.getPaymentSchedule() != null)
-                .map(InsuranceOutstandingAmount::getInsuranceOutstandingAmountId)
-                .collect(Collectors.toList());
 
         BigDecimal amount = calculateInstallment(insurancePolicy, outstandingAmountList);
 
         logger.info("{} - Calculated installment amount: {}", method, amount);
 
-        PaymentSchedule ps = new PaymentSchedule();
-        ps.setInsurancePolicy(insurancePolicy);
-        ps.setRepaymentAmount(amount);
-        ps.setCreatedDate(new Date());
-        ps.setInvoiceType(invoiceType);
-        ps.setRepaymentMonth(month);
-        ps.setRepaymentYear(year);
-        ps.setPaymentStatus(PaymentStatus.PENDING);
-        ps.setNormalPayment(true);
+        PaymentSchedule newSchedule = new PaymentSchedule();
+        newSchedule.setInsurancePolicy(insurancePolicy);
+        newSchedule.setRepaymentAmount(amount);
+        newSchedule.setCreatedDate(new Date());
+        newSchedule.setInvoiceType(invoiceType);
+        newSchedule.setRepaymentMonth(month);
+        newSchedule.setRepaymentYear(year);
+        newSchedule.setPaymentStatus(PaymentStatus.PENDING);
+        newSchedule.setNormalPayment(true);
 
-        logger.debug("{} - PaymentSchedule prepared: policyId={}, amount={}, month={}, year={}",
-                method, policyId, amount, month, year);
+        logger.debug("{} - PaymentSchedule prepared: insurancePolicyId={}, amount={}, month={}, year={}",
+                method, insurancePolicyId, amount, month, year);
 
-        dBTransactionService.saveDataBase(ps, outstandingAmountListLisIDs);
+        dBTransactionService.processAndPersistPaymentSchedule(newSchedule,outstandingAmountList,invoiceType);
 
-        logger.info("{} - Success - Payment schedule created for policyId: {}", method, policyId);
+        logger.info("{} - Success - Payment schedule created for insurancePolicyId: {}", method, insurancePolicyId);
     }
 
     @Override
