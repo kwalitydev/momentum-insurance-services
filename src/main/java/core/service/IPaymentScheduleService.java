@@ -23,5 +23,7 @@ public interface IPaymentScheduleService {
 
     PaymentScheduleDetails findPaymentDetailsByInsurancePolicy(String insurancePolicyId, List<PaymentStatus> paymentStatuses);
 
+  //  void processPayment(InsurancePolicy insurancePolicy, InvoiceType type);
+
 
 }
