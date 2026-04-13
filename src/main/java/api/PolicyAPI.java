@@ -5,6 +5,7 @@ import core.constants.*;
 import core.exception.BusinessException;
 import core.impl.ProcessWorkflowImpl;
 import core.service.IPaymentScheduleService;
+import core.service.IPolicyService;
 import core.threads.PostCancellation;
 import core.util.*;
 import dao.BeanFactory;
@@ -86,6 +87,9 @@ public class PolicyAPI {
     private IPaymentScheduleService iPaymentScheduleService;
     @Inject
     private PolicyChangeControlInterface policyChangeControlInterface;
+
+    @Inject
+    private IPolicyService iPolicyService ;
 
 
     @GET
@@ -1335,9 +1339,9 @@ public class PolicyAPI {
         String errorCause = "";
 
         try {
-            List<InsurancePolicy> insurancePolicyList = this.insurancePolicyInterface.findByMobileNumber(phoneNumber);
-            if (!insurancePolicyList.isEmpty()) {
-                response = Response.status(Response.Status.OK).entity(insurancePolicyList).build();
+            PolicyDetailsDTO policyDetailsDTO = this.iPolicyService.findPaymentDetailsByAccountNumber(phoneNumber);
+            if (policyDetailsDTO!=null) {
+                response = Response.status(Response.Status.OK).entity(policyDetailsDTO).build();
                 defaultSuccess(LOGGER,reqRes);
                 queryExecuted = true;
             } else {

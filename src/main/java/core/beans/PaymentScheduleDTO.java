@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 @Builder
 public class PaymentScheduleDTO implements Serializable {
+    private Long paymentId;
     private BigDecimal repaymentAmount;
     private BigDecimal paidAmount;
     private String repaymentMonth;
