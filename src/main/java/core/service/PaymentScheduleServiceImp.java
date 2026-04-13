@@ -326,6 +326,7 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
             List<BeneficiaryDTO> beneficiaries = beneficiariesList.stream()
                     .map(b -> BeneficiaryDTO.builder()
                             .name(b.getName())
+                            .beneficiaryId(b.getBeneficiaryId())
                             .totalCharge(b.getTotalCharge())
                             .status(b.getStatus().getDescription())
                             .description(b.getRelationShip().getDescription())
@@ -366,6 +367,7 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
                                         ).collect(Collectors.toList());
 
                         return PaymentScheduleDTO.builder()
+                                .paymentId(ps.getPaymentScheduleId())
                                 .repaymentAmount(ps.getRepaymentAmount())
                                 .paidAmount(ps.getPaidAmount())
                                 .repaymentMonth(ps.getRepaymentMonth())

@@ -3,7 +3,7 @@ package api;
 
 import core.beans.*;
 import core.service.IPaymentScheduleService;
-import core.service.IPolicyChartService;
+import core.service.IPolicyService;
 import core.util.Util;
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -21,7 +21,7 @@ import java.util.List;
 public class DashboardAPI {
 
     @Inject
-    IPolicyChartService policyChartService;
+    IPolicyService policyChartService;
 
     @Inject
     IPaymentScheduleService iPaymentScheduleService;

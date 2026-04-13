@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 @Builder
 @ToString
 public class BeneficiaryDTO implements Serializable {
+    private Long beneficiaryId;
     private String name;
     private BigDecimal totalCharge;
     private String description;

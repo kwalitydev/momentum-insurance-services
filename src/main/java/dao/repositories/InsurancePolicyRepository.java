@@ -116,7 +116,7 @@ public interface InsurancePolicyRepository extends JpaRepository<InsurancePolicy
 
     @Query("SELECT p FROM InsurancePolicy p " +
            "JOIN FETCH p.policyHolder ph " +
-           "WHERE ph.mobileNumber = :mobile")
+           "WHERE ph.mobileNumber = :mobile ORDER BY p.createdDate DESC")
     List<InsurancePolicy> findByMobileNumber(@Param("mobile") String mobile);
 
     @Query("SELECT p FROM InsurancePolicy p " +
