@@ -398,6 +398,75 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
         }
     }
 
+    @Override
+    public PaymentResponse processPayment(PaymentRequest paymentRequest) {
+
+        String method = "processPayment";
+
+        logger.info("{} - Start - paymentScheduleId: {}, paymentMethod: {}, amount: {}",
+                method,
+                paymentRequest.getPaymentScheduleId(),
+                paymentRequest.getPaymentMethod(),
+                paymentRequest.getAmount());
+
+        PaymentSchedule paymentSchedule = paymentScheduleRepository
+                .findByPaymentScheduleId(paymentRequest.getPaymentScheduleId())
+                .orElseThrow(() -> {
+                    logger.error("{} - PaymentSchedule not found for id: {}",
+                            method, paymentRequest.getPaymentScheduleId());
+
+                    return new BusinessException(
+                            Response.Status.NOT_FOUND.getStatusCode(),
+                            "PaymentSchedule not found for id : " + paymentRequest.getPaymentScheduleId()
+                    );
+                });
+
+        logger.info("{} - PaymentSchedule found - id: {}, currentStatus: {}",
+                method,
+                paymentSchedule.getPaymentScheduleId(),
+                paymentSchedule.getPaymentStatus());
+
+        String transactionId = CoreUtil.generateTransaction();
+
+        logger.debug("{} - Generated transactionId: {}", method, transactionId);
+
+        if (PaymentMethodStatus.MPESA.equals(paymentRequest.getPaymentMethod())) {
+
+            logger.info("{} - Processing MPESA payment for scheduleId: {}",
+                    method, paymentSchedule.getPaymentScheduleId());
+
+            int updated = dBTransactionService.updatePaymentSchedule(
+                    paymentSchedule.getPaymentScheduleId(),
+                    transactionId,
+                    LocalDateTime.now(),
+                    PaymentMethodStatus.MPESA,
+                    PaymentStatus.PAID,
+                    paymentRequest.getAmount()
+            );
+
+            logger.info("{} - Update result: {} row(s) affected for scheduleId: {}",
+                    method, updated, paymentSchedule.getPaymentScheduleId());
+
+            if (updated == 0) {
+                logger.warn("{} - No rows updated for scheduleId: {}", method,
+                        paymentSchedule.getPaymentScheduleId());
+            }
+
+        } else {
+            logger.warn("{} - Unsupported payment method: {}",
+                    method, paymentRequest.getPaymentMethod());
+        }
+
+        PaymentResponse response = PaymentResponse.builder()
+                .responseCode("SUCCESS")
+                .description("Payment processed successfully")
+                .build();
+
+        logger.info("{} - End - paymentScheduleId: {}", method,
+                paymentRequest.getPaymentScheduleId());
+
+        return response;
+    }
     private PaymentChartDTO buildMonthChart() {
 
         LocalDate today = LocalDate.now();
