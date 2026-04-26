@@ -2,8 +2,8 @@ package core.beans;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import dao.enums.PaymentMethodStatus;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+
+import dao.enums.PaymentType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Builder
 @Data
@@ -25,4 +26,6 @@ public class PaymentRequest implements Serializable {
     private String mobileNumber;
     private String policeNumber;
     private PaymentMethodStatus paymentMethod;
+    private PaymentType PaymentType;
+    private List<BeneficiaryPartialDTO> beneficiaries;
 }

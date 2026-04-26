@@ -72,15 +72,17 @@ public class DBTransactionService {
                                      LocalDateTime paymentDate,
                                      PaymentMethodStatus paymentMethodStatus,
                                      PaymentStatus paymentStatus,
-                                     //@Param("status") Status status,
-                                     BigDecimal paidAmount) {
+                                     BigDecimal paidAmount,
+                                     String operatorMessage,
+                                     String externalTransactionId
+    ) {
 
         return this.paymentScheduleRepository
                 .updatePaymentSchedule(paymentSchedule,
                         transactionId,
                         paymentDate,
                         paymentMethodStatus,
-                        paymentStatus, paidAmount);
+                        paymentStatus, paidAmount, operatorMessage, externalTransactionId);
     }
 
 
