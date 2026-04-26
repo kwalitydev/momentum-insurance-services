@@ -18,6 +18,7 @@ public class RequestUtil {
     public static List<String> OVERRIDE_LIST;
     public static String EMAIL_ENDPOINT;
     public static boolean ENCRYPTED_BODY;
+    public static String MPESA_URL;
 
 
 }

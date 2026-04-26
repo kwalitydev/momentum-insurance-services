@@ -54,5 +54,8 @@ public interface BeneficiariesRepository extends JpaRepository<Beneficiaries, St
     List<Beneficiaries> findByInsurancePolicyId(
             @Param("insurancePolicyId") String insurancePolicyId);
 
+    @Query("SELECT b FROM Beneficiaries b WHERE b.beneficiaryId IN :ids")
+    List<Beneficiaries> findByIds(@Param("ids") List<Long> ids);
+
 
 }

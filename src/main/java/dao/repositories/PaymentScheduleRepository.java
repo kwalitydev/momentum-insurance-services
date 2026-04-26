@@ -330,8 +330,9 @@ public interface PaymentScheduleRepository extends JpaRepository<PaymentSchedule
            "ps.paymentDate = :paymentDate, " +
            "ps.paymentMethodStatus = :paymentMethodStatus, " +
            "ps.paymentStatus = :paymentStatus, " +
-         //  "ps.status = :status, " +
-           "ps.paidAmount = :paidAmount " +
+           "ps.paidAmount = :paidAmount, " +
+           "ps.operatorMessage = :operatorMessage, " +
+           "ps.externalTransactionId = :externalTransactionId " +
            "WHERE ps.paymentScheduleId = :id")
     int updatePaymentSchedule(
             @Param("id") Long id,
@@ -339,7 +340,8 @@ public interface PaymentScheduleRepository extends JpaRepository<PaymentSchedule
             @Param("paymentDate") LocalDateTime paymentDate,
             @Param("paymentMethodStatus") PaymentMethodStatus paymentMethodStatus,
             @Param("paymentStatus") PaymentStatus paymentStatus,
-            //@Param("status") Status status,
-            @Param("paidAmount") BigDecimal paidAmount
+            @Param("paidAmount") BigDecimal paidAmount,
+            @Param("operatorMessage") String operatorMessage,
+            @Param("externalTransactionId") String externalTransactionId
     );
 }

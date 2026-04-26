@@ -8,10 +8,7 @@ import core.exception.BusinessException;
 import core.util.CoreUtil;
 import core.util.Util;
 import dao.entities.*;
-import dao.enums.InvoiceType;
-import dao.enums.PaymentMethodStatus;
-import dao.enums.TransactionType;
-import dao.enums.insuranceOutstandingEnum;
+import dao.enums.*;
 import dao.interfaces.InsurancePolicyInterface;
 import dao.interfaces.PaymentScheduleInterface;
 import dao.interfaces.PolicyChangeControlInterface;
@@ -65,6 +62,12 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
 
     @Inject
     private PolicyChangeControlInterface policyChangeControlInterface;
+
+    @Inject
+    private IMpesaClientService iMpesaClientService;
+
+    @Inject
+    private PartialPaymentService partialPaymentService;
 
     @Override
     public List<RecentPaymentDTO> getLastPayments(int limit) {
@@ -428,20 +431,43 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
 
         String transactionId = CoreUtil.generateTransaction();
 
-        logger.debug("{} - Generated transactionId: {}", method, transactionId);
-
         if (PaymentMethodStatus.MPESA.equals(paymentRequest.getPaymentMethod())) {
 
             logger.info("{} - Processing MPESA payment for scheduleId: {}",
                     method, paymentSchedule.getPaymentScheduleId());
+
+            MpesaRequest mpesaRequest = MpesaRequest.builder()
+                    .msisdn(paymentRequest.getMobileNumber())
+                    .clientTransactionId(transactionId)
+                    .amount(paymentRequest.getAmount())
+                    .partnerCode("momentum")
+                    .clientAppCode("momentum#JMQRJ2S2")
+                    .build();
+
+            MpesaResponse mpesaResponse;
+
+            try {
+                mpesaResponse = this.iMpesaClientService.callMpesa(mpesaRequest);
+            } catch (Exception e) {
+                logger.error("{} - Error calling M-Pesa", method, e);
+
+                throw new BusinessException(502, "Error calling payment provider");
+            }
+
+            PaymentStatus status = mpesaResponse.getStatus()
+                    .equalsIgnoreCase(Util.SUCCESS)
+                    ? PaymentStatus.PAID
+                    : PaymentStatus.FAILED;
 
             int updated = dBTransactionService.updatePaymentSchedule(
                     paymentSchedule.getPaymentScheduleId(),
                     transactionId,
                     LocalDateTime.now(),
                     PaymentMethodStatus.MPESA,
-                    PaymentStatus.PAID,
-                    paymentRequest.getAmount()
+                    status,
+                    paymentRequest.getAmount(),
+                    mpesaResponse.getMessage(),
+                    mpesaResponse.getExternalReference()
             );
 
             logger.info("{} - Update result: {} row(s) affected for scheduleId: {}",
@@ -451,22 +477,24 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
                 logger.warn("{} - No rows updated for scheduleId: {}", method,
                         paymentSchedule.getPaymentScheduleId());
             }
+            // update partial payments
+            if (PaymentType.PARTIAL.equals(paymentRequest.getPaymentType())
+                && PaymentStatus.PAID.equals(status)) {
+                partialPaymentService.processPartialPayment(paymentRequest, paymentSchedule, method);
+            }
 
-        } else {
-            logger.warn("{} - Unsupported payment method: {}",
-                    method, paymentRequest.getPaymentMethod());
+            logger.info("{} - End - paymentScheduleId: {}", method,
+                    paymentRequest.getPaymentScheduleId());
+
+            return PaymentResponse.builder()
+                    .responseCode(PaymentStatus.PAID.equals(status) ? Util.SUCCESS : Util.FAILED)
+                    .description(mpesaResponse.getMessage())
+                    .build();
+
         }
-
-        PaymentResponse response = PaymentResponse.builder()
-                .responseCode("SUCCESS")
-                .description("Payment processed successfully")
-                .build();
-
-        logger.info("{} - End - paymentScheduleId: {}", method,
-                paymentRequest.getPaymentScheduleId());
-
-        return response;
+        throw new BusinessException(400, "Unsupported payment method");
     }
+
     private PaymentChartDTO buildMonthChart() {
 
         LocalDate today = LocalDate.now();
@@ -655,5 +683,6 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
                 throw new IllegalArgumentException("Invalid BenefitCycle: " + benefitCycle.getCycleType());
         }
     }
+
 
 }

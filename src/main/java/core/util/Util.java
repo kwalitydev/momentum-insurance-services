@@ -52,6 +52,10 @@ public class Util {
     public static final String DASHBOARD = "/dashboard";
     public static final String APP = "/app/v1";
 
+    public static final String SUCCESS = "SUCCESS";
+    public static final String FAILED = "FAILED";
+
+
     public static String getCoCode(String accountNumber){
         return "MZ0010"+accountNumber.substring(0,3);
     }

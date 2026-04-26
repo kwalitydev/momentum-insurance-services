@@ -66,6 +66,7 @@
         <class>dao.entities.InsuranceStatementEntry</class>
         <class>dao.entities.InsuranceBalance</class>
         <class>dao.entities.PolicyChangeControl</class>
+        <class>dao.entities.PaymentScheduleBeneficiary</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
 
         <properties>
