@@ -3,6 +3,7 @@ package dao.repositories;
 import core.constants.PaymentStatus;
 import dao.entities.*;
 import dao.enums.InvoiceType;
+import dao.enums.PaymentMethodStatus;
 import dao.interfaces.PaymentScheduleInterface;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,6 +16,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PaymentScheduleRepository extends JpaRepository<PaymentSchedule, String>, PaymentScheduleInterface {
@@ -314,4 +316,32 @@ public interface PaymentScheduleRepository extends JpaRepository<PaymentSchedule
            "ORDER BY ps.createdDate DESC")
     List<PaymentSchedule> findLatestByStatus(
             @Param("status") InvoiceType status);
+
+
+    @Query("SELECT ps FROM PaymentSchedule ps " +
+           "WHERE ps.paymentScheduleId = :id")
+    Optional<PaymentSchedule> findByPaymentScheduleId(
+            @Param("id") Long id);
+
+
+    @Modifying
+    @Query("UPDATE PaymentSchedule ps SET " +
+           "ps.transactionId = :transactionId, " +
+           "ps.paymentDate = :paymentDate, " +
+           "ps.paymentMethodStatus = :paymentMethodStatus, " +
+           "ps.paymentStatus = :paymentStatus, " +
+           "ps.paidAmount = :paidAmount, " +
+           "ps.operatorMessage = :operatorMessage, " +
+           "ps.externalTransactionId = :externalTransactionId " +
+           "WHERE ps.paymentScheduleId = :id")
+    int updatePaymentSchedule(
+            @Param("id") Long id,
+            @Param("transactionId") String transactionId,
+            @Param("paymentDate") LocalDateTime paymentDate,
+            @Param("paymentMethodStatus") PaymentMethodStatus paymentMethodStatus,
+            @Param("paymentStatus") PaymentStatus paymentStatus,
+            @Param("paidAmount") BigDecimal paidAmount,
+            @Param("operatorMessage") String operatorMessage,
+            @Param("externalTransactionId") String externalTransactionId
+    );
 }

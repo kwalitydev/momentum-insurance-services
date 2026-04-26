@@ -14,6 +14,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
+import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -28,6 +29,11 @@ import static core.util.Util.*;
 
 
 public class CoreUtil {
+
+    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final int RANDOM_PART_LENGTH = 6;
+    private static final SecureRandom RANDOM = new SecureRandom();
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("MMddHHmmss");
 
     private static final AtomicLong LAST_TIME_MS = new AtomicLong();
 
@@ -348,5 +354,18 @@ public class CoreUtil {
             throw new RuntimeException("Erro ao converter para JSON", e);
         }
     }
+
+    public synchronized static String generateTransaction() {
+        // Parte fixa: data e hora
+        String dateTimePart = LocalDateTime.now().format(FORMATTER);
+        // Parte aleatória: 6 caracteres
+        StringBuilder randomPart = new StringBuilder(RANDOM_PART_LENGTH);
+        for (int i = 0; i < RANDOM_PART_LENGTH; i++) {
+            int index = RANDOM.nextInt(CHARACTERS.length());
+            randomPart.append(CHARACTERS.charAt(index));
+        }
+        return dateTimePart + randomPart;
+    }
+
 
 }

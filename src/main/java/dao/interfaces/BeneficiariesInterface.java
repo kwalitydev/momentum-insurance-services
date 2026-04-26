@@ -4,6 +4,7 @@ package dao.interfaces;
 import dao.entities.*;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Date;
 import java.util.List;
@@ -32,4 +33,5 @@ public interface BeneficiariesInterface {
     List<Beneficiaries> findByDOB(String dob,Status status,List<Long> relationShips,Long subProductId);
 
     List<Beneficiaries> findByInsurancePolicyId(String insurancePolicyId);
+    List<Beneficiaries> findByIds( List<Long> ids);
 }

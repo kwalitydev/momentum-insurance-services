@@ -75,6 +75,7 @@ public class Startup implements ServletContextListener {
         TWS_ENDPOINT = System.getProperty("ins.platform.t24.endpoint");
         TWS_PASSWORD = System.getProperty("ins.platform.t24.password");
         EMAIL_ENDPOINT = System.getProperty("ins.platform.email.endpoint");
+        MPESA_URL = System.getProperty("ins.platform.mpesa.url");
         try{
             ENCRYPTED_BODY = Boolean.parseBoolean(System.getProperty("ins.platform.email.body.encryption"));
         }

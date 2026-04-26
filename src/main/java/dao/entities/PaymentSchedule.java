@@ -32,6 +32,8 @@ public class PaymentSchedule implements Serializable {
     private String messageId;
     private Boolean normalPayment = true;
     private String errorMessage;
+    private String operatorMessage;
+    private String externalTransactionId;
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
     @Enumerated(EnumType.STRING)

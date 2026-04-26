@@ -5,12 +5,16 @@ import core.util.CoreUtil;
 import dao.entities.InsuranceOutstandingAmount;
 import dao.entities.PaymentSchedule;
 import dao.enums.InvoiceType;
+import dao.enums.PaymentMethodStatus;
+import dao.repositories.PaymentScheduleRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -25,6 +29,9 @@ public class DBTransactionService {
 
     @Inject
     private IPaymentScheduleService paymentScheduleService;
+
+    @Inject
+    private PaymentScheduleRepository paymentScheduleRepository;
 
 
     @Transactional()
@@ -58,6 +65,26 @@ public class DBTransactionService {
         }
 
     }
+
+    @Transactional()
+    public int updatePaymentSchedule(Long paymentSchedule,
+                                     String transactionId,
+                                     LocalDateTime paymentDate,
+                                     PaymentMethodStatus paymentMethodStatus,
+                                     PaymentStatus paymentStatus,
+                                     BigDecimal paidAmount,
+                                     String operatorMessage,
+                                     String externalTransactionId
+    ) {
+
+        return this.paymentScheduleRepository
+                .updatePaymentSchedule(paymentSchedule,
+                        transactionId,
+                        paymentDate,
+                        paymentMethodStatus,
+                        paymentStatus, paidAmount, operatorMessage, externalTransactionId);
+    }
+
 
     private void expireLinkedProformas(
             List<InsuranceOutstandingAmount> outstandingList,
