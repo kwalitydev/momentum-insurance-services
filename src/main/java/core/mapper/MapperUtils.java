@@ -9,11 +9,12 @@ import dao.entities.PolicyHolder;
 import java.util.List;
 
 import static core.util.Util.formatDate;
+import static core.util.Util.getCurrentMonthInterval;
 
 public class MapperUtils {
 
     public static PolicyDetailsDTO mapToPolicyDetailsDTO(InsurancePolicy policy,
-                                                  List<BeneficiaryDTO> beneficiaries) {
+                                                  List<BeneficiaryDTO> beneficiaries,String collectionDays) {
         if (policy == null) return null;
 
         PolicyHolder holder = policy.getPolicyHolder();
@@ -38,8 +39,8 @@ public class MapperUtils {
                 .startDate(formatDate(policy.getStartDate()))
                 .endDate(formatDate(policy.getExpiryDate()))
                 .nextPaymentInterval(
-                        policy.getPaymentFrequency() != null
-                                ? policy.getPaymentFrequency().getName()
+                        getCurrentMonthInterval(collectionDays)  != null
+                                ? collectionDays
                                 : null
                 )
                 .subProductName(

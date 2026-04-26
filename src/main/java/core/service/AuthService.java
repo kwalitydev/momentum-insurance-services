@@ -2,12 +2,15 @@ package core.service;
 
 
 import core.beans.*;
+import core.exception.BusinessException;
 import core.mapper.MapperUtils;
 import core.util.AES;
 import core.util.CoreUtil;
+import core.util.RequestUtil;
 import core.util.Util;
 import dao.entities.*;
 import dao.enums.UserStatus;
+import dao.interfaces.ApplicationInterface;
 import dao.repositories.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,6 +18,7 @@ import org.apache.logging.log4j.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -48,6 +52,8 @@ public class AuthService {
 
     @Inject
     private BeneficiariesRepository beneficiariesRepository;
+    @Inject
+    private ApplicationInterface applicationInterface;
 
 
 
@@ -262,8 +268,27 @@ public class AuthService {
                 .collect(Collectors.toList());
 
 
-        PolicyDetailsDTO policyDetailsDTO = MapperUtils
-                .mapToPolicyDetailsDTO(insurancePolicy, beneficiaries);
+
+        PolicyDetailsDTO policyDetailsDTO;
+        Optional<Application> application = applicationInterface.findByAppId(RequestUtil.APP_ID);
+        if(application.isPresent()) {
+
+            policyDetailsDTO = MapperUtils
+                    .mapToPolicyDetailsDTO(insurancePolicy, beneficiaries,application.get().getCollectionDays());
+
+            logger.info("{} - Successfully built PolicyDetailsDTO for policyId: {}",
+                    method, insurancePolicy.getInsurancePolicyId());
+        } else {
+            logger.error("{} - Application with appId {} not found", method, RequestUtil.APP_ID);
+
+            throw new BusinessException(
+                    Response.Status.NOT_FOUND.getStatusCode(),
+                    "Application not found for appId: " + RequestUtil.APP_ID
+            );
+        }
+
+        logger.info("{} - Successfully built PolicyDetailsDTO for policyId: {}",
+                method, insurancePolicy.getInsurancePolicyId());
 
         logger.info("{} - Successful retrieved: {}", method, policyDetailsDTO.toString());
 

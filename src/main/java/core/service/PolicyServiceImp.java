@@ -3,9 +3,12 @@ package core.service;
 import core.beans.*;
 import core.exception.BusinessException;
 import core.mapper.MapperUtils;
+import core.util.RequestUtil;
 import core.util.Util;
+import dao.entities.Application;
 import dao.entities.Beneficiaries;
 import dao.entities.InsurancePolicy;
+import dao.interfaces.ApplicationInterface;
 import dao.repositories.BeneficiariesRepository;
 import dao.repositories.InsurancePolicyRepository;
 import org.apache.logging.log4j.LogManager;
@@ -18,6 +21,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -29,6 +33,8 @@ public class PolicyServiceImp implements IPolicyService {
 
     @Inject
     private BeneficiariesRepository beneficiariesRepository;
+    @Inject
+    private ApplicationInterface applicationInterface;
 
 
     @Override
@@ -115,11 +121,23 @@ public class PolicyServiceImp implements IPolicyService {
 
         logger.debug("{} - Beneficiaries mapped - count: {}", method, beneficiaries.size());
 
-        PolicyDetailsDTO policyDetailsDTO = MapperUtils
-                .mapToPolicyDetailsDTO(insurancePolicy, beneficiaries);
+        PolicyDetailsDTO policyDetailsDTO;
+        Optional<Application> application = applicationInterface.findByAppId(RequestUtil.APP_ID);
+        if(application.isPresent()) {
 
-        logger.info("{} - Successfully built PolicyDetailsDTO for policyId: {}",
-                method, insurancePolicy.getInsurancePolicyId());
+             policyDetailsDTO = MapperUtils
+                    .mapToPolicyDetailsDTO(insurancePolicy, beneficiaries,application.get().getCollectionDays());
+
+            logger.info("{} - Successfully built PolicyDetailsDTO for policyId: {}",
+                    method, insurancePolicy.getInsurancePolicyId());
+        } else {
+            logger.error("{} - Application with appId {} not found", method, RequestUtil.APP_ID);
+
+            throw new BusinessException(
+                    Response.Status.NOT_FOUND.getStatusCode(),
+                    "Application not found for appId: " + RequestUtil.APP_ID
+            );
+        }
 
         return policyDetailsDTO;
     }

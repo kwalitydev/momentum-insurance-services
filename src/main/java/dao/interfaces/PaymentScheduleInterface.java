@@ -49,5 +49,6 @@ public interface PaymentScheduleInterface {
     boolean existsByPolicyId( String policyId);
 
     List<PaymentSchedule> findByPolicyAndPaymentStatus(String insurancePolicyId, List<PaymentStatus> paymentStatuses);
+    List<PaymentSchedule> findByPaymentScheduleId(Long paymentScheduleId);
     List<PaymentSchedule> findLatestByStatus(InvoiceType status);
 }

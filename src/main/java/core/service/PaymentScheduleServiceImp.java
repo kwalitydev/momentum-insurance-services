@@ -299,7 +299,7 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
     @Override
     public PaymentScheduleDetails findPaymentDetailsByInsurancePolicy(
             String insurancePolicyId,
-            List<PaymentStatus> paymentStatuses) {
+            List<PaymentStatus> paymentStatuses,Long paymentScheduleId) {
 
         String method = "findPaymentDetailsByInsurancePolicy";
         logger.info("{} - Start - insurancePolicyId: {}, paymentStatuses: {}",
@@ -335,11 +335,22 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
                     )
                     .collect(Collectors.toList());
 
-            List<PaymentSchedule> paymentSchedules =
-                    paymentScheduleInterface.findByPolicyAndPaymentStatus(
-                            insurancePolicyId,
-                            paymentStatuses
-                    );
+            List<PaymentSchedule> paymentSchedules;
+            if(paymentScheduleId != null){
+                paymentSchedules =
+                        paymentScheduleInterface.findByPaymentScheduleId(
+                               paymentScheduleId
+                        );
+
+            }
+            else{
+                paymentSchedules =
+                        paymentScheduleInterface.findByPolicyAndPaymentStatus(
+                                insurancePolicyId,
+                                paymentStatuses
+                        );
+            }
+
 
             logger.info("{} - PaymentSchedules fetched: {}", method, paymentSchedules.size());
 

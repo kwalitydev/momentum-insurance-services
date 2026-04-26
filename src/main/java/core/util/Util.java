@@ -18,6 +18,7 @@ import java.time.format.TextStyle;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static core.util.CoreUtil.today;
 
@@ -350,6 +351,65 @@ public class Util {
                 .anyMatch(day -> day == today);
     }
 
+    public static boolean isEffectiveDateAfterCollectionPeriod(Date effectiveDate, List<Integer> collectionDays) {
+        if (effectiveDate == null || collectionDays == null || collectionDays.isEmpty()) {
+            throw new IllegalArgumentException("Invalid input");
+        }
+        int startDay = Collections.min(collectionDays);
+
+        Calendar startDate = Calendar.getInstance();
+        startDate.set(Calendar.DAY_OF_MONTH, startDay);
+        resetTime(startDate);
+
+        Calendar endDate = Calendar.getInstance();
+        endDate.set(Calendar.DAY_OF_MONTH, endDate.getActualMaximum(Calendar.DAY_OF_MONTH));
+        resetTime(endDate);
+
+        Calendar effective = Calendar.getInstance();
+        effective.setTime(effectiveDate);
+        resetTime(effective);
+
+        return effective.after(endDate);
+    }
+
+    private static void resetTime(Calendar cal) {
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+    }
+
+    public static List<Integer> parseCollectionDays(String collectionDays) {
+        if (collectionDays == null || collectionDays.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return Arrays.stream(collectionDays.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .map(Integer::parseInt)
+                .collect(Collectors.toList());
+    }
+
+    public static boolean isAfterCollectionPeriod(String collectionDays,Date date) {
+
+        if (collectionDays == null || collectionDays.trim().isEmpty()) {
+            throw new IllegalArgumentException("Collection days cannot be empty");
+        }
+
+        int firstCollectionDay = Arrays.stream(collectionDays.split(","))
+                .map(String::trim)
+                .mapToInt(Integer::parseInt)
+                .min()
+                .getAsInt();
+
+        int today = date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate()
+                .getDayOfMonth();
+
+        return today >= firstCollectionDay;
+    }
 
     public static boolean isAfterCollectionPeriod(String collectionDays) {
 

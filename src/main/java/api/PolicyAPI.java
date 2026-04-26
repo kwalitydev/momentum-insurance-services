@@ -90,6 +90,8 @@ public class PolicyAPI {
 
     @Inject
     private IPolicyService iPolicyService ;
+    @Inject
+    private ApplicationInterface applicationInterface;
 
 
     @GET
@@ -535,6 +537,72 @@ public class PolicyAPI {
                     age,setBenefitCycle(benefitCycle));
             if(memberProductPrices.isPresent()) {
                 response = Response.status(Response.Status.OK).entity(memberProductPrices.get()).build();
+            }
+            defaultSuccess(LOGGER,reqRes);
+            queryExecuted = true;
+
+
+        } catch (Exception e) {
+            LOGGER.error(reqRes,e);
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            errorCause = e.getCause().getMessage();
+        } finally {
+
+            queryUtil.saveLog(CoreUtil.setWebserviceLog(reqRes, requestTime, username,
+                    methodName, response.getStatus(), queryExecuted, HttpMethod.GET, errorCause, sessionId, headers.getRemoteAddr()));
+        }
+
+        return response;
+
+    }
+
+
+
+    @GET
+    @Path("/member-price-list/edit")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getMemberPriceForAmendment(@QueryParam("subProductId") Long subProductId,
+                                   @QueryParam("benefitCycle") Long benefitCycle,
+                                   @QueryParam("dateOfBirth") String dateOfBirth,
+                                               @QueryParam("effectiveDate") String effectiveDate,
+                                   @QueryParam("sessionId") String sessionId,@QueryParam("username") String username,@Context HttpServletRequest headers) {
+
+        String reqRes = getLogId();
+        String methodName = "getMemberPrice";
+        LOGGER.info("{} is being called with parameter. subProductId -> {}, username -> {}, sessionId -> {}, logId -> {}, benefitCycle - {}, dateOfBirth -. {}, ipAddress -> {} ",
+                methodName,subProductId, username, sessionId, reqRes,benefitCycle,dateOfBirth, headers.getRemoteAddr());
+
+        Date requestTime = today();
+        Response response = Response.status(Response.Status.NO_CONTENT).build();
+        boolean queryExecuted = false;
+        String errorCause = "";
+
+        try {
+            SubProduct subProduct = new SubProduct();
+            subProduct.setSubProductId(subProductId);
+
+            int age = calculateAge(dateOfBirth);
+
+            LOGGER.info("Age is {}",age);
+            Optional<MemberProductPrice> memberProductPrices = memberProductPriceInterface.findBySubProduct(subProduct,
+                    age,setBenefitCycle(benefitCycle));
+            Date eDate = stringToDate(effectiveDate);
+
+            Optional<Application> application = applicationInterface.findByAppId(RequestUtil.APP_ID);
+            boolean isAfterCollectionPeriod = false;
+            if(application.isPresent()) {
+                 isAfterCollectionPeriod = isEffectiveDateAfterCollectionPeriod(eDate,parseCollectionDays(application.get().getCollectionDays()));
+                 LOGGER.info("Is after collection period? {} , effective date {}", isAfterCollectionPeriod,eDate);
+            }
+
+            if(memberProductPrices.isPresent()) {
+                MemberProductPriceResponse memberProductPriceResponse = new MemberProductPriceResponse();
+                memberProductPriceResponse.setAmount(memberProductPrices.get().getAmount());
+                memberProductPriceResponse.setCurrency(memberProductPrices.get().getCurrency());
+                memberProductPriceResponse.setBeneficiaryDescription(memberProductPrices.get().getBeneficiaryDescription());
+                memberProductPriceResponse.setAfterCollectionDays(isAfterCollectionPeriod);
+                response = Response.status(Response.Status.OK).entity(memberProductPriceResponse).build();
             }
             defaultSuccess(LOGGER,reqRes);
             queryExecuted = true;
@@ -1408,6 +1476,7 @@ public class PolicyAPI {
     @Produces(MediaType.APPLICATION_JSON)
     public Response findPaymentDetails(
             @QueryParam("insurancePolicyId") String insurancePolicyId,
+            @QueryParam("paymentScheduleId") Long paymentScheduleId,
             @QueryParam("paymentStatuses") List<PaymentStatus> paymentStatuses,
             @QueryParam("sessionId") String sessionId,
             @QueryParam("username") String username,
@@ -1417,8 +1486,8 @@ public class PolicyAPI {
         String methodName = "findPaymentDetails";
         String ipAddress = headers.getRemoteAddr();
 
-        LOGGER.info("{} is being called. insurancePolicyId -> {}, username -> {}, sessionId -> {}, logId -> {}, ipAddress -> {} ",
-                methodName, insurancePolicyId, username, sessionId, reqRes, ipAddress);
+        LOGGER.info("{} is being called. insurancePolicyId -> {}, paymentScheduleId -> {}, username -> {}, sessionId -> {}, logId -> {}, ipAddress -> {} ",
+                methodName, insurancePolicyId,paymentScheduleId, username, sessionId, reqRes, ipAddress);
 
         Date requestTime = today();
         Response response = Response.status(Response.Status.NO_CONTENT).build();
@@ -1430,7 +1499,8 @@ public class PolicyAPI {
             PaymentScheduleDetails result =
                     iPaymentScheduleService.findPaymentDetailsByInsurancePolicy(
                             insurancePolicyId,
-                            paymentStatuses
+                            paymentStatuses,
+                            paymentScheduleId
                     );
 
             if (result != null) {
