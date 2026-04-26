@@ -21,7 +21,7 @@ public interface IPaymentScheduleService {
 
     void processInvoice(InsurancePolicy insurancePolicy, InvoiceType type);
 
-    PaymentScheduleDetails findPaymentDetailsByInsurancePolicy(String insurancePolicyId, List<PaymentStatus> paymentStatuses);
+    PaymentScheduleDetails     findPaymentDetailsByInsurancePolicy(String insurancePolicyId, List<PaymentStatus> paymentStatuses);
 
     PaymentResponse processPayment(PaymentRequest paymentRequest);
 
