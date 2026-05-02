@@ -14,7 +14,7 @@ public interface BeneficiariesInterface {
     Beneficiaries save(Beneficiaries b);
     List<Beneficiaries> findByInsurancePolicyAndStatus(InsurancePolicy policy,Status status);
     List<Beneficiaries> findByInsurancePolicyAndStatus(String policyId,Status status);
-    int updateBeneficiary(Date lastUpdated, String userId, Status status, Long beneficiaryId);
+    int updateBeneficiary(Date lastUpdated, String userId, Status status,Date effectiveDate, Long beneficiaryId);
     List<Beneficiaries> findByRelationship(InsurancePolicy insurancePolicy,List<String> relationShips,Status status);
     int updateBeneficiary(String name, Date dateOfBirth, IDType idType, String student, RelationShip relationShip,
                           Date lastUpdated, String userId, InsurancePolicy insurancePolicy, Double percentageAllocated, Long beneficiaryId);

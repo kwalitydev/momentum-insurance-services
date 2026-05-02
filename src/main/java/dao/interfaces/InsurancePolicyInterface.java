@@ -1,11 +1,8 @@
 package dao.interfaces;
 
 
-import core.beans.PolicyRequest;
-import core.beans.PolicyResponse;
 import dao.entities.*;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -25,11 +22,8 @@ public interface InsurancePolicyInterface {
     List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Status status,SubProduct subProduct);
     List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Users userId,SubProduct subProduct);
 
-   int cancelPolicy(Date lastUpdate, Status status,String userId,String policyId);
-
+   int updatePolicy(Date lastUpdate, Status status, String userId, String policyId);
     int updatePolicy(Date lastUpdate, String userId, Coverage coverage, BigDecimal totalAmount,SubProduct subProduct,Date expiryDate,String policyId);
-
-
     List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate, Product product, Pageable pageable);
     List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,SubProduct subProduct,Pageable pageable);
     List<InsurancePolicy> findByDateInterval(Date startDate, Date endDate,Status status,SubProduct subProduct,Pageable pageable);

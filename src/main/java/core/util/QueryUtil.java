@@ -8,7 +8,6 @@ import dao.entities.*;
 import dao.interfaces.*;
 import dao.repositories.PaymentLogRepository;
 import dao.repositories.PaymentScheduleRepository;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -140,13 +139,6 @@ public class QueryUtil {
 
     }
 
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
-    public int cancelPolicy(String policy){
-        return insurancePolicyInterface.cancelPolicy(today(),
-                setStatus(Statuses.CANCELLED.toString()), getSystemUser().getUserId(), policy);
-
-    }
-
     @Transactional
     public Notification postNotification(Notification notification){
         return notificationInterface.save(notification);
@@ -164,6 +156,7 @@ public class QueryUtil {
      return  beneficiariesInterface.updateBeneficiary(today(),
                 getSystemUser().getUserId(),
                 setStatus(Statuses.INACTIVE.toString()),
+                today(),
                 ben);
     }
 

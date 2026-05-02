@@ -15,6 +15,8 @@ public class BeneficiaryRequestPayload implements Serializable {
     private Integer index;
     private BigDecimal totalCharge;
     private Long beneficiaryId;
+    private String effectiveDate;
+    private String comment;
 
     public String getName() {
         return name;
@@ -96,6 +98,22 @@ public class BeneficiaryRequestPayload implements Serializable {
         this.beneficiaryId = beneficiaryId;
     }
 
+    public String getEffectiveDate() {
+        return effectiveDate;
+    }
+
+    public void setEffectiveDate(String effectiveDate) {
+        this.effectiveDate = effectiveDate;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
     @Override
     public String toString() {
         return "BeneficiaryRequestPayload{" +
@@ -109,6 +127,8 @@ public class BeneficiaryRequestPayload implements Serializable {
                 ", index=" + index +
                 ", totalCharge=" + totalCharge +
                 ", beneficiaryId=" + beneficiaryId +
+                ", effectiveDate='" + effectiveDate + '\'' +
+                ", comment='" + comment + '\'' +
                 '}';
     }
 }

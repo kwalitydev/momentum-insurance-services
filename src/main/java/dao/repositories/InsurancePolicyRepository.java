@@ -41,7 +41,7 @@ public interface InsurancePolicyRepository extends JpaRepository<InsurancePolicy
 
     @Modifying(clearAutomatically = true)
     @Query("update InsurancePolicy set lastUpdated=?1, status =?2, updatedUser=?3 where policyId=?4")
-    int cancelPolicy(Date lastUpdate, Status status, String users, String policyId);
+    int updatePolicy(Date lastUpdate, Status status, String users, String policyId);
 
     @Modifying(clearAutomatically = true)
     @Query("update InsurancePolicy set lastUpdated=?1, updatedUser=?2,coverage=?3, totalAmount=?4, subProduct =?5,expiryDate=?6 where policyId=?7")
@@ -140,5 +140,6 @@ public interface InsurancePolicyRepository extends JpaRepository<InsurancePolicy
 
     @Query("SELECT p FROM InsurancePolicy p WHERE p.insurancePolicyId = :insurancePolicyId")
     Optional<InsurancePolicy> findByInsurancePolicyId(@Param("insurancePolicyId") String insurancePolicyId);
+
 
 }

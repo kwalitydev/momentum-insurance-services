@@ -268,7 +268,6 @@ public class AuthService {
                 .collect(Collectors.toList());
 
 
-
         PolicyDetailsDTO policyDetailsDTO;
         Optional<Application> application = applicationInterface.findByAppId(RequestUtil.APP_ID);
         if(application.isPresent()) {
@@ -291,6 +290,7 @@ public class AuthService {
                 method, insurancePolicy.getInsurancePolicyId());
 
         logger.info("{} - Successful retrieved: {}", method, policyDetailsDTO.toString());
+
 
         return policyDetailsDTO;
     }

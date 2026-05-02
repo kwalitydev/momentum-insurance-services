@@ -341,8 +341,8 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
             List<PaymentSchedule> paymentSchedules;
             if(paymentScheduleId != null){
                 paymentSchedules =
-                        paymentScheduleInterface.findByPaymentScheduleId(
-                               paymentScheduleId
+                        paymentScheduleInterface.findByPaymentSchedule(
+                                paymentScheduleId
                         );
 
             }

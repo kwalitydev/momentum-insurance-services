@@ -125,7 +125,7 @@ public class PolicyServiceImp implements IPolicyService {
         Optional<Application> application = applicationInterface.findByAppId(RequestUtil.APP_ID);
         if(application.isPresent()) {
 
-             policyDetailsDTO = MapperUtils
+            policyDetailsDTO = MapperUtils
                     .mapToPolicyDetailsDTO(insurancePolicy, beneficiaries,application.get().getCollectionDays());
 
             logger.info("{} - Successfully built PolicyDetailsDTO for policyId: {}",
@@ -138,6 +138,7 @@ public class PolicyServiceImp implements IPolicyService {
                     "Application not found for appId: " + RequestUtil.APP_ID
             );
         }
+
 
         return policyDetailsDTO;
     }

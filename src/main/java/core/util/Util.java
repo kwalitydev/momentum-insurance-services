@@ -355,6 +355,25 @@ public class Util {
                 .anyMatch(day -> day == today);
     }
 
+
+    public static boolean isAfterCollectionPeriod(String collectionDays) {
+
+        if (collectionDays == null || collectionDays.trim().isEmpty()) {
+            throw new IllegalArgumentException("Collection days cannot be empty");
+        }
+
+        int firstCollectionDay = Arrays.stream(collectionDays.split(","))
+                .map(String::trim)
+                .mapToInt(Integer::parseInt)
+                .min()
+                .getAsInt();
+
+        int today = LocalDate.now().getDayOfMonth();
+
+        return today >= firstCollectionDay;
+    }
+
+
     public static boolean isEffectiveDateAfterCollectionPeriod(Date effectiveDate, List<Integer> collectionDays) {
         if (effectiveDate == null || collectionDays == null || collectionDays.isEmpty()) {
             throw new IllegalArgumentException("Invalid input");
@@ -411,23 +430,6 @@ public class Util {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate()
                 .getDayOfMonth();
-
-        return today >= firstCollectionDay;
-    }
-
-    public static boolean isAfterCollectionPeriod(String collectionDays) {
-
-        if (collectionDays == null || collectionDays.trim().isEmpty()) {
-            throw new IllegalArgumentException("Collection days cannot be empty");
-        }
-
-        int firstCollectionDay = Arrays.stream(collectionDays.split(","))
-                .map(String::trim)
-                .mapToInt(Integer::parseInt)
-                .min()
-                .getAsInt();
-
-        int today = LocalDate.now().getDayOfMonth();
 
         return today >= firstCollectionDay;
     }

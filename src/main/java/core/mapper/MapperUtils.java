@@ -14,7 +14,7 @@ import static core.util.Util.getCurrentMonthInterval;
 public class MapperUtils {
 
     public static PolicyDetailsDTO mapToPolicyDetailsDTO(InsurancePolicy policy,
-                                                  List<BeneficiaryDTO> beneficiaries,String collectionDays) {
+                                                         List<BeneficiaryDTO> beneficiaries,String collectionDays) {
         if (policy == null) return null;
 
         PolicyHolder holder = policy.getPolicyHolder();
