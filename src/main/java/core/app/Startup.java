@@ -76,6 +76,10 @@ public class Startup implements ServletContextListener {
         TWS_PASSWORD = System.getProperty("ins.platform.t24.password");
         EMAIL_ENDPOINT = System.getProperty("ins.platform.email.endpoint");
         MPESA_URL = System.getProperty("ins.platform.mpesa.url");
+        TWILO_ACCOUNT_SID = System.getProperty("ins.platform.twilo.account.sid");
+        TWILO_AUTH_TOKEN = System.getProperty("ins.platform.twilo.auth.token");
+        TWILO_PHONE_NUMBER = System.getProperty("ins.platform.twilo.from.phoneNumber");
+
         try{
             ENCRYPTED_BODY = Boolean.parseBoolean(System.getProperty("ins.platform.email.body.encryption"));
         }
