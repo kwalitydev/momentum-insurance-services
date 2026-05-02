@@ -66,6 +66,7 @@ public class Startup implements ServletContextListener {
         }
     }
     private void initializeSystemProperties(){
+
         API_CONNECT_TIMEOUT = Integer.parseInt(System.getProperty("ins.platform.sms.connect.timeout"));
         API_URL = System.getProperty("ins.platform.sms.endpoint");
         USER = System.getProperty("ins.platform.sms.user");
