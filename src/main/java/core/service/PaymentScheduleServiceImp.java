@@ -9,6 +9,7 @@ import core.util.CoreUtil;
 import core.util.Util;
 import dao.entities.*;
 import dao.enums.*;
+import dao.interfaces.BaseAmountInterface;
 import dao.interfaces.InsurancePolicyInterface;
 import dao.interfaces.PaymentScheduleInterface;
 import dao.interfaces.PolicyChangeControlInterface;
@@ -68,6 +69,9 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
 
     @Inject
     private PartialPaymentService partialPaymentService;
+
+    @Inject
+    private BaseAmountInterface baseAmountInterface;
 
     @Override
     public List<RecentPaymentDTO> getLastPayments(int limit) {
@@ -321,6 +325,10 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
             InsurancePolicy insurancePolicy = insurancePolicyOpt.get();
             logger.info("{} - InsurancePolicy found: {}", method, insurancePolicy.getInsurancePolicyId());
 
+            BigDecimal baseAmountByPolicyId = baseAmountInterface.findBaseAmountByPolicyId(insurancePolicy.getPolicyId());
+
+            logger.info("{} - BaseAmount  found for policy: {}", method, insurancePolicy.getPolicyId());
+
             List<Beneficiaries> beneficiariesList =
                     beneficiariesRepository.findByInsurancePolicyId(insurancePolicyId);
 
@@ -395,6 +403,7 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
 
             PaymentScheduleDetails result = PaymentScheduleDetails.builder()
                     .policyId(insurancePolicy.getPolicyId())
+                    .policyBaseAmount(baseAmountByPolicyId)
                     .insurancePolicyId(insurancePolicy.getInsurancePolicyId())
                     .totalAmount(insurancePolicy.getTotalAmount())
                     .paymentSchedules(paymentScheduleDTOList)

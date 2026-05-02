@@ -12,6 +12,7 @@ public class PaymentScheduleDetails implements Serializable {
     private String insurancePolicyId;
     private String policyId;
     private BigDecimal totalAmount;
+    private BigDecimal policyBaseAmount;
     private List<PaymentScheduleDTO> paymentSchedules;
     private List<BeneficiaryDTO> beneficiaries;
 }

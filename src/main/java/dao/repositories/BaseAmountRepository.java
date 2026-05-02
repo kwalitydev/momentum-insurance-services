@@ -5,7 +5,9 @@ import dao.interfaces.BaseAmountInterface;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 public interface BaseAmountRepository extends JpaRepository<BaseAmount, String>, BaseAmountInterface {
@@ -21,4 +23,14 @@ public interface BaseAmountRepository extends JpaRepository<BaseAmount, String>,
 
     @Query("Select b FROM BaseAmount b WHERE b.productConfig.subProduct = ?1 AND b.status =?2 AND b.currency =?3 AND b.benefitCycle=?4 ")
     Optional<BaseAmount> findBySubProductAndStatus(SubProduct subProduct, Status status, Currency currency, BenefitCycle benefitCycle);
+
+
+    @Query("SELECT b.baseAmount " +
+           "FROM BaseAmount b " +
+           "JOIN b.productConfig pc " +
+           "JOIN InsurancePolicy ip ON pc.subProduct = ip.subProduct " +
+           "WHERE ip.policyId = :policyId " +
+           "AND pc.status.id = 'ACTIVE' " +
+           "AND b.benefitCycle = ip.benefitCycle")
+    BigDecimal findBaseAmountByPolicyId(@Param("policyId") String policyId);
 }
