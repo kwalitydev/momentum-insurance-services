@@ -348,6 +348,8 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
 
             List<PaymentSchedule> paymentSchedules;
             if(paymentScheduleId != null){
+                logger.info("{} - Fetching PaymentSchedule for paymentScheduleId: {}",
+                        method, paymentScheduleId);
                 paymentSchedules =
                         paymentScheduleInterface.findByPaymentSchedule(
                                 paymentScheduleId
@@ -355,6 +357,8 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
 
             }
             else{
+                logger.info("{} - Fetching PaymentSchedules for insurancePolicyId: {} with paymentStatuses: {}",
+                        method, insurancePolicyId, paymentStatuses);
                 paymentSchedules =
                         paymentScheduleInterface.findByPolicyAndPaymentStatus(
                                 insurancePolicyId,
