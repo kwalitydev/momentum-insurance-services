@@ -1,7 +1,10 @@
 package core.util;
 
 
+import core.threads.PostCancellation;
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -12,10 +15,11 @@ import java.util.Base64;
 public class FileUtil {
 
     public static String BASE_DIRECTORY;
-
+    private static final Logger LOGGER = LogManager.getLogger(PostCancellation.class);
     public static File createFile(String url,String name,String folderName,String subFolder) throws IOException {
         File newdir = new File(BASE_DIRECTORY+File.separator +folderName+File.separator+subFolder+File.separator);
 
+        LOGGER.info("Creating file in directory -> {}",newdir.getAbsolutePath());
         if (!newdir.exists()) {
           boolean created = newdir.mkdir();
           if(!created){
