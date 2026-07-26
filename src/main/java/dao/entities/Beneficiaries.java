@@ -30,6 +30,7 @@ public class Beneficiaries implements Serializable {
     private InsurancePolicy insurancePolicy;
     @OneToOne
     private Status status;
+    private Date effectiveDate;
 
 
 
@@ -145,6 +146,13 @@ public class Beneficiaries implements Serializable {
         this.status = status;
     }
 
+    public Date getEffectiveDate() {
+        return effectiveDate;
+    }
+
+    public void setEffectiveDate(Date effectiveDate) {
+        this.effectiveDate = effectiveDate;
+    }
 
     @Override
     public String toString() {
@@ -162,6 +170,7 @@ public class Beneficiaries implements Serializable {
                 ", totalCharge=" + totalCharge +
                 ", insurancePolicy=" + insurancePolicy +
                 ", status=" + status +
+                ", effectiveDate=" + effectiveDate +
                 '}';
     }
 }

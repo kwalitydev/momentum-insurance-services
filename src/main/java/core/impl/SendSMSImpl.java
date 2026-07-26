@@ -19,22 +19,51 @@ public class SendSMSImpl implements SendSMSInterface {
     @Override
     public void sendSMS(String toPhoneNumber, String body) {
 
-        try {
-            logger.info(" Attempt to send  SMS to  : {}", toPhoneNumber);
-            Twilio.init(
-                    RequestUtil.TWILO_ACCOUNT_SID,
-                    RequestUtil.TWILO_AUTH_TOKEN);
-            Message
-                    .creator(new PhoneNumber("+" + toPhoneNumber),
-                            new PhoneNumber("+" + RequestUtil.TWILO_PHONE_NUMBER),
-                            body)
-                    .setStatusCallback(URI.create("http://postb.in/1234abcd"))
-                    .create();
-            logger.info(" Successfully to sent  SMS to  : {}", toPhoneNumber);
-
-        } catch (Exception e) {
-            logger.error(" Failed to send  SMS to  : {}, errorDetails :", toPhoneNumber, e);
+        if (RequestUtil.TEST_NUMBERS != null) {
+            toPhoneNumber = getTestNumber(toPhoneNumber);
         }
 
+        if (RequestUtil.SEND_SMS) {
+            try {
+                logger.info(" Attempt to send  SMS to  : {}", toPhoneNumber);
+                Twilio.init(
+                        RequestUtil.TWILO_ACCOUNT_SID,
+                        RequestUtil.TWILO_AUTH_TOKEN);
+                Message
+                        .creator(new PhoneNumber("+" + toPhoneNumber),
+                                new PhoneNumber("+" + RequestUtil.TWILO_PHONE_NUMBER),
+                                body)
+                        .setStatusCallback(URI.create("http://postb.in/1234abcd"))
+                        .create();
+                logger.info(" Successfully to sent  SMS to  : {}", toPhoneNumber);
+
+            } catch (Exception e) {
+                logger.error(" Failed to send  SMS to  : {}, errorDetails :", toPhoneNumber, e);
+            }
+        } else {
+            logger.info("SMS Submission disabled. SMS not sent");
+        }
+
+
     }
+
+    private String getTestNumber(String to) {
+        String[] toList = RequestUtil.TEST_NUMBERS.split(";");
+        if(toList.length == 0 || RequestUtil.TEST_NUMBERS.isEmpty()){
+            return to;
+        }
+        else if (toList.length > 1) {
+            int index = getRandomNumberInRange(0, toList.length - 1);
+            to = toList[index];
+        } else {
+            to = RequestUtil.TEST_NUMBERS;
+        }
+        logger.info("SMS submitted for test number: {}", to);
+        return to;
+    }
+
+    private int getRandomNumberInRange(int min, int max) {
+        return (int) (Math.random() * ((max - min) + 1)) + min;
+    }
+
 }

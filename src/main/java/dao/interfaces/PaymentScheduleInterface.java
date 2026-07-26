@@ -50,4 +50,6 @@ public interface PaymentScheduleInterface {
 
     List<PaymentSchedule> findByPolicyAndPaymentStatus(String insurancePolicyId, List<PaymentStatus> paymentStatuses);
     List<PaymentSchedule> findLatestByStatus(InvoiceType status);
+    List<PaymentSchedule> findByPaymentSchedule(Long paymentScheduleId);
+
 }

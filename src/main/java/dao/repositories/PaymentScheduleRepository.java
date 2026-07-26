@@ -49,6 +49,9 @@ public interface PaymentScheduleRepository extends JpaRepository<PaymentSchedule
     @Query("SELECT ps from PaymentSchedule ps WHERE ps.status IN ?1 AND ps.insurancePolicy.status=?2")
     List<PaymentSchedule> getPaymentSchedulesByPolicy(List<Status> statuses, Status policyStatus);
 
+    @Query("SELECT ps from PaymentSchedule ps WHERE ps.paymentScheduleId=?2")
+    List<PaymentSchedule> findByPaymentSchedule(Long paymentScheduleId);
+
     @Modifying(clearAutomatically = true)
     @Query("update PaymentSchedule set paidAmount=?1, lastAttempt=?2, status =?3, chargeCode=?4,transactionId=?5,normalPayment=?6 where paymentScheduleId=?7")
     int updatePayment(BigDecimal paidAmount, Date lastAttempt, Status status, String chargeCode, String transactionId, Boolean normalPayment, Long paymentScheduleId);
@@ -320,8 +323,7 @@ public interface PaymentScheduleRepository extends JpaRepository<PaymentSchedule
 
     @Query("SELECT ps FROM PaymentSchedule ps " +
            "WHERE ps.paymentScheduleId = :id")
-    Optional<PaymentSchedule> findByPaymentScheduleId(
-            @Param("id") Long id);
+    Optional<PaymentSchedule> findByPaymentScheduleId(@Param("id") Long id);
 
 
     @Modifying
