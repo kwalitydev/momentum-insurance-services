@@ -8,14 +8,18 @@ import dao.interfaces.CoreErrorMappingInterface;
 import dao.interfaces.TaskInterface;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import static core.constants.Tasks.*;
+import static core.constants.Tasks.PAYMENT_SCHEDULE_HANDLER;
 import static core.util.CoreUtil.formatDateTime;
 import static core.util.CoreUtil.toMs;
 import static core.util.RequestUtil.*;
@@ -32,7 +36,7 @@ public class Startup implements ServletContextListener {
     @Inject
     private TaskInterface taskInterface;
     private long defaultInitialDelay = 60;
-    private int defaultFrequency = 60*60*24;
+    private int defaultFrequency = 60 * 60 * 24;
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
@@ -65,7 +69,8 @@ public class Startup implements ServletContextListener {
             logTaskNotFound(taskEnum.toString());
         }
     }
-    private void initializeSystemProperties(){
+
+    private void initializeSystemProperties() {
 
         API_CONNECT_TIMEOUT = Integer.parseInt(System.getProperty("ins.platform.sms.connect.timeout"));
         API_URL = System.getProperty("ins.platform.sms.endpoint");
@@ -77,14 +82,14 @@ public class Startup implements ServletContextListener {
         TWS_PASSWORD = System.getProperty("ins.platform.t24.password");
         EMAIL_ENDPOINT = System.getProperty("ins.platform.email.endpoint");
         MPESA_URL = System.getProperty("ins.platform.mpesa.url");
+        EMOLA_URL = System.getProperty("ins.platform.emola.url");
         TWILO_ACCOUNT_SID = System.getProperty("ins.platform.twilo.account.sid");
         TWILO_AUTH_TOKEN = System.getProperty("ins.platform.twilo.auth.token");
         TWILO_PHONE_NUMBER = System.getProperty("ins.platform.twilo.from.phoneNumber");
 
-        try{
+        try {
             ENCRYPTED_BODY = Boolean.parseBoolean(System.getProperty("ins.platform.email.body.encryption"));
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             LOGGER.warn("ins.platform.email.body.encryption could be parsed. Setting to default");
             ENCRYPTED_BODY = true;
         }
@@ -102,7 +107,7 @@ public class Startup implements ServletContextListener {
     }
 
     private void logError(String message, Exception e) {
-       LOGGER.error(message + ". Error -> {}", e.getMessage());
+        LOGGER.error(message + ". Error -> {}", e.getMessage());
     }
 
     private TaskConfig getTask(String task) {
@@ -122,7 +127,7 @@ public class Startup implements ServletContextListener {
     private Runnable getTaskRunnable(Enum<?> taskEnum) {
         switch (taskEnum.toString()) {
             //case "PROPERTY_TASK":
-              //  return propertyTask;
+            //  return propertyTask;
             case "PAYMENT_SCHEDULE_HANDLER":
                 return paymentScheduleHandler;
             default:

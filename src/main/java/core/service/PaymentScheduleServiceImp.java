@@ -65,7 +65,7 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
     private PolicyChangeControlInterface policyChangeControlInterface;
 
     @Inject
-    private IMpesaClientService iMpesaClientService;
+    private IEwalletClientService iEwalletClientService;
 
     @Inject
     private PartialPaymentService partialPaymentService;
@@ -121,7 +121,7 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
                 totals.getOrDefault(PaymentMethodStatus.MPESA, BigDecimal.ZERO);
 
         BigDecimal totalEmola =
-                totals.getOrDefault(PaymentMethodStatus.E_MOLA, BigDecimal.ZERO);
+                totals.getOrDefault(PaymentMethodStatus.EMOLA, BigDecimal.ZERO);
 
         return MonthlyCollectionSummaryDTO.builder()
                 .totalMpesa(totalMpesa)
@@ -455,68 +455,68 @@ public class PaymentScheduleServiceImp implements IPaymentScheduleService {
 
         String transactionId = CoreUtil.generateTransaction();
 
-        if (PaymentMethodStatus.MPESA.equals(paymentRequest.getPaymentMethod())) {
 
-            logger.info("{} - Processing MPESA payment for scheduleId: {}",
-                    method, paymentSchedule.getPaymentScheduleId());
+        logger.info("{} - Processing E-wallet payment for scheduleId: {}",
+                method, paymentSchedule.getPaymentScheduleId());
 
-            MpesaRequest mpesaRequest = MpesaRequest.builder()
-                    .msisdn(paymentRequest.getMobileNumber())
-                    .clientTransactionId(transactionId)
-                    .amount(paymentRequest.getAmount())
-                    .partnerCode("momentum")
-                    .clientAppCode("momentum#JMQRJ2S2")
-                    .build();
+        EwalletRequest ewalletRequest = EwalletRequest.builder()
+                .msisdn(paymentRequest.getMobileNumber())
+                .clientTransactionId(transactionId)
+                .amount(paymentRequest.getAmount())
+                .partnerCode("momentum")
+                .clientAppCode("momentum#JMQRJ2S2")
+                .build();
 
-            MpesaResponse mpesaResponse;
+        EwalletResponse ewalletResponse;
 
-            try {
-                mpesaResponse = this.iMpesaClientService.callMpesa(mpesaRequest);
-            } catch (Exception e) {
-                logger.error("{} - Error calling M-Pesa", method, e);
+        try {
+            ewalletResponse = this.iEwalletClientService
+                    .transferToEwallet(ewalletRequest, paymentRequest.getPaymentMethod());
+        } catch (Exception e) {
+            logger.error("{} - Error calling E- wallet", method, e);
 
-                throw new BusinessException(502, "Error calling payment provider");
-            }
-
-            PaymentStatus status = mpesaResponse.getStatus()
-                    .equalsIgnoreCase(Util.SUCCESS)
-                    ? PaymentStatus.PAID
-                    : PaymentStatus.FAILED;
-
-            int updated = dBTransactionService.updatePaymentSchedule(
-                    paymentSchedule.getPaymentScheduleId(),
-                    transactionId,
-                    LocalDateTime.now(),
-                    PaymentMethodStatus.MPESA,
-                    status,
-                    paymentRequest.getAmount(),
-                    mpesaResponse.getMessage(),
-                    mpesaResponse.getExternalReference()
-            );
-
-            logger.info("{} - Update result: {} row(s) affected for scheduleId: {}",
-                    method, updated, paymentSchedule.getPaymentScheduleId());
-
-            if (updated == 0) {
-                logger.warn("{} - No rows updated for scheduleId: {}", method,
-                        paymentSchedule.getPaymentScheduleId());
-            }
-            // update partial payments
-            if (PaymentType.PARTIAL.equals(paymentRequest.getPaymentType())
-                && PaymentStatus.PAID.equals(status)) {
-                partialPaymentService.processPartialPayment(paymentRequest, paymentSchedule, method);
-            }
-
-            logger.info("{} - End - paymentScheduleId: {}", method,
-                    paymentRequest.getPaymentScheduleId());
-
-            return PaymentResponse.builder()
-                    .responseCode(PaymentStatus.PAID.equals(status) ? Util.SUCCESS : Util.FAILED)
-                    .description(mpesaResponse.getMessage())
-                    .build();
-
+            throw new BusinessException(502, "Error calling payment provider");
         }
-        throw new BusinessException(400, "Unsupported payment method");
+
+        PaymentStatus status = ewalletResponse.getStatus()
+                .equalsIgnoreCase(Util.SUCCESS)
+                ? PaymentStatus.PAID
+                : PaymentStatus.FAILED;
+
+        int updated = dBTransactionService.updatePaymentSchedule(
+                paymentSchedule.getPaymentScheduleId(),
+                transactionId,
+                LocalDateTime.now(),
+                paymentRequest.getPaymentMethod(),
+                status,
+                paymentRequest.getAmount(),
+                ewalletResponse.getMessage(),
+                ewalletResponse.getExternalReference()
+        );
+
+        logger.info("{} - Update result: {} row(s) affected for scheduleId: {}",
+                method, updated, paymentSchedule.getPaymentScheduleId());
+
+        if (updated == 0) {
+            logger.warn("{} - No rows updated for scheduleId: {}", method,
+                    paymentSchedule.getPaymentScheduleId());
+        }
+        // update partial payments
+        if (PaymentType.PARTIAL.equals(paymentRequest.getPaymentType())
+            && PaymentStatus.PAID.equals(status)) {
+            partialPaymentService.processPartialPayment(paymentRequest, paymentSchedule, method);
+        }
+
+        logger.info("{} - End - paymentScheduleId: {}", method,
+                paymentRequest.getPaymentScheduleId());
+
+        return PaymentResponse.builder()
+                .responseCode(ewalletResponse.getStatus())
+                .transactionID(ewalletResponse.getClientTransactionId())
+                .description(ewalletResponse.getMessage())
+                .build();
+
+
     }
 
     private PaymentChartDTO buildMonthChart() {

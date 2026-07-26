@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MpesaResponse implements Serializable {
+public class EwalletResponse implements Serializable {
     private String clientTransactionId;
     private String externalReference;
     private String status;

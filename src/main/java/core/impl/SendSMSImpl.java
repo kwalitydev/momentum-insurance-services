@@ -14,7 +14,7 @@ import java.net.URI;
 @ApplicationScoped
 public class SendSMSImpl implements SendSMSInterface {
 
-    private static final Logger logger = LogManager.getLogger(SendSMSInterface.class);
+    private static final Logger logger = LogManager.getLogger(SendSMSImpl.class);
 
     @Override
     public void sendSMS(String toPhoneNumber, String body) {
