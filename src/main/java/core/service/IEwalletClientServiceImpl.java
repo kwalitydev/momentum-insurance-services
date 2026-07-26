@@ -1,9 +1,10 @@
 package core.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import core.beans.MpesaRequest;
-import core.beans.MpesaResponse;
+import core.beans.EwalletRequest;
+import core.beans.EwalletResponse;
 import core.util.Util;
+import dao.enums.PaymentMethodStatus;
 import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,17 +12,18 @@ import org.slf4j.LoggerFactory;
 import javax.enterprise.context.ApplicationScoped;
 import java.util.concurrent.TimeUnit;
 
+import static core.util.RequestUtil.EMOLA_URL;
 import static core.util.RequestUtil.MPESA_URL;
 
 @ApplicationScoped
-public class IMpesaClientServiceImpl implements IMpesaClientService {
+public class IEwalletClientServiceImpl implements IEwalletClientService {
 
-    private static final Logger logger = LoggerFactory.getLogger(IMpesaClientServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(IEwalletClientServiceImpl.class);
 
     private final OkHttpClient client;
     private final ObjectMapper mapper;
 
-    public IMpesaClientServiceImpl() {
+    public IEwalletClientServiceImpl() {
         this.mapper = new ObjectMapper();
         this.client = new OkHttpClient.Builder()
                 .connectTimeout(60, TimeUnit.SECONDS)
@@ -32,21 +34,23 @@ public class IMpesaClientServiceImpl implements IMpesaClientService {
     }
 
     @Override
-    public MpesaResponse callMpesa(MpesaRequest requestDto) {
+    public EwalletResponse transferToEwallet(EwalletRequest requestDto, PaymentMethodStatus paymentMethod) {
 
         long start = System.currentTimeMillis();
 
+        String ewalletUrl = paymentMethod.equals(PaymentMethodStatus.MPESA) ?
+                MPESA_URL : EMOLA_URL;
         try {
             String json = mapper.writeValueAsString(requestDto);
 
-            logger.info("[M-PESA REQUEST] url={} payload={}", MPESA_URL, json);
+            logger.info("[ E-wallet REQUEST] url={} payload={}", ewalletUrl, json);
 
             RequestBody body = RequestBody.create(
                     json, MediaType.parse("application/json"));
 
             Request request = new Request
                     .Builder()
-                    .url(MPESA_URL)
+                    .url(ewalletUrl)
                     .post(body)
                     .addHeader("Content-Type", "application/json")
                     .build();
@@ -59,24 +63,23 @@ public class IMpesaClientServiceImpl implements IMpesaClientService {
                         ? response.body().string()
                         : "";
 
-                logger.info("[M-PESA RESPONSE] code={} duration={}ms body={}",
-                        response.code(), duration, responseBody);
+                logger.info("[ {} RESPONSE] code={} duration={}ms body={}",
+                        paymentMethod, response.code(), duration, responseBody);
 
-                MpesaResponse mpesaResponse =
-                        mapper.readValue(responseBody, MpesaResponse.class);
+                EwalletResponse ewalletResponse =
+                        mapper.readValue(responseBody, EwalletResponse.class);
 
-                if (!Util.SUCCESS.equals(mpesaResponse.getStatus())) {
-                    logger.warn("[M-PESA BUSINESS ERROR] status={} message={}",
-                            mpesaResponse.getStatus(),
-                            mpesaResponse.getMessage());
+                if (!Util.SUCCESS.equals(ewalletResponse.getStatus())) {
+                    logger.warn("[{} BUSINESS ERROR] status={} message={}", paymentMethod,
+                            ewalletResponse.getStatus(),
+                            ewalletResponse.getMessage());
                 }
-
-                return mpesaResponse;
+                return ewalletResponse;
             }
 
         } catch (Exception e) {
-            logger.error("[M-PESA ERROR] Unexpected error M-Pesa API", e);
-            throw new RuntimeException("[M-PESA ERROR] Unexpected error M-Pesa API", e);
+            logger.error("[{} ERROR] Unexpected error API", paymentMethod, e);
+            throw new RuntimeException("[E-wallet ERROR] Unexpected error E-wallet API", e);
         }
     }
 

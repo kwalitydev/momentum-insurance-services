@@ -11,7 +11,6 @@ import core.impl.ProcessWorkflowImpl;
 import core.service.IPaymentScheduleService;
 import core.service.IPolicyService;
 import core.threads.PostCancellation;
-import core.util.CoreUtil;
 import core.util.InsuranceUtil;
 import core.util.NotificationUtil;
 import core.util.QueryUtil;
@@ -1482,7 +1481,8 @@ public class PolicyAPI {
         String errorCause = "";
 
         try {
-            PaymentResponse paymentResponse = iPaymentScheduleService.processPayment(paymentRequest);
+            PaymentResponse paymentResponse = iPaymentScheduleService
+                    .processPayment(paymentRequest);
 
             if (paymentResponse != null) {
 

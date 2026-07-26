@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 
 @Data
 @Builder
-public class MpesaRequest implements Serializable {
+public class EwalletRequest implements Serializable {
     private String msisdn;
     private BigDecimal amount;
     private String clientTransactionId;

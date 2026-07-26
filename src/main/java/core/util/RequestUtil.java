@@ -19,6 +19,7 @@ public class RequestUtil {
     public static String EMAIL_ENDPOINT;
     public static boolean ENCRYPTED_BODY;
     public static String MPESA_URL;
+    public static String EMOLA_URL;
     public static String TWILO_ACCOUNT_SID;
     public static String TWILO_AUTH_TOKEN;
     public static String TWILO_PHONE_NUMBER;
